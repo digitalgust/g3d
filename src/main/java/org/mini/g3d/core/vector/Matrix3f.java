@@ -60,7 +60,7 @@ public class Matrix3f extends Matrix implements Serializable {
      */
     public Matrix3f() {
         super();
-        setIdentity();
+        identity();
     }
 
     /**
@@ -472,8 +472,8 @@ public class Matrix3f extends Matrix implements Serializable {
      *
      * @return this
      */
-    public Matrix setIdentity() {
-        return setIdentity(this);
+    public Matrix identity() {
+        return identity(this);
     }
 
     /**
@@ -482,7 +482,7 @@ public class Matrix3f extends Matrix implements Serializable {
      * @param m The matrix to be set to the identity
      * @return m
      */
-    public static Matrix3f setIdentity(Matrix3f m) {
+    public static Matrix3f identity(Matrix3f m) {
         m.mat[M00] = 1.0f;
         m.mat[M01] = 0.0f;
         m.mat[M02] = 0.0f;

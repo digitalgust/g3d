@@ -1,12 +1,10 @@
 package org.mini.g3d.skybox;
 
-import org.mini.g3d.core.vector.Matrix4f;
-import org.mini.g3d.core.vector.Vector3f;
-
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.EngineManager;
 import org.mini.g3d.core.ShaderProgram;
-import org.mini.g3d.core.toolbox.G3dMath;
+import org.mini.g3d.core.vector.Matrix4f;
+import org.mini.g3d.core.vector.Vector3f;
 
 public class SkyboxShader extends ShaderProgram{
 
@@ -33,7 +31,7 @@ public class SkyboxShader extends ShaderProgram{
 	}
 
 	public void loadViewMatrix(Camera camera){
-		Matrix4f matrix = G3dMath.createViewMatrix(camera);
+		Matrix4f matrix = camera.getViewMatrix();
 		matrix.mat[Matrix4f.M30] = 0;
 		matrix.mat[Matrix4f.M31] = 0;
 		matrix.mat[Matrix4f.M32] = 0;

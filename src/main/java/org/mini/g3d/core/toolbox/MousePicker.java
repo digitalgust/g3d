@@ -1,12 +1,11 @@
 package org.mini.g3d.core.toolbox;
 
+import org.mini.g3d.core.EngineManager;
+import org.mini.g3d.core.WorldCamera;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector2f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.core.vector.Vector4f;
-
-import org.mini.g3d.core.Camera;
-import org.mini.g3d.core.EngineManager;
 import org.mini.g3d.terrain.Terrain;
 
 public class MousePicker {
@@ -18,15 +17,20 @@ public class MousePicker {
 
     private Matrix4f projectionMatrix;
     private Matrix4f viewMatrix;
-    private Camera camera;
+    private WorldCamera camera;
 
     private Terrain terrain;
     private Vector3f currentTerrainPoint;
 
-    public MousePicker(Camera cam, Matrix4f projection, Terrain terrain) {
-        camera = cam;
-        projectionMatrix = projection;
-        viewMatrix = G3dMath.createViewMatrix(camera);
+    public MousePicker(WorldCamera cam, Terrain terrain) {
+        this.camera = cam;
+        this.camera.getProjectionDispatcher().register(new Runnable() {
+            @Override
+            public void run() {
+                projectionMatrix = camera.getProjectionMatrix();
+                viewMatrix = camera.getViewMatrix();
+            }
+        });
         this.terrain = terrain;
     }
 
@@ -44,7 +48,7 @@ public class MousePicker {
 
 
     public void update() {
-        viewMatrix = G3dMath.createViewMatrix(camera);
+        viewMatrix = camera.getViewMatrix();;
         if (intersectionInRange(0, RAY_RANGE, currentRay)) {
             currentTerrainPoint = binarySearch(0, 0, RAY_RANGE, currentRay);
         } else {

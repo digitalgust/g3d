@@ -55,7 +55,7 @@ public abstract class Matrix implements Serializable {
      *
      * @return this
      */
-    public abstract Matrix setIdentity();
+    public abstract Matrix identity();
 
     /**
      * Invert this matrix

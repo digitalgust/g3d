@@ -1,6 +1,5 @@
 package org.mini.g3d.core;
 
-import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector2f;
 import org.mini.g3d.core.vector.Vector3f;
@@ -99,11 +98,10 @@ public class MasterShader extends ShaderProgram {
     }
 
     public void loadViewMatrix(Camera camera) {
-        Matrix4f viewMatrix = G3dMath.createViewMatrix(camera);
 //        Matrix4f viewMatrix = new Matrix4f();
 //        float[] eye = new float[]{GamePanel.sun.getPosition().left, GamePanel.sun.getPosition().top, GamePanel.sun.getPosition().z};
 //        Gutil.mat4x4_look_at(viewMatrix.mat, eye, new float[]{-GamePanel.sun.getPosition().left, -GamePanel.sun.getPosition().top, -GamePanel.sun.getPosition().z}, new float[]{0.0f, 1.0f, 0.0f});
-        super.loadMatrix(location_viewMatrix, viewMatrix);
+        super.loadMatrix(location_viewMatrix, camera.getViewMatrix());
     }
 
     public void setLightning(Float useFakeLightning) {

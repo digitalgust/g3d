@@ -35,17 +35,16 @@ import java.io.Serializable;
 
 
 /**
- *
  * Holds a 3-tuple vector.
  *
  * @author cix_foo <cix_foo@users.sourceforge.net>
  * @version $Revision$ $Id$
  */
-public class Vector3f extends Vector implements Serializable, ReadableVector3f, WritableVector3f {
+public class Vector3f extends Vector2f implements Serializable, ReadableVector3f, WritableVector3f {
 
     private static final long serialVersionUID = 1L;
 
-    public float x, y, z;
+    public float  z;
 
     /**
      * Constructor for Vector3f.
@@ -69,20 +68,32 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
     }
 
     /* (non-Javadoc)
-	 * @see org.mini.g3d.vector.WritableVector2f#set(float, float)
+     * @see org.mini.g3d.vector.WritableVector2f#set(float, float)
      */
-    public void set(float x, float y) {
+    public Vector3f set(float x, float y) {
         this.x = x;
         this.y = y;
+        return this;
     }
 
     /* (non-Javadoc)
-	 * @see org.mini.g3d.vector.WritableVector3f#set(float, float, float)
+     * @see org.mini.g3d.vector.WritableVector3f#set(float, float, float)
      */
-    public void set(float x, float y, float z) {
+    public Vector3f set(float x, float y, float z) {
         this.x = x;
         this.y = y;
         this.z = z;
+        return this;
+    }
+
+    /**
+     * Set all components to zero.
+     *
+     * @return a vector holding the result
+     */
+    public Vector3f zero() {
+        set(0, 0, 0);
+        return this;
     }
 
     /**
@@ -119,14 +130,21 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
         return this;
     }
 
+    public Vector3f translate(Vector3f pos) {
+        this.x += pos.x;
+        this.y += pos.y;
+        this.z += pos.z;
+        return this;
+    }
+
     /**
      * Add a vector to another vector and place the result in a destination
      * vector.
      *
-     * @param left The LHS vector
+     * @param left  The LHS vector
      * @param right The RHS vector
-     * @param dest The destination vector, or null if a new vector is to be
-     * created
+     * @param dest  The destination vector, or null if a new vector is to be
+     *              created
      * @return the sum of left and right in dest
      */
     public static Vector3f add(Vector3f left, Vector3f right, Vector3f dest) {
@@ -142,10 +160,10 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
      * Subtract a vector from another vector and place the result in a
      * destination vector.
      *
-     * @param left The LHS vector
+     * @param left  The LHS vector
      * @param right The RHS vector
-     * @param dest The destination vector, or null if a new vector is to be
-     * created
+     * @param dest  The destination vector, or null if a new vector is to be
+     *              created
      * @return left minus right in dest
      */
     public static Vector3f sub(Vector3f left, Vector3f right, Vector3f dest) {
@@ -160,10 +178,10 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
     /**
      * The cross product of two vectors.
      *
-     * @param left The LHS vector
+     * @param left  The LHS vector
      * @param right The RHS vector
-     * @param dest The destination result, or null if a new vector is to be
-     * created
+     * @param dest  The destination result, or null if a new vector is to be
+     *              created
      * @return left cross right
      */
     public static Vector3f cross(
@@ -200,7 +218,7 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
      * Negate a vector and place the result in a destination vector.
      *
      * @param dest The destination vector or null if a new vector is to be
-     * created
+     *             created
      * @return the negated vector
      */
     public Vector3f negate(Vector3f dest) {
@@ -217,7 +235,7 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
      * Normalise this vector and place the result in another vector.
      *
      * @param dest The destination vector, or null if a new vector is to be
-     * created
+     *             created
      * @return the normalised vector
      */
     public Vector3f normalise(Vector3f dest) {
@@ -236,7 +254,7 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
      * The dot product of two vectors is calculated as v1.left * v2.left + v1.top * v2.top
      * + v1.z * v2.z
      *
-     * @param left The LHS vector
+     * @param left  The LHS vector
      * @param right The RHS vector
      * @return left dot right
      */
@@ -261,10 +279,98 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
         return (float) Math.acos(dls);
     }
 
-    /* (non-Javadoc)
-	 * @see org.lwjgl.vector.Vector#load(FloatBuffer)
+
+    static final double PIHalf = Math.PI * 0.5;
+    static final double PI2 = Math.PI * 2.0;
+    static boolean FASTMATH = true;
+
+    public static double cosFromSin(double sin, double angle) {
+        if (FASTMATH)
+            return Math.sin(angle + PIHalf);
+        // sin(x)^2 + cos(x)^2 = 1
+        double cos = Math.sqrt(1.0 - sin * sin);
+        double a = angle + PIHalf;
+        double b = a - (int) (a / PI2) * PI2;
+        if (b < 0.0)
+            b = PI2 + b;
+        if (b >= Math.PI)
+            return -cos;
+        return cos;
+    }
+
+    /**
+     * Rotate this vector the specified radians around the X axis.
+     *
+     * @param angle the angle in radians
+     * @return a vector holding the result
      */
-    public Vector load(float[] buf) {
+    public Vector3f rotateX(float angle) {
+        return rotateX(angle, this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.joml.Vector3fc#rotateX(float, org.joml.Vector3f)
+     */
+    public Vector3f rotateX(float angle, Vector3f dest) {
+        float sin = (float) Math.sin(angle), cos = (float) cosFromSin(sin, angle);
+        float y = this.y * cos - this.z * sin;
+        float z = this.y * sin + this.z * cos;
+        dest.x = this.x;
+        dest.y = y;
+        dest.z = z;
+        return dest;
+    }
+
+    /**
+     * Rotate this vector the specified radians around the Y axis.
+     *
+     * @param angle the angle in radians
+     * @return a vector holding the result
+     */
+    public Vector3f rotateY(float angle) {
+        return rotateY(angle, this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.joml.Vector3fc#rotateY(float, org.joml.Vector3f)
+     */
+    public Vector3f rotateY(float angle, Vector3f dest) {
+        float sin = (float) Math.sin(angle), cos = (float) cosFromSin(sin, angle);
+        float x = this.x * cos + this.z * sin;
+        float z = -this.x * sin + this.z * cos;
+        dest.x = x;
+        dest.y = this.y;
+        dest.z = z;
+        return dest;
+    }
+
+    /**
+     * Rotate this vector the specified radians around the Z axis.
+     *
+     * @param angle the angle in radians
+     * @return a vector holding the result
+     */
+    public Vector3f rotateZ(float angle) {
+        return rotateZ(angle, this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.joml.Vector3fc#rotateZ(float, org.joml.Vector3f)
+     */
+    public Vector3f rotateZ(float angle, Vector3f dest) {
+        float sin = (float) Math.sin(angle), cos = (float) cosFromSin(sin, angle);
+        float x = this.x * cos - this.y * sin;
+        float y = this.x * sin + this.y * cos;
+        dest.x = x;
+        dest.y = y;
+        dest.z = this.z;
+        return dest;
+    }
+
+    /* (non-Javadoc)
+     * @see org.lwjgl.vector.Vector#load(FloatBuffer)
+     */
+    public Vector3f load(float[] buf) {
         x = buf[0];
         y = buf[1];
         z = buf[2];
@@ -272,9 +378,9 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
     }
 
     /* (non-Javadoc)
-	 * @see org.lwjgl.vector.Vector#scale(float)
+     * @see org.lwjgl.vector.Vector#scale(float)
      */
-    public Vector scale(float scale) {
+    public Vector3f scale(float scale) {
 
         x *= scale;
         y *= scale;
@@ -285,9 +391,9 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
     }
 
     /* (non-Javadoc)
-	 * @see org.lwjgl.vector.Vector#store(FloatBuffer)
+     * @see org.lwjgl.vector.Vector#store(FloatBuffer)
      */
-    public Vector store(float[] buf) {
+    public Vector3f store(float[] buf) {
 
         buf[0] = (x);
         buf[1] = (y);
@@ -297,7 +403,7 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
     }
 
     /* (non-Javadoc)
-	 * @see java.lang.Object#toString()
+     * @see java.lang.Object#toString()
      */
     public String toString() {
         StringBuilder sb = new StringBuilder(64);
@@ -315,14 +421,14 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
     /**
      * @return left
      */
-    public final float getX() {
+    public  float getX() {
         return x;
     }
 
     /**
      * @return top
      */
-    public final float getY() {
+    public  float getY() {
         return y;
     }
 
@@ -331,8 +437,9 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
      *
      * @param x
      */
-    public final void setX(float x) {
+    public  Vector3f setX(float x) {
         this.x = x;
+        return this;
     }
 
     /**
@@ -340,8 +447,9 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
      *
      * @param y
      */
-    public final void setY(float y) {
+    public  Vector3f setY(float y) {
         this.y = y;
+        return this;
     }
 
     /**
@@ -349,12 +457,13 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
      *
      * @param z
      */
-    public void setZ(float z) {
+    public Vector3f setZ(float z) {
         this.z = z;
+        return this;
     }
 
     /* (Overrides)
-	 * @see org.lwjgl.vector.ReadableVector3f#getZ()
+     * @see org.lwjgl.vector.ReadableVector3f#getZ()
      */
     public float getZ() {
         return z;
@@ -378,4 +487,31 @@ public class Vector3f extends Vector implements Serializable, ReadableVector3f, 
 
         return false;
     }
+
+
+    /**
+     * Linearly interpolate <code>this</code> and <code>other</code> using the given interpolation factor <code>t</code>
+     * and store the result in <code>this</code>.
+     * <p>
+     * If <code>t</code> is <code>0.0</code> then the result is <code>this</code>. If the interpolation factor is <code>1.0</code>
+     * then the result is <code>other</code>.
+     *
+     * @param other the other vector
+     * @param t     the interpolation factor between 0.0 and 1.0
+     * @return a vector holding the result
+     */
+    public Vector3f lerp(Vector3f other, float t) {
+        return lerp(other, t, this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.joml.Vector3fc#lerp(org.joml.Vector3fc, float, org.joml.Vector3f)
+     */
+    public Vector3f lerp(Vector3f other, float t, Vector3f dest) {
+        dest.x = x + (other.x - x) * t;
+        dest.y = y + (other.y - y) * t;
+        dest.z = z + (other.z - z) * t;
+        return dest;
+    }
+
 }

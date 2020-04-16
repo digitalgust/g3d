@@ -2,6 +2,7 @@ package org.mini.g3d.water;
 
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.Loader;
+import org.mini.g3d.core.WorldCamera;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
@@ -17,15 +18,22 @@ public class WaterRenderer {
     private RawModel quad;
     private WaterShader shader;
 
-    public WaterRenderer(Loader loader, WaterShader shader, Matrix4f projectionMatrix) {
+    public WaterRenderer(Loader loader, WaterShader shader, WorldCamera camera) {
+        camera.getProjectionDispatcher().register(new Runnable() {
+            @Override
+            public void run() {
+                // Loads the shader, only has to be done once
+                shader.start();
+                Matrix4f projectionMatrix = camera.getProjectionMatrix();
+                shader.loadProjectionMatrix(projectionMatrix);
+                shader.start();
+            }
+        });
         this.shader = shader;
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.stop();
         setUpVAO(loader);
     }
 
-    public void render(List<WaterTile> water, Camera camera) {
+    public void render(Camera camera, List<WaterTile> water) {
         prepareRender(camera);
         for (WaterTile tile : water) {
             Matrix4f modelMatrix = G3dMath.createTransformationMatrix(

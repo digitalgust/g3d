@@ -1,6 +1,6 @@
 package org.mini.g3d.core.widget;
 
-import org.mini.g3d.core.Camera;
+import org.mini.g3d.core.WorldCamera;
 import org.mini.glfm.Glfm;
 import org.mini.gui.GImage;
 
@@ -10,7 +10,7 @@ public class ViewMover extends Widget {
 
 
     boolean touched;
-    Camera camera;
+    WorldCamera camera;
 
 
     public ViewMover(String iconPath, float left, float top, float w, float h) {
@@ -19,7 +19,7 @@ public class ViewMover extends Widget {
     }
 
 
-    public void setCamera(Camera camera) {
+    public void setCamera(WorldCamera camera) {
         this.camera = camera;
     }
 
@@ -52,9 +52,9 @@ public class ViewMover extends Widget {
     public boolean dragEvent(float dx, float dy, float x, float y) {
 
         if (camera != null && touched) {
-            float a = camera.getAngleAroundPlayer();
+            float a = camera.getAngleAroundMaster();
             float adjx = dx * 0.5f;
-            camera.setAngleAroundPlayer(a - adjx);
+            camera.setAngleAroundMaster(a - adjx);
             float pitch = camera.getPitch();
             float adjy = dy * 0.3f;
             if (pitch + adjy > 2f && pitch + adjy < 70f) {

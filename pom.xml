@@ -57,8 +57,8 @@
                         <configuration>       
                             <tasks>
                                 <!--  copy to binary lib dir -->
-                                <mkdir dir="${basedir}/../miniJVM/binary/libex/"/>
-                                <copy todir="${basedir}/../miniJVM/binary/libex/" overwrite="true" >
+                                <mkdir dir="${basedir}/../BiBiX/srv_res/webserver/htmls/down"/>
+                                <copy todir="${basedir}/../BiBiX/srv_res/webserver/htmls/down/" overwrite="true" >
                                     <fileset dir="${project.build.directory}" erroronmissingdir="false">
                                         <include name="${project.artifactId}.jar"/>
                                     </fileset>

@@ -1,6 +1,7 @@
 package org.mini.g3d.terrain;
 
 import org.mini.g3d.core.MasterPass;
+import org.mini.g3d.core.WorldCamera;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
@@ -14,10 +15,19 @@ public class TerrainRenderer {
 
     private TerrainShader shader;
 
-    public TerrainRenderer(TerrainShader shader, Matrix4f projectionMatrix) {
+    public TerrainRenderer(TerrainShader shader, WorldCamera camera) {
+        camera.getProjectionDispatcher().register(new Runnable() {
+            @Override
+            public void run() {
+                // Loads the shader, only has to be done once
+                shader.start();
+                Matrix4f projectionMatrix = camera.getProjectionMatrix();
+                shader.loadProjectionMatrix(projectionMatrix);
+                shader.start();
+            }
+        });
         this.shader = shader;
         shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
         shader.connectTextureUnits();
         shader.stop();
     }

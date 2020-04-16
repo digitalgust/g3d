@@ -1,9 +1,8 @@
 package org.mini.g3d.water;
 
-import org.mini.g3d.core.vector.Matrix4f;
-import org.mini.g3d.core.ShaderProgram;
-import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.Camera;
+import org.mini.g3d.core.ShaderProgram;
+import org.mini.g3d.core.vector.Matrix4f;
 
 public class WaterShader extends ShaderProgram {
 
@@ -35,8 +34,7 @@ public class WaterShader extends ShaderProgram {
 	}
 	
 	public void loadViewMatrix(Camera camera){
-		Matrix4f viewMatrix = G3dMath.createViewMatrix(camera);
-		loadMatrix(location_viewMatrix, viewMatrix);
+		loadMatrix(location_viewMatrix, camera.getViewMatrix());
 	}
 
 	public void loadModelMatrix(Matrix4f modelMatrix){

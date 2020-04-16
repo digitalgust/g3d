@@ -71,9 +71,10 @@ public class Vector2f extends Vector implements Serializable, ReadableVector2f, 
     /* (non-Javadoc)
 	 * @see org.mini.g3d.vector.WritableVector2f#set(float, float)
      */
-    public void set(float x, float y) {
+    public Vector2f set(float x, float y) {
         this.x = x;
         this.y = y;
+        return this;
     }
 
     /**
@@ -87,7 +88,15 @@ public class Vector2f extends Vector implements Serializable, ReadableVector2f, 
         y = src.getY();
         return this;
     }
-
+    /**
+     * Set all components to zero.
+     *
+     * @return a vector holding the result
+     */
+    public Vector2f zero() {
+        set(0, 0);
+        return this;
+    }
     /**
      * @return the length squared of the vector
      */
@@ -273,14 +282,14 @@ public class Vector2f extends Vector implements Serializable, ReadableVector2f, 
     /**
      * @return left
      */
-    public final float getX() {
+    public  float getX() {
         return x;
     }
 
     /**
      * @return top
      */
-    public final float getY() {
+    public  float getY() {
         return y;
     }
 
@@ -289,8 +298,9 @@ public class Vector2f extends Vector implements Serializable, ReadableVector2f, 
      *
      * @param x
      */
-    public final void setX(float x) {
+    public  Vector2f setX(float x) {
         this.x = x;
+        return this;
     }
 
     /**
@@ -298,8 +308,9 @@ public class Vector2f extends Vector implements Serializable, ReadableVector2f, 
      *
      * @param y
      */
-    public final void setY(float y) {
+    public Vector2f setY(float y) {
         this.y = y;
+        return this;
     }
 
     public boolean equals(Object obj) {

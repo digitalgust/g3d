@@ -31,8 +31,9 @@
  */
 package org.mini.g3d.core.vector;
 
-import java.io.Serializable;
 import org.mini.nanovg.Gutil;
+
+import java.io.Serializable;
 
 /**
  * Holds a 4x4 float matrix.
@@ -53,7 +54,7 @@ public class Matrix4f extends Matrix implements Serializable {
      */
     public Matrix4f() {
         super();
-        setIdentity();
+        identity();
     }
 
     public Matrix4f(final Matrix4f src) {
@@ -66,11 +67,63 @@ public class Matrix4f extends Matrix implements Serializable {
      */
     public String toString() {
         StringBuilder buf = new StringBuilder();
-        buf.append(mat[M00]).append(' ').append(mat[M10]).append(' ').append(mat[M20]).append(' ').append(mat[M30]).append('\n');
-        buf.append(mat[M01]).append(' ').append(mat[M11]).append(' ').append(mat[M21]).append(' ').append(mat[M31]).append('\n');
-        buf.append(mat[M02]).append(' ').append(mat[M12]).append(' ').append(mat[M22]).append(' ').append(mat[M32]).append('\n');
-        buf.append(mat[M03]).append(' ').append(mat[M13]).append(' ').append(mat[M23]).append(' ').append(mat[M33]).append('\n');
+        buf.append(format(mat[M00], 3)).append(' ').append(format(mat[M10], 3)).append(' ').append(format(mat[M20], 3)).append(' ').append(format(mat[M30], 3)).append('\n');
+        buf.append(format(mat[M01], 3)).append(' ').append(format(mat[M11], 3)).append(' ').append(format(mat[M21], 3)).append(' ').append(format(mat[M31], 3)).append('\n');
+        buf.append(format(mat[M02], 3)).append(' ').append(format(mat[M12], 3)).append(' ').append(format(mat[M22], 3)).append(' ').append(format(mat[M32], 3)).append('\n');
+        buf.append(format(mat[M03], 3)).append(' ').append(format(mat[M13], 3)).append(' ').append(format(mat[M23], 3)).append(' ').append(format(mat[M33], 3)).append('\n');
         return buf.toString();
+    }
+
+    static String format(float f, int base) {
+        int baseNum = 1;
+        int baseLead = 1;
+        for (int i = 0; i < base; i++) {
+            baseNum *= 10;
+            baseLead *= 10;
+        }
+        StringBuilder sb = new StringBuilder();
+        if (f < 0) {
+            sb.append('-');
+            f = -f;
+        } else {
+            sb.append(' ');
+        }
+        if (f == 0f) {
+            sb.append("0.");
+            for (int i = 0; i < base; i++) sb.append('0');
+            sb.append("E+0");
+        } else if (f > 10) {
+            int i = 1;
+            for (; i < 308; i++) {
+                f = f / 10;
+                if (f < 10f) break;
+            }
+            sb.append((char) (((int) f) + 0x30)).append('.');
+            f -= (int) f;
+            sb.append(Integer.toString((int) (baseLead + f * baseNum)).substring(1)).append("E+").append(i);
+        } else if (f < 1) {
+            int i = 1;
+            for (; i < 308; i++) {
+                f = f * 10;
+                if (f >= 1) break;
+            }
+            sb.append((char) (((int) f) + 0x30)).append('.');
+            f -= (int) f;
+            sb.append(Integer.toString((int) (baseLead + f * baseNum)).substring(1)).append("E-").append(i);
+
+        } else {
+            sb.append((char) (((int) f) + 0x30)).append('.');
+            f -= (int) f;
+            sb.append(Integer.toString((int) (baseLead + f * baseNum)).substring(1)).append("E+").append(0);
+
+        }
+        return sb.toString();
+    }
+
+    public static void main(String[] s) {
+        System.out.println(format(555.33f, 3));
+        System.out.println(format(0.0033f, 3));
+        System.out.println(format(1.0033f, 3));
     }
 
     /**
@@ -78,8 +131,8 @@ public class Matrix4f extends Matrix implements Serializable {
      *
      * @return this
      */
-    public Matrix setIdentity() {
-        return setIdentity(this);
+    public Matrix identity() {
+        return identity(this);
     }
 
     /**
@@ -88,7 +141,7 @@ public class Matrix4f extends Matrix implements Serializable {
      * @param m The matrix to set to the identity
      * @return m
      */
-    public static Matrix4f setIdentity(Matrix4f m) {
+    public static Matrix4f identity(Matrix4f m) {
         Gutil.mat4x4_identity(m.mat);
 //        m.mat[M00] = 1.0f;
 //        m.mat[M01] = 0.0f;
@@ -159,7 +212,7 @@ public class Matrix4f extends Matrix implements Serializable {
     /**
      * Copy the source matrix to the destination matrix
      *
-     * @param src The source matrix
+     * @param src  The source matrix
      * @param dest The destination matrix, or null of a new one is to be created
      * @return The copied matrix
      */
@@ -324,9 +377,9 @@ public class Matrix4f extends Matrix implements Serializable {
     /**
      * Add two matrices together and place the result in a third matrix.
      *
-     * @param left The left source matrix
+     * @param left  The left source matrix
      * @param right The right source matrix
-     * @param dest The destination matrix, or null if a new one is to be created
+     * @param dest  The destination matrix, or null if a new one is to be created
      * @return the destination matrix
      */
     public static Matrix4f add(Matrix4f left, Matrix4f right, Matrix4f dest) {
@@ -358,9 +411,9 @@ public class Matrix4f extends Matrix implements Serializable {
      * Subtract the right matrix from the left and place the result in a third
      * matrix.
      *
-     * @param left The left source matrix
+     * @param left  The left source matrix
      * @param right The right source matrix
-     * @param dest The destination matrix, or null if a new one is to be created
+     * @param dest  The destination matrix, or null if a new one is to be created
      * @return the destination matrix
      */
     public static Matrix4f sub(Matrix4f left, Matrix4f right, Matrix4f dest) {
@@ -392,9 +445,9 @@ public class Matrix4f extends Matrix implements Serializable {
      * Multiply the right matrix by the left and place the result in a third
      * matrix.
      *
-     * @param left The left source matrix
+     * @param left  The left source matrix
      * @param right The right source matrix
-     * @param dest The destination matrix, or null if a new one is to be created
+     * @param dest  The destination matrix, or null if a new one is to be created
      * @return the destination matrix
      */
     public static Matrix4f mul(Matrix4f left, Matrix4f right, Matrix4f dest) {
@@ -422,13 +475,54 @@ public class Matrix4f extends Matrix implements Serializable {
         return dest;
     }
 
+
+    static float fma(float a, float b, float c) {
+        return a * b + c;
+    }
+
+    public static Matrix4f mulfma(Matrix4f left, Matrix4f right, Matrix4f dest) {
+        float nm00 = fma(left.mat[M00], right.mat[M00], fma(left.mat[M10], right.mat[M01], fma(left.mat[M20], right.mat[M02], left.mat[M30] * right.mat[M03])));
+        float nm01 = fma(left.mat[M01], right.mat[M00], fma(left.mat[M11], right.mat[M01], fma(left.mat[M21], right.mat[M02], left.mat[M31] * right.mat[M03])));
+        float nm02 = fma(left.mat[M02], right.mat[M00], fma(left.mat[M12], right.mat[M01], fma(left.mat[M22], right.mat[M02], left.mat[M32] * right.mat[M03])));
+        float nm03 = fma(left.mat[M03], right.mat[M00], fma(left.mat[M13], right.mat[M01], fma(left.mat[M23], right.mat[M02], left.mat[M33] * right.mat[M03])));
+        float nm10 = fma(left.mat[M00], right.mat[M10], fma(left.mat[M10], right.mat[M11], fma(left.mat[M20], right.mat[M12], left.mat[M30] * right.mat[M13])));
+        float nm11 = fma(left.mat[M01], right.mat[M10], fma(left.mat[M11], right.mat[M11], fma(left.mat[M21], right.mat[M12], left.mat[M31] * right.mat[M13])));
+        float nm12 = fma(left.mat[M02], right.mat[M10], fma(left.mat[M12], right.mat[M11], fma(left.mat[M22], right.mat[M12], left.mat[M32] * right.mat[M13])));
+        float nm13 = fma(left.mat[M03], right.mat[M10], fma(left.mat[M13], right.mat[M11], fma(left.mat[M23], right.mat[M12], left.mat[M33] * right.mat[M13])));
+        float nm20 = fma(left.mat[M00], right.mat[M20], fma(left.mat[M10], right.mat[M21], fma(left.mat[M20], right.mat[M22], left.mat[M30] * right.mat[M23])));
+        float nm21 = fma(left.mat[M01], right.mat[M20], fma(left.mat[M11], right.mat[M21], fma(left.mat[M21], right.mat[M22], left.mat[M31] * right.mat[M23])));
+        float nm22 = fma(left.mat[M02], right.mat[M20], fma(left.mat[M12], right.mat[M21], fma(left.mat[M22], right.mat[M22], left.mat[M32] * right.mat[M23])));
+        float nm23 = fma(left.mat[M03], right.mat[M20], fma(left.mat[M13], right.mat[M21], fma(left.mat[M23], right.mat[M22], left.mat[M33] * right.mat[M23])));
+        float nm30 = fma(left.mat[M00], right.mat[M30], fma(left.mat[M10], right.mat[M31], fma(left.mat[M20], right.mat[M32], left.mat[M30] * right.mat[M33])));
+        float nm31 = fma(left.mat[M01], right.mat[M30], fma(left.mat[M11], right.mat[M31], fma(left.mat[M21], right.mat[M32], left.mat[M31] * right.mat[M33])));
+        float nm32 = fma(left.mat[M02], right.mat[M30], fma(left.mat[M12], right.mat[M31], fma(left.mat[M22], right.mat[M32], left.mat[M32] * right.mat[M33])));
+        float nm33 = fma(left.mat[M03], right.mat[M30], fma(left.mat[M13], right.mat[M31], fma(left.mat[M23], right.mat[M32], left.mat[M33] * right.mat[M33])));
+        dest.mat[M00] = (nm00);
+        dest.mat[M01] = (nm01);
+        dest.mat[M02] = (nm02);
+        dest.mat[M03] = (nm03);
+        dest.mat[M10] = (nm10);
+        dest.mat[M11] = (nm11);
+        dest.mat[M12] = (nm12);
+        dest.mat[M13] = (nm13);
+        dest.mat[M20] = (nm20);
+        dest.mat[M21] = (nm21);
+        dest.mat[M22] = (nm22);
+        dest.mat[M23] = (nm23);
+        dest.mat[M30] = (nm30);
+        dest.mat[M31] = (nm31);
+        dest.mat[M32] = (nm32);
+        dest.mat[M33] = (nm33);
+        return dest;
+    }
+
     /**
      * Transform a Vector by a matrix and return the result in a destination
      * vector.
      *
-     * @param left The left matrix
+     * @param left  The left matrix
      * @param right The right vector
-     * @param dest The destination vector, or null if a new one is to be created
+     * @param dest  The destination vector, or null if a new one is to be created
      * @return the destination vector
      */
     public static Vector4f transform(Matrix4f left, Vector4f right, Vector4f dest) {
@@ -491,10 +585,10 @@ public class Matrix4f extends Matrix implements Serializable {
     /**
      * Scales the source matrix and put the result in the destination matrix
      *
-     * @param vec The vector to scale by
-     * @param src The source matrix
+     * @param vec  The vector to scale by
+     * @param src  The source matrix
      * @param dest The destination matrix, or null if a new matrix is to be
-     * created
+     *             created
      * @return The scaled matrix
      */
     public static Matrix4f scale(Vector3f vec, Matrix4f src, Matrix4f dest) {
@@ -521,8 +615,8 @@ public class Matrix4f extends Matrix implements Serializable {
      * Rotates the matrix around the given axis the specified angle
      *
      * @param angle the angle, in radians.
-     * @param axis The vector representing the rotation axis. Must be
-     * normalized.
+     * @param axis  The vector representing the rotation axis. Must be
+     *              normalized.
      * @return this
      */
     public Matrix4f rotate(float angle, Vector3f axis) {
@@ -533,10 +627,10 @@ public class Matrix4f extends Matrix implements Serializable {
      * Rotates the matrix around the given axis the specified angle
      *
      * @param angle the angle, in radians.
-     * @param axis The vector representing the rotation axis. Must be
-     * normalized.
-     * @param dest The matrix to put the result, or null if a new matrix is to
-     * be created
+     * @param axis  The vector representing the rotation axis. Must be
+     *              normalized.
+     * @param dest  The matrix to put the result, or null if a new matrix is to
+     *              be created
      * @return The rotated matrix
      */
     public Matrix4f rotate(float angle, Vector3f axis, Matrix4f dest) {
@@ -548,11 +642,11 @@ public class Matrix4f extends Matrix implements Serializable {
      * put the result in the destination matrix.
      *
      * @param angle the angle, in radians.
-     * @param axis The vector representing the rotation axis. Must be
-     * normalized.
-     * @param src The matrix to rotate
-     * @param dest The matrix to put the result, or null if a new matrix is to
-     * be created
+     * @param axis  The vector representing the rotation axis. Must be
+     *              normalized.
+     * @param src   The matrix to rotate
+     * @param dest  The matrix to put the result, or null if a new matrix is to
+     *              be created
      * @return The rotated matrix
      */
     public static Matrix4f rotate(float angle, Vector3f axis, Matrix4f src, Matrix4f dest) {
@@ -614,9 +708,9 @@ public class Matrix4f extends Matrix implements Serializable {
     /**
      * Translate this matrix and stash the result in another matrix
      *
-     * @param vec The vector to translate by
+     * @param vec  The vector to translate by
      * @param dest The destination matrix or null if a new matrix is to be
-     * created
+     *             created
      * @return the translated matrix
      */
     public Matrix4f translate(Vector3f vec, Matrix4f dest) {
@@ -627,10 +721,10 @@ public class Matrix4f extends Matrix implements Serializable {
      * Translate the source matrix and stash the result in the destination
      * matrix
      *
-     * @param vec The vector to translate by
-     * @param src The source matrix
+     * @param vec  The vector to translate by
+     * @param src  The source matrix
      * @param dest The destination matrix or null if a new matrix is to be
-     * created
+     *             created
      * @return The translated matrix
      */
     public static Matrix4f translate(Vector3f vec, Matrix4f src, Matrix4f dest) {
@@ -650,9 +744,9 @@ public class Matrix4f extends Matrix implements Serializable {
     /**
      * Translate this matrix and stash the result in another matrix
      *
-     * @param vec The vector to translate by
+     * @param vec  The vector to translate by
      * @param dest The destination matrix or null if a new matrix is to be
-     * created
+     *             created
      * @return the translated matrix
      */
     public Matrix4f translate(Vector2f vec, Matrix4f dest) {
@@ -663,10 +757,10 @@ public class Matrix4f extends Matrix implements Serializable {
      * Translate the source matrix and stash the result in the destination
      * matrix
      *
-     * @param vec The vector to translate by
-     * @param src The source matrix
+     * @param vec  The vector to translate by
+     * @param src  The source matrix
      * @param dest The destination matrix or null if a new matrix is to be
-     * created
+     *             created
      * @return The translated matrix
      */
     public static Matrix4f translate(Vector2f vec, Matrix4f src, Matrix4f dest) {
@@ -687,7 +781,7 @@ public class Matrix4f extends Matrix implements Serializable {
      * Transpose this matrix and place the result in another matrix
      *
      * @param dest The destination matrix or null if a new matrix is to be
-     * created
+     *             created
      * @return the transposed matrix
      */
     public Matrix4f transpose(Matrix4f dest) {
@@ -698,9 +792,9 @@ public class Matrix4f extends Matrix implements Serializable {
      * Transpose the source matrix and place the result in the destination
      * matrix
      *
-     * @param src The source matrix
+     * @param src  The source matrix
      * @param dest The destination matrix or null if a new matrix is to be
-     * created
+     *             created
      * @return the transposed matrix
      */
     public static Matrix4f transpose(Matrix4f src, Matrix4f dest) {
@@ -739,26 +833,26 @@ public class Matrix4f extends Matrix implements Serializable {
      */
     public float determinant() {
         float f
-                = mat[M00]
-                * ((mat[M11] * mat[M22] * mat[M33] + mat[M12] * mat[M23] * mat[M31] + mat[M13] * mat[M21] * mat[M32])
-                - mat[M13] * mat[M22] * mat[M31]
-                - mat[M11] * mat[M23] * mat[M32]
-                - mat[M12] * mat[M21] * mat[M33]);
+            = mat[M00]
+            * ((mat[M11] * mat[M22] * mat[M33] + mat[M12] * mat[M23] * mat[M31] + mat[M13] * mat[M21] * mat[M32])
+            - mat[M13] * mat[M22] * mat[M31]
+            - mat[M11] * mat[M23] * mat[M32]
+            - mat[M12] * mat[M21] * mat[M33]);
         f -= mat[M01]
-                * ((mat[M10] * mat[M22] * mat[M33] + mat[M12] * mat[M23] * mat[M30] + mat[M13] * mat[M20] * mat[M32])
-                - mat[M13] * mat[M22] * mat[M30]
-                - mat[M10] * mat[M23] * mat[M32]
-                - mat[M12] * mat[M20] * mat[M33]);
+            * ((mat[M10] * mat[M22] * mat[M33] + mat[M12] * mat[M23] * mat[M30] + mat[M13] * mat[M20] * mat[M32])
+            - mat[M13] * mat[M22] * mat[M30]
+            - mat[M10] * mat[M23] * mat[M32]
+            - mat[M12] * mat[M20] * mat[M33]);
         f += mat[M02]
-                * ((mat[M10] * mat[M21] * mat[M33] + mat[M11] * mat[M23] * mat[M30] + mat[M13] * mat[M20] * mat[M31])
-                - mat[M13] * mat[M21] * mat[M30]
-                - mat[M10] * mat[M23] * mat[M31]
-                - mat[M11] * mat[M20] * mat[M33]);
+            * ((mat[M10] * mat[M21] * mat[M33] + mat[M11] * mat[M23] * mat[M30] + mat[M13] * mat[M20] * mat[M31])
+            - mat[M13] * mat[M21] * mat[M30]
+            - mat[M10] * mat[M23] * mat[M31]
+            - mat[M11] * mat[M20] * mat[M33]);
         f -= mat[M03]
-                * ((mat[M10] * mat[M21] * mat[M32] + mat[M11] * mat[M22] * mat[M30] + mat[M12] * mat[M20] * mat[M31])
-                - mat[M12] * mat[M21] * mat[M30]
-                - mat[M10] * mat[M22] * mat[M31]
-                - mat[M11] * mat[M20] * mat[M32]);
+            * ((mat[M10] * mat[M21] * mat[M32] + mat[M11] * mat[M22] * mat[M30] + mat[M12] * mat[M20] * mat[M31])
+            - mat[M12] * mat[M21] * mat[M30]
+            - mat[M10] * mat[M22] * mat[M31]
+            - mat[M11] * mat[M20] * mat[M32]);
         return f;
     }
 
@@ -768,11 +862,11 @@ public class Matrix4f extends Matrix implements Serializable {
      * @return result
      */
     private static float determinant3x3(float t00, float t01, float t02,
-            float t10, float t11, float t12,
-            float t20, float t21, float t22) {
+                                        float t10, float t11, float t12,
+                                        float t20, float t21, float t22) {
         return t00 * (t11 * t22 - t12 * t21)
-                + t01 * (t12 * t20 - t10 * t22)
-                + t02 * (t10 * t21 - t11 * t20);
+            + t01 * (t12 * t20 - t10 * t22)
+            + t02 * (t10 * t21 - t11 * t20);
     }
 
     /**
@@ -787,9 +881,9 @@ public class Matrix4f extends Matrix implements Serializable {
     /**
      * Invert the source matrix and put the result in the destination
      *
-     * @param src The source matrix
+     * @param src  The source matrix
      * @param dest The destination matrix, or null if a new matrix is to be
-     * created
+     *             created
      * @return The inverted matrix if successful, null otherwise
      */
     public static Matrix4f invert(Matrix4f src, Matrix4f dest) {
@@ -797,10 +891,10 @@ public class Matrix4f extends Matrix implements Serializable {
 
         if (determinant != 0) {
             /*
-			 * mat[M00] mat[M01] mat[M02] mat[M03]
-			 * mat[M10] mat[M11] mat[M12] mat[M13]
-			 * mat[M20] mat[M21] mat[M22] mat[M23]
-			 * mat[M30] mat[M31] mat[M32] mat[M33]
+             * mat[M00] mat[M01] mat[M02] mat[M03]
+             * mat[M10] mat[M11] mat[M12] mat[M13]
+             * mat[M20] mat[M21] mat[M22] mat[M23]
+             * mat[M30] mat[M31] mat[M32] mat[M33]
              */
             if (dest == null) {
                 dest = new Matrix4f();
@@ -872,7 +966,7 @@ public class Matrix4f extends Matrix implements Serializable {
      * Negate this matrix and place the result in a destination matrix.
      *
      * @param dest The destination matrix, or null if a new matrix is to be
-     * created
+     *             created
      * @return the negated matrix
      */
     public Matrix4f negate(Matrix4f dest) {
@@ -882,9 +976,9 @@ public class Matrix4f extends Matrix implements Serializable {
     /**
      * Negate this matrix and place the result in a destination matrix.
      *
-     * @param src The source matrix
+     * @param src  The source matrix
      * @param dest The destination matrix, or null if a new matrix is to be
-     * created
+     *             created
      * @return The negated matrix
      */
     public static Matrix4f negate(Matrix4f src, Matrix4f dest) {
@@ -909,6 +1003,149 @@ public class Matrix4f extends Matrix implements Serializable {
         dest.mat[M32] = -src.mat[M32];
         dest.mat[M33] = -src.mat[M33];
 
+        return dest;
+    }
+
+
+    /**
+     * Apply a symmetric perspective projection frustum transformation for a right-handed coordinate system
+     * using OpenGL's NDC z range of <code>[-1..+1]</code> to this matrix.
+     * <p>
+     * If <code>M</code> is <code>this</code> matrix and <code>P</code> the perspective projection matrix,
+     * then the new matrix will be <code>M * P</code>. So when transforming a
+     * vector <code>v</code> with the new matrix by using <code>M * P * v</code>,
+     * the perspective projection will be applied first!
+     * <p>
+     * In order to set the matrix to a perspective frustum transformation without post-multiplying,
+     * use {@link #perspective(float, float, float, float) setPerspective}.
+     *
+     * @param fovy   the vertical field of view in radians (must be greater than zero and less than {@link Math#PI PI})
+     * @param aspect the aspect ratio (i.e. width / height; must be greater than zero)
+     * @param zNear  near clipping plane distance. If the special value {@link Float#POSITIVE_INFINITY} is used, the near clipping plane will be at positive infinity.
+     *               In that case, <code>zFar</code> may not also be {@link Float#POSITIVE_INFINITY}.
+     * @param zFar   far clipping plane distance. If the special value {@link Float#POSITIVE_INFINITY} is used, the far clipping plane will be at positive infinity.
+     *               In that case, <code>zNear</code> may not also be {@link Float#POSITIVE_INFINITY}.
+     * @return a matrix holding the result
+     * @see #perspective(float, float, float, float)
+     */
+    public Matrix4f perspective(float fovy, float aspect, float zNear, float zFar) {
+        Gutil.mat4x4_perspective(this.mat, fovy, aspect, zNear, zFar);
+        return this;
+    }
+
+    /**
+     * Apply a "lookat" transformation to this matrix for a right-handed coordinate system,
+     * that aligns <code>-z</code> with <code>center - eye</code>.
+     * <p>
+     * If <code>M</code> is <code>this</code> matrix and <code>L</code> the lookat matrix,
+     * then the new matrix will be <code>M * L</code>. So when transforming a
+     * vector <code>v</code> with the new matrix by using <code>M * L * v</code>,
+     * the lookat transformation will be applied first!
+     * <p>
+     * In order to set the matrix to a lookat transformation without post-multiplying it,
+     * use {@link #lookAt(float, float, float, float, float, float, float, float, float) setLookAt()}.
+     *
+     * @param eyeX    the x-coordinate of the eye/camera location
+     * @param eyeY    the y-coordinate of the eye/camera location
+     * @param eyeZ    the z-coordinate of the eye/camera location
+     * @param centerX the x-coordinate of the point to look at
+     * @param centerY the y-coordinate of the point to look at
+     * @param centerZ the z-coordinate of the point to look at
+     * @param upX     the x-coordinate of the up vector
+     * @param upY     the y-coordinate of the up vector
+     * @param upZ     the z-coordinate of the up vector
+     * @return a matrix holding the result
+     * @see #lookAt(Vector3f, Vector3f, Vector3f)
+     * @see #lookAt(float, float, float, float, float, float, float, float, float)
+     */
+    public Matrix4f lookAt(float eyeX, float eyeY, float eyeZ,
+                           float centerX, float centerY, float centerZ,
+                           float upX, float upY, float upZ) {
+        Gutil.mat4x4_look_at(
+            mat
+            , new float[]{eyeX, eyeY, eyeZ}
+            , new float[]{centerX, centerY, centerZ}
+            , new float[]{upX, upY, upZ});
+        return this;
+    }
+
+    public Matrix4f lookAt(Vector3f eye,
+                           Vector3f center,
+                           Vector3f up) {
+        Gutil.mat4x4_look_at(
+            mat
+            , new float[]{eye.x, eye.y, eye.z}
+            , new float[]{center.x, center.y, center.z}
+            , new float[]{up.x, up.y, up.z});
+        return this;
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.joml.Matrix4fc#getScale(org.joml.Vector3f)
+     */
+    public Vector3f getScale(Vector3f dest) {
+        dest.x = (float) Math.sqrt(mat[M00] * mat[M00] + mat[M01] * mat[M01] + mat[M02] * mat[M02]);
+        dest.y = (float) Math.sqrt(mat[M10] * mat[M10] + mat[M11] * mat[M11] + mat[M12] * mat[M12]);
+        dest.z = (float) Math.sqrt(mat[M20] * mat[M20] + mat[M21] * mat[M21] + mat[M22] * mat[M22]);
+        return dest;
+    }
+
+
+    /* (non-Javadoc)
+     * @see org.joml.Matrix4fc#getUnnormalizedRotation(org.joml.Quaternionf)
+     */
+    public Quaternionf getUnnormalizedRotation(Quaternionf dest) {
+        return dest.setFromUnnormalized(this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.joml.Matrix4fc#getNormalizedRotation(org.joml.Quaternionf)
+     */
+    public Quaternionf getNormalizedRotation(Quaternionf dest) {
+        return dest.setFromNormalized(this);
+    }
+
+    public Vector3f getTranslation(Vector3f dest) {
+        dest.x = mat[M30];
+        dest.y = mat[M31];
+        dest.z = mat[M32];
+        return dest;
+    }
+
+
+    public static Matrix4f translationRotateScale(Vector3f t,
+                                                  Quaternionf q,
+                                                  Vector3f s,
+                                                  Matrix4f dest) {
+        float dqx = q.x + q.x;
+        float dqy = q.y + q.y;
+        float dqz = q.z + q.z;
+        float q00 = dqx * q.x;
+        float q11 = dqy * q.y;
+        float q22 = dqz * q.z;
+        float q01 = dqx * q.y;
+        float q02 = dqx * q.z;
+        float q03 = dqx * q.w;
+        float q12 = dqy * q.z;
+        float q13 = dqy * q.w;
+        float q23 = dqz * q.w;
+        dest.mat[M00] = (s.x - (q11 + q22) * s.x);
+        dest.mat[M01] = ((q01 + q23) * s.x);
+        dest.mat[M02] = ((q02 - q13) * s.x);
+        dest.mat[M03] = (0.0f);
+        dest.mat[M10] = ((q01 - q23) * s.y);
+        dest.mat[M11] = (s.y - (q22 + q00) * s.y);
+        dest.mat[M12] = ((q12 + q03) * s.y);
+        dest.mat[M13] = (0.0f);
+        dest.mat[M20] = ((q02 + q13) * s.z);
+        dest.mat[M21] = ((q12 - q03) * s.z);
+        dest.mat[M22] = (s.z - (q11 + q00) * s.z);
+        dest.mat[M23] = (0.0f);
+        dest.mat[M30] = (t.x);
+        dest.mat[M31] = (t.y);
+        dest.mat[M32] = (t.z);
+        dest.mat[M33] = (1.0f);
         return dest;
     }
 }

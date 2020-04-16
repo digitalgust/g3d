@@ -3,7 +3,6 @@ package org.mini.g3d.core;
 import org.mini.g3d.animation.AnimatedModel;
 import org.mini.g3d.animation.AnimatedModelRenderer;
 import org.mini.g3d.animation.AnimatedModelShader;
-import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.entity.EntityRenderer;
 import org.mini.g3d.skybox.Skybox;
 import org.mini.g3d.skybox.SkyboxRenderer;
@@ -17,17 +16,15 @@ import static org.mini.gl.GL.*;
 
 public class MasterRenderer extends AbstractRenderer {
 
-    private static final float FOV = 70;
-    private static final float NEAR_PLANE = 0.1f;
-    private static final float FAR_PLANE = 500;
+    public static final float FOV = 70;
+    public static final float NEAR_PLANE = 0.1f;
+    public static final float FAR_PLANE = 500;
 
     float fogTime;
     private static float FOG_RED = 0.f;
     private static float FOG_GREEN = 0.f;
     private static float FOG_BLUE = 0.f;
 
-    private Matrix4f projectionMatrix;
-    private Matrix4f skyBoxProjectionMatrix;
 
     private MasterShader masterShader = new MasterShader();
     private EntityRenderer enitiyRenderer;
@@ -41,14 +38,13 @@ public class MasterRenderer extends AbstractRenderer {
 
     private SkyboxRenderer skyboxRenderer;
 
-    public MasterRenderer() {
+    public MasterRenderer(WorldCamera camera) {
         enableCulling();
-        createProjectionMatrix();
-        skyBoxProjectionMatrix = createSkyboxProjectionMatrix();
-        enitiyRenderer = new EntityRenderer(masterShader, projectionMatrix);
-        terrainRenderer = new TerrainRenderer(terrainShader, projectionMatrix);
-        animatedModelRenderer = new AnimatedModelRenderer(animatedModelShader, projectionMatrix);
-        skyboxRenderer = new SkyboxRenderer(skyBoxProjectionMatrix);
+
+        enitiyRenderer = new EntityRenderer(masterShader, camera);
+        terrainRenderer = new TerrainRenderer(terrainShader, camera);
+        animatedModelRenderer = new AnimatedModelRenderer(animatedModelShader, camera);
+        skyboxRenderer = new SkyboxRenderer(camera);
     }
 
 
@@ -71,13 +67,15 @@ public class MasterRenderer extends AbstractRenderer {
         masterShader.loadViewMatrix(camera);
         enitiyRenderer.render(entities);
         masterShader.stop();
+        Gutil.checkGlError(this.getClass().getCanonicalName()+"render 1");
 
-        animatedModelShader.start();
-        animatedModelShader.loadSkyColor(FOG_RED, FOG_GREEN, FOG_BLUE);
-        animatedModelShader.loadLights(lights);
-        animatedModelShader.loadViewMatrix(camera);
-        animatedModelRenderer.render(animatedPlayer);
-        animatedModelShader.stop();
+//        animatedModelShader.start();
+//        animatedModelShader.loadSkyColor(FOG_RED, FOG_GREEN, FOG_BLUE);
+//        animatedModelShader.loadLights(lights);
+//        animatedModelShader.loadViewMatrix(camera);
+        animatedModelRenderer.render(camera, animatedPlayer);
+//        animatedModelShader.stop();
+        Gutil.checkGlError(this.getClass().getCanonicalName()+"render 2");
 
         terrainShader.start();
         terrainShader.loadSkyColour(FOG_RED, FOG_GREEN, FOG_BLUE);
@@ -85,15 +83,13 @@ public class MasterRenderer extends AbstractRenderer {
         terrainShader.loadViewMatrix(camera);
         terrainRenderer.render(terrains);
         terrainShader.stop();
+        Gutil.checkGlError(this.getClass().getCanonicalName()+"render 3");
 
         skyboxRenderer.render(camera, box, FOG_RED, FOG_GREEN, FOG_BLUE);
 
         clear();
     }
 
-    public Matrix4f getProjectionMatrix() {
-        return this.projectionMatrix;
-    }
 
     public void cleanUp() {
         masterShader.cleanUp();
@@ -106,40 +102,6 @@ public class MasterRenderer extends AbstractRenderer {
         glClearColor(FOG_RED, FOG_GREEN, FOG_BLUE, 1);
     }
 
-    public void reloadProjectionMatrix() {
-        enitiyRenderer.reloadProjectionMatrix(projectionMatrix);
-        animatedModelRenderer.reloadProjectionMatrix(projectionMatrix);
-        terrainRenderer.reloadProjectionMatrix(projectionMatrix);
-        skyBoxProjectionMatrix = createSkyboxProjectionMatrix();
-        skyboxRenderer.reloadProjectionMatrix(skyBoxProjectionMatrix);
-    }
-
-    public void createProjectionMatrix() {
-//        float aspectRatio = (float) EngineManager.getWidth() / (float) EngineManager.getHeight();
-//        float y_scale = (float) ((1f / Math.tan(Math.toRadians(FOV / 2f))) * aspectRatio);
-//        float x_scale = y_scale / aspectRatio;
-//        float frustum_length = FAR_PLANE - NEAR_PLANE;
-//        projectionMatrix = new Matrix4f();
-//        projectionMatrix.mat[Matrix4f.M00] = x_scale;
-//        projectionMatrix.mat[Matrix4f.M11] = y_scale;
-//        projectionMatrix.mat[Matrix4f.M22] = -((FAR_PLANE + NEAR_PLANE) / frustum_length);
-//        projectionMatrix.mat[Matrix4f.M23] = -1;
-//        projectionMatrix.mat[Matrix4f.M32] = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
-//        projectionMatrix.mat[Matrix4f.M33] = 0;
-
-        projectionMatrix = new Matrix4f();
-        float aspectRatio = (float) EngineManager.getWidth() / (float) EngineManager.getHeight();
-        Gutil.mat4x4_perspective(projectionMatrix.mat, FOV, aspectRatio, NEAR_PLANE, FAR_PLANE);
-//        Gutil.mat4x4_ortho(projectionMatrix.mat, -1500.0f, 1500.0f, -1500.0f, 1500.0f, 0.1f, 3000.0f);
-    }
-
-    private Matrix4f createSkyboxProjectionMatrix() {
-
-        Matrix4f projection = new Matrix4f();
-        float aspectRatio = (float) EngineManager.getWidth() / (float) EngineManager.getHeight();
-        Gutil.mat4x4_perspective(projection.mat, FOV, aspectRatio, NEAR_PLANE, FAR_PLANE * 8);
-        return projection;
-    }
 
     private void updateFogColor() {
         float sec = EngineManager.getFrameTimeSeconds();

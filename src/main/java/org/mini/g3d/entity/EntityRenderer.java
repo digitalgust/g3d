@@ -2,12 +2,13 @@ package org.mini.g3d.entity;
 
 import org.mini.g3d.core.MasterPass;
 import org.mini.g3d.core.MasterRenderer;
+import org.mini.g3d.core.MasterShader;
+import org.mini.g3d.core.WorldCamera;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
+import org.mini.g3d.core.textures.ModelTexture;
 import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
-import org.mini.g3d.core.MasterShader;
-import org.mini.g3d.core.textures.ModelTexture;
 
 import java.util.List;
 import java.util.Map;
@@ -18,11 +19,18 @@ public class EntityRenderer {
 
     private MasterShader shader;
 
-    public EntityRenderer(MasterShader shader, Matrix4f projectionMatrix) {
+    public EntityRenderer(MasterShader shader, WorldCamera camera) {
+        camera.getProjectionDispatcher().register(new Runnable() {
+            @Override
+            public void run() {
+                // Loads the shader, only has to be done once
+                shader.start();
+                Matrix4f projectionMatrix = camera.getProjectionMatrix();
+                shader.loadProjectionMatrix(projectionMatrix);
+                shader.start();
+            }
+        });
         this.shader = shader;
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.stop();
     }
 
     public void render(Map<TexturedModel, List<Entity>> entities) {

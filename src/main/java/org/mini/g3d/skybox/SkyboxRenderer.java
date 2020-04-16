@@ -2,6 +2,7 @@ package org.mini.g3d.skybox;
 
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.EngineManager;
+import org.mini.g3d.core.WorldCamera;
 import org.mini.g3d.core.vector.Matrix4f;
 
 import static org.mini.gl.GL.*;
@@ -11,10 +12,18 @@ public class SkyboxRenderer {
     private SkyboxShader shader;
     private float time = 0;
 
-    public SkyboxRenderer(Matrix4f projectionMatrix) {
+    public SkyboxRenderer(WorldCamera camera) {
+        camera.getProjectionDispatcher().register(new Runnable() {
+            @Override
+            public void run() {
+                shader.start();
+                Matrix4f projectionMatrix = camera.getSkyBoxProjectionMatrix();
+                shader.loadProjectionMatrix(projectionMatrix);
+                shader.stop();
+            }
+        });
         shader = new SkyboxShader();
         shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
         shader.connectTextureUnits();
         shader.stop();
     }
@@ -65,7 +74,7 @@ public class SkyboxRenderer {
         shader.loadBlendFactor(blendFactor);
     }
 
-    public void reloadProjectionMatrix(Matrix4f projectionMatrix){
+    public void reloadProjectionMatrix(Matrix4f projectionMatrix) {
         shader.start();
         shader.loadProjectionMatrix(projectionMatrix);
         shader.stop();

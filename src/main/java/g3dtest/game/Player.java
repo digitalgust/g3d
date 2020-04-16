@@ -1,64 +1,64 @@
 package g3dtest.game;
 
+import org.mini.g3d.animation.AnimatedModel;
 import org.mini.g3d.core.EngineManager;
-import org.mini.g3d.entity.Entity;
 import org.mini.g3d.core.vector.Vector3f;
-
-import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.terrain.Terrain;
 import org.mini.glfw.Glfw;
-import static org.mini.glfw.Glfw.GLFW_KEY_A;
-import static org.mini.glfw.Glfw.GLFW_KEY_D;
-import static org.mini.glfw.Glfw.GLFW_KEY_S;
-import static org.mini.glfw.Glfw.GLFW_KEY_W;
-import static org.mini.glfw.Glfw.GLFW_PRESS;
 
-public class Player extends Entity {
+import static org.mini.glfw.Glfw.*;
+
+public class Player extends AnimatedModel {
 
     private static final float RUN_SPEED = 20;
     private static final float TURN_SPEED = 160;
     private static final float GRAVITY = -50;
     private static final float JUMP_POWER = 30;
-
     private static final float TERRAIN_HEIGHT = 0;
+
 
     private float currentSpeed = 0;
     private float currentTurnSpeed = 0;
-    private float upwardSpeed = 0;
+    private float upwardsSpeed = 0;
 
     private boolean isInAir = false;
 
-    public Player(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
-        super(model, position, rotX, rotY, rotZ, scale);
+    public Player(String path, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
+        loadFile(path);
+        super.setPosition(position);
+        super.setRotX(rotX);
+        super.setRotY(rotY);
+        super.setRotZ(rotZ);
+        super.setScale(scale);
         super.increasePosition(0, 0, 0);
     }
 
-    public void move(Terrain terrain) {
-        //checkInputs();
-        super.increaseRotation(0, currentTurnSpeed * EngineManager.getFrameTimeSeconds(), 0);
-        float distance = currentSpeed * EngineManager.getFrameTimeSeconds();
-
-        float dx = (float) (distance * Math.sin(Math.toRadians(super.getRotY())));
-        float dz = (float) (distance * Math.cos(Math.toRadians(super.getRotY())));
-        super.increasePosition(dx, 0, dz);
-
-        upwardSpeed += GRAVITY * EngineManager.getFrameTimeSeconds();
-        super.increasePosition(0, upwardSpeed * EngineManager.getFrameTimeSeconds(), 0);
-        float terrainHeight = terrain.getHeightOfTerrain(super.getPosition().x, super.getPosition().z);
-//		System.out.println("Position: " +this.getPosition().left + " " + this.getPosition().top + " " + this.getPosition().z);
-        if (super.getPosition().y < terrainHeight) {
-            upwardSpeed = 0;
-            isInAir = false;
-            super.getPosition().y = terrainHeight;
-        }
-    }
-
-    private void jump() {
-        if (!isInAir) {
-            this.upwardSpeed = JUMP_POWER;
-            isInAir = true;
-        }
-    }
+//    public void update(Terrain terrain) {
+//        //checkInputs();
+//        super.increaseRotation(0, currentTurnSpeed * EngineManager.getFrameTimeSeconds(), 0);
+//        float distance = currentSpeed * EngineManager.getFrameTimeSeconds();
+//
+//        float dx = (float) (distance * Math.sin(Math.toRadians(super.getRotY())));
+//        float dz = (float) (distance * Math.cos(Math.toRadians(super.getRotY())));
+//        super.increasePosition(dx, 0, dz);
+//
+//        upwardsSpeed += GRAVITY * EngineManager.getFrameTimeSeconds();
+//        super.increasePosition(0, upwardsSpeed * EngineManager.getFrameTimeSeconds(), 0);
+//        float terrainHeight = terrain.getHeightOfTerrain(super.getPosition().x, super.getPosition().z);
+////		System.out.println("Position: " +this.getPosition().left + " " + this.getPosition().top + " " + this.getPosition().z);
+//        if (super.getPosition().y < terrainHeight) {
+//            upwardsSpeed = 0;
+//            isInAir = false;
+//            super.getPosition().y = terrainHeight;
+//        }
+//    }
+//
+//    public void jump() {
+//        if (!isInAir) {
+//            this.upwardsSpeed = JUMP_POWER;
+//            isInAir = true;
+//        }
+//    }
 
     public void key(int key, int scancode, int action, int mods) {
 
@@ -81,6 +81,63 @@ public class Player extends Entity {
         if (key == Glfw.GLFW_KEY_SPACE && action == GLFW_PRESS) {
             jump();
         }
+    }
+
+    public void turnLeft() {
+        this.currentTurnSpeed = -TURN_SPEED;
+    }
+
+    public void turnRight() {
+        this.currentTurnSpeed = TURN_SPEED;
+    }
+
+    public void moveForward() {
+        this.currentSpeed = RUN_SPEED;
+    }
+
+    public void moveBack() {
+        this.currentSpeed = -RUN_SPEED;
+    }
+
+    public void moveStop() {
+        this.currentSpeed = 0;
+    }
+
+    public void turnStop() {
+        this.currentTurnSpeed = 0;
+    }
+
+
+    public void move(Terrain terrain) {
+        rotateAnimatedPlayer();
+        float distance = currentSpeed * EngineManager.getFrameTimeSeconds();
+        float dx = (float) (distance * Math.sin(Math.toRadians(super.getRotY())));
+        float dz = (float) (distance * Math.cos(Math.toRadians(super.getRotY())));
+        super.increasePosition(dx, 0, dz);
+        upwardsSpeed += GRAVITY * EngineManager.getFrameTimeSeconds();
+        super.increasePosition(0, upwardsSpeed * EngineManager.getFrameTimeSeconds(), 0);
+        float terrainHeight = terrain.getHeightOfTerrain(super.getPosition().x, super.getPosition().z);
+
+        if (super.getPosition().y < terrainHeight) {
+            upwardsSpeed = 0;
+            isInAir = false;
+            super.getPosition().y = terrainHeight;
+            //setAnimation(runAnimation);
+        }
+    }
+
+    public void jump() {
+        if (!isInAir) {
+            this.upwardsSpeed = JUMP_POWER;
+            isInAir = true;
+            //setAnimation(null); // Dont want to model to look like its running in the air. Would have applied a jumping animation here.
+        }
+    }
+
+    private void rotateAnimatedPlayer() {
+        float turnSpeed = currentTurnSpeed * EngineManager.getFrameTimeSeconds();
+
+        super.increaseRotation(0, turnSpeed, 0);
     }
 //	private void checkInputs() {
 //		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {

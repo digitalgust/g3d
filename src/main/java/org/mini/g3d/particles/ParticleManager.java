@@ -3,6 +3,7 @@ package org.mini.g3d.particles;
 
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.Loader;
+import org.mini.g3d.core.WorldCamera;
 import org.mini.g3d.core.vector.Matrix4f;
 
 import java.util.*;
@@ -13,8 +14,8 @@ public class ParticleManager {
     private static Map<ParticleTexture, List<Particle>> particles = new HashMap<ParticleTexture, List<Particle>>();
     private static ParticleRenderer renderer;
 
-    public static void init(Loader loader, Matrix4f projectionMatrix) {
-        renderer = new ParticleRenderer(loader, projectionMatrix);
+    public static void init(Loader loader, WorldCamera camera) {
+        renderer = new ParticleRenderer(loader, camera);
     }
 
     public static void update(Camera camera) {

@@ -2,11 +2,9 @@ package org.mini.g3d.animation;
 
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.Light;
-import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector2f;
 import org.mini.g3d.core.vector.Vector3f;
-import org.mini.g3d.core.ShaderProgram;
 
 import java.util.List;
 
@@ -21,7 +19,7 @@ import static org.mini.g3d.core.MasterShader.MAX_LIGHTS;
  * @author Glenn Arne Christensen
  */
 
-public class AnimatedModelShader extends ShaderProgram {
+public class AnimatedModelShader extends org.mini.g3d.core.ShaderProgram {
 
     private static final String VERTEX_SHADER = "/res/shader/animatedEntityVertex.shader";
     private static final String FRAGMENT_SHADER = "/res/shader/animatedEntityFragment.shader";
@@ -150,8 +148,7 @@ public class AnimatedModelShader extends ShaderProgram {
 
     // Takes inn the view matrix we want to load up
     public void loadViewMatrix(Camera camera) {
-        Matrix4f viewMatrix = G3dMath.createViewMatrix(camera);
-        super.loadMatrix(location_viewMatrix, viewMatrix);
+        super.loadMatrix(location_viewMatrix, camera.getViewMatrix());
     }
 
 }

@@ -2,10 +2,9 @@ package org.mini.g3d.terrain;
 
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.Light;
-import org.mini.g3d.core.toolbox.G3dMath;
+import org.mini.g3d.core.ShaderProgram;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
-import org.mini.g3d.core.ShaderProgram;
 
 import java.util.List;
 
@@ -110,8 +109,7 @@ public class TerrainShader extends ShaderProgram {
 	}
 	
 	public void loadViewMatrix(Camera camera) {
-		Matrix4f viewMatrix = G3dMath.createViewMatrix(camera);
-		super.loadMatrix(location_viewMatrix, viewMatrix);
+		super.loadMatrix(location_viewMatrix, camera.getViewMatrix());
 	}
 
 

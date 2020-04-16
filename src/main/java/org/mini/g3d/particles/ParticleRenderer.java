@@ -3,8 +3,8 @@ package org.mini.g3d.particles;
 
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.Loader;
+import org.mini.g3d.core.WorldCamera;
 import org.mini.g3d.core.models.RawModel;
-import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 
@@ -28,7 +28,17 @@ public class ParticleRenderer {
     private int vbo;
     private int pointer = 0;
 
-    protected ParticleRenderer(Loader loader, Matrix4f projectionMatrix) {
+    protected ParticleRenderer(Loader loader, WorldCamera camera) {
+        camera.getProjectionDispatcher().register(new Runnable() {
+            @Override
+            public void run() {
+                // Loads the shader, only has to be done once
+                shader.start();
+                Matrix4f projectionMatrix = camera.getProjectionMatrix();
+                shader.loadProjectionMatrix(projectionMatrix);
+                shader.start();
+            }
+        });
         this.loader = loader;
         this.vbo = loader.createEmptyFloatVbo(INSTANCE_DATA_LENGTH * MAX_INSTANCES);
         this.quad = loader.loadToVAO(this.VERTICES, 2);
@@ -39,13 +49,10 @@ public class ParticleRenderer {
         loader.addInstancedAttribute(quad.getVaoID(), vbo, 5, 4, INSTANCE_DATA_LENGTH, 16);
         loader.addInstancedAttribute(quad.getVaoID(), vbo, 6, 1, INSTANCE_DATA_LENGTH, 20);
         shader = new ParticleShader();
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.stop();
     }
 
     protected void render(Map<ParticleTexture, List<Particle>> particles, Camera camera) {
-        Matrix4f viewMatrix = G3dMath.createViewMatrix(camera);
+        Matrix4f viewMatrix = camera.getViewMatrix();
         prepare();
         for (ParticleTexture texture : particles.keySet()) {
             bindTexture(texture);

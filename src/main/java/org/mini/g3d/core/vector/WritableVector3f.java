@@ -43,7 +43,7 @@ public interface WritableVector3f extends WritableVector2f {
 	 * Set the Z value
 	 * @param z
 	 */
-	void setZ(float z);
+	WritableVector3f setZ(float z);
 
 	/**
 	 * Set the X,Y,Z values
@@ -51,6 +51,6 @@ public interface WritableVector3f extends WritableVector2f {
    * @param y
    * @param z
 	 */
-	void set(float x, float y, float z);
+	WritableVector3f set(float x, float y, float z);
 
 }

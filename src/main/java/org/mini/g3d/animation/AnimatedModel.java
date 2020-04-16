@@ -1,159 +1,168 @@
 package org.mini.g3d.animation;
 
-import org.mini.g3d.core.models.TexturedModel;
-import org.mini.g3d.entity.Entity;
+import org.mini.g3d.core.gltf2.loader.GLTFImporter;
+import org.mini.g3d.core.gltf2.loader.data.*;
+import org.mini.g3d.core.gltf2.render.RenderMesh;
+import org.mini.g3d.core.gltf2.render.RenderMeshPrimitive;
+import org.mini.g3d.core.gltf2.render.RenderNode;
+import org.mini.g3d.core.gltf2.render.animation.RenderAnimation;
 import org.mini.g3d.core.models.RawModel;
+import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.textures.ModelTexture;
+import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
-import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.entity.Entity;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-/**
- * A entity that can be animated
- *
- * @author Glenn Arne Christensen
- */
+import static org.mini.gl.GL.glGenVertexArrays;
+
 public class AnimatedModel extends Entity {
 
-    // Skin of the animated model
-//	private final RawModel rawModel;
-//	private final ModelTexture modelTexture;
+    Random random = new Random();
+    Matrix4f mat = new Matrix4f();
 
-    // Skeleton of the animated model
-    private final Joint rootJoint; // Only needed to have a reference to the root joint, as it is structured in a hierarchy
-    private final int jointCount; // Holds the amount of joints in the skeleton, so we know how big we have to create the matrix
+    public AnimatedModel() {
 
-    /**
-     * AnimatedModel needs its own animator, as this will do all the work,
-     * on animating the model and having it in the correct poses at the giving times
-     */
-    private final Animator animator;
-
-//	private Vector3f position;
-//	private float rotX, rotY, rotZ, scale;
-
-
-    /**
-     * Constructor to create a animated model.
-     * Has the same values as creating a entity, only difference here
-     * is that we need to send in the root joint, as well as
-     * the amount of joints that are in the skeleton
-     */
-    public AnimatedModel(RawModel rawModel, ModelTexture modelTexture, Joint rootJoint, int jointCount, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
-        super(new TexturedModel(rawModel, modelTexture), position, rotX, rotY, rotZ, scale);
-        this.rootJoint = rootJoint;
-        this.jointCount = jointCount;
-        System.out.println("jointCount: " + jointCount);
-        this.animator = new Animator(this);
-        rootJoint.calculateInverseBindTransform(new Matrix4f()); // This function takes in a parent bind transform, but as we use the root joint, we just send in a matrix
     }
 
-    /**
-     * Makes so we can move the animated model
-     */
-    public void increasePosition(float dx, float dy, float dz) {
-        this.position.x += dx;
-        this.position.y += dy;
-        this.position.z += dz;
+    public List<RenderAnimation> getAnimations() {
+        return animations;
     }
 
-    /**
-     * Change rotation of the entity
-     */
-    public void increaseRotation(float dx, float dy, float dz) {
-        this.rotX += dx;
-        this.rotY += dy;
-        this.rotZ += dz;
+    private List<RenderAnimation> animations = new ArrayList<>();
+
+    public void setRootRenderNode(RenderNode rootRenderNode) {
+        this.rootRenderNode = rootRenderNode;
+        //mat.translate(new Vector3f(random.nextFloat() * 5f, 0, random.nextFloat() * 5f));
     }
 
-    /**
-     * Tells the animator of this animated model to do the animation.
-     */
-    public void doAnimation(Animation animation) {
-        animator.doAnimation(animation);
+    private RenderNode rootRenderNode = new RenderNode(null, null);
+
+    public long getAnimationStartTime() {
+        return animationStartTime;
     }
 
-    /**
-     * Updates the animator for this entity, basically updating the animated
-     * pose of the entity. Must be called every frame.
-     */
+    public void setAnimationStartTime(long animationStartTime) {
+        this.animationStartTime = animationStartTime;
+    }
+
+    private long animationStartTime;
+
+
+    public RenderNode getRootRenderNode() {
+        return rootRenderNode;
+    }
+
+
     public void update() {
-        animator.update();
+        animateNode();
+        mat.setZero();
+        G3dMath.createTransformationMatrix(getPosition(), getRotX(), getRotY(), getRotZ(), getScale(), mat);
+        rootRenderNode.applyTransform(mat);
+        rootRenderNode.updateSkin();
     }
 
+    //  private static float debugStep = -0.25f;
+    private void animateNode() {
+        float animationTimeScale = 1.f;
+        float elapsedTime =
+                (System.currentTimeMillis() - animationStartTime) / 1000f * animationTimeScale;
+//    debugStep += 0.25f;
+//    float elapsedTime = debugStep;
 
-    /**
-     * Adds the current joint as well as their children to the matrix array
-     * containing the joint transforms
-     */
-    private void addJointsToMatrixArray(Joint currentJoint, Matrix4f[] jointMatrices) {
-        jointMatrices[currentJoint.jointID] = currentJoint.getAnimatedTransform();
-        for (Joint childJoint : currentJoint.children) {
-            addJointsToMatrixArray(childJoint, jointMatrices);
+        //TODO selecting animation
+
+        for (RenderAnimation anim : animations) {
+            anim.advance(elapsedTime);
         }
     }
 
-    // Getters and setters
 
-    /**
-     * Creates a matrix, the size dependent of the amounts of joints in the skeleton.
-     * The way the joints are ordered is dependent of the index of the joint.
-     * And returns the transforms of the joints in the current pose of the animation
-     */
-    public Matrix4f[] getJointTransforms() {
-        Matrix4f[] jointMatrices = new Matrix4f[jointCount];
-        addJointsToMatrixArray(rootJoint, jointMatrices);
-        return jointMatrices;
+    public void loadFile(String path) {
+
+        File file = new File(path);
+        GLTFImporter gltfImporter = new GLTFImporter();
+        //Clear before loading
+
+        RenderNode rootRenderNode = new RenderNode(null, null);
+        setRootRenderNode(rootRenderNode);
+
+        GLTF gltf;
+        gltf = gltfImporter.load(file.getPath());
+        if (gltf == null) {
+            throw new RuntimeException();
+        }
+
+        if (gltf.getExtensionsRequired() != null) {
+            throw new RuntimeException("Extensions not supported. Loading next file");
+        }
+
+        GLTFScene scene = gltf.getDefaultScene();
+        if (scene == null) {
+            scene = gltf.getScenes().get(0);
+        }
+
+        //Generate RenderNodes for scene
+        for (GLTFNode rootNode : scene.getRootNodes()) {
+            processNodeChildren(rootNode, rootRenderNode);
+        }
+
+        //Generate Animations
+        if (gltf.getAnimations() != null) {
+            for (GLTFAnimation animation : gltf.getAnimations()) {
+                getAnimations().add(new RenderAnimation(animation));
+            }
+        }
+
+        Matrix4f sceneScale = new Matrix4f();
+        rootRenderNode.applyTransform(sceneScale);
+
+//    AABBf sceneExtends = new AABBf();
+//    renderCamera.getSceneExtends(rootRenderNode, sceneExtends);
+//    float minValue = Math.min(sceneExtends.minX, Math.min(sceneExtends.minY, sceneExtends.minZ));
+//    float maxValue = Math.max(sceneExtends.maxX, Math.max(sceneExtends.maxY, sceneExtends.maxZ));
+//    float delta = 1 / (maxValue - minValue);
+//    sceneScale.scale(delta);
+//    rootRenderNode.applyTransform(sceneScale);
+//    System.out.println("Scaling scene by " + delta);
+
+        //renderCamera.fitViewToScene(rootRenderNode);
+
+        setAnimationStartTime(System.currentTimeMillis());
+
+        int[] vao = {0};
+        glGenVertexArrays(1, vao, 0);
+//        glBindVertexArray(vao[0]);
+
+        RawModel raw = new RawModel(vao[0], 0);
+        ModelTexture mt = new ModelTexture(-1);
+        model = new TexturedModel(raw, mt);
     }
 
+    private void processNodeChildren(GLTFNode node, RenderNode parent) {
+        RenderNode renderNode;
+        GLTFMesh mesh = node.getMesh();
+        if (mesh != null) {
+            GLTFMesh gltfMesh = mesh;
+            renderNode = new RenderMesh(node, parent);
+            for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
+                System.out.println("Processing GLTFMesh. Name: " + gltfMesh.getName());
+                //Each primitive gets its own render object.
+                new RenderMeshPrimitive(primitive, null, (RenderMesh) renderNode);
+            }
+        } else {
+            renderNode = new RenderNode(node, parent);
+        }
+        GLTFCamera camera = node.getCamera();
+        //if (camera != null) renderCamera.setGLTFCamera(camera);
 
-    public Joint getRootJoint() {
-        return rootJoint;
+        if (node.getChildren() != null)
+            for (GLTFNode childNode : node.getChildren()) {
+                processNodeChildren(childNode, renderNode);
+            }
     }
-
-    public int getJointCount() {
-        return jointCount;
-    }
-
-
-    public Vector3f getPosition() {
-        return position;
-    }
-
-    public void setPosition(Vector3f position) {
-        this.position = position;
-    }
-
-    public float getRotX() {
-        return rotX;
-    }
-
-    public void setRotX(float rotX) {
-        this.rotX = rotX;
-    }
-
-    public float getRotY() {
-        return rotY;
-    }
-
-    public void setRotY(float rotY) {
-        this.rotY = rotY;
-    }
-
-    public float getRotZ() {
-        return rotZ;
-    }
-
-    public void setRotZ(float rotZ) {
-        this.rotZ = rotZ;
-    }
-
-    public float getScale() {
-        return scale;
-    }
-
-    public void setScale(float scale) {
-        this.scale = scale;
-    }
-
 }

@@ -51,7 +51,7 @@ public class Matrix2f extends Matrix implements Serializable {
      * Constructor for Matrix2f. The matrix is initialised to the identity.
      */
     public Matrix2f() {
-        setIdentity();
+        identity();
     }
 
     /**
@@ -381,8 +381,8 @@ public class Matrix2f extends Matrix implements Serializable {
      *
      * @return this
      */
-    public Matrix setIdentity() {
-        return setIdentity(this);
+    public Matrix identity() {
+        return identity(this);
     }
 
     /**
@@ -391,7 +391,7 @@ public class Matrix2f extends Matrix implements Serializable {
      * @param src The matrix to set to the identity.
      * @return The source matrix
      */
-    public static Matrix2f setIdentity(Matrix2f src) {
+    public static Matrix2f identity(Matrix2f src) {
         src.mat[M00] = 1.0f;
         src.mat[M01] = 0.0f;
         src.mat[M10] = 0.0f;
