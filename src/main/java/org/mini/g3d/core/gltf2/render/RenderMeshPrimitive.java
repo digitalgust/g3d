@@ -6,6 +6,7 @@
 
 package org.mini.g3d.core.gltf2.render;
 
+import org.mini.g3d.core.gltf2.AnimatedShader;
 import org.mini.g3d.core.gltf2.loader.data.GLTFAccessor;
 import org.mini.g3d.core.gltf2.loader.data.GLTFMeshPrimitive;
 import org.mini.g3d.core.gltf2.loader.data.GLTFNode;
@@ -24,6 +25,21 @@ import java.util.Map.Entry;
  */
 public class RenderMeshPrimitive extends RenderNode {
 
+
+    //====================================================
+    //for cache the program id
+
+    public AnimatedShader getShader() {
+        return shader;
+    }
+
+    public void setShader(AnimatedShader shader) {
+        this.shader = shader;
+    }
+
+    AnimatedShader shader = null;
+
+    //====================================================
 
     /**
      * Very similar to GLTFMeshPrimitive.getAttributes but the string is a variable in the shader

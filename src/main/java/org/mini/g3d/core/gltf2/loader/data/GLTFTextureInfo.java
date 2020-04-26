@@ -73,4 +73,21 @@ public class GLTFTextureInfo extends GLTFProperty {
             return strength;
         }
     }
+
+
+    /**
+     * none of gltf
+     * ============================================
+     */
+
+    int texid = -1;
+
+    public int getTexid() {
+        return texid;
+    }
+
+    public void setTexid(int texid) {
+        this.texid = texid;
+    }
+
 }

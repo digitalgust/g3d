@@ -6,49 +6,53 @@
 
 package org.mini.g3d.core.gltf2.render;
 
+import org.mini.g3d.core.BackendSuported;
 import org.mini.g3d.core.gltf2.loader.data.GLTFNode;
-import org.mini.g3d.core.vector.AABBf;
-import org.mini.g3d.core.vector.Matrix4f;
-import org.mini.g3d.core.vector.Quaternionf;
-import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.core.vector.*;
+import org.mini.nanovg.Gutil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class RenderNode {
+public class RenderNode implements BackendSuported {
 
     private static final String EXTRA_KEY = "_RenderNode";
     protected AABBf boundingBox;
     private RenderSkin skin;
-    private Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
-    private Vector3f translation = new Vector3f();
-    private Quaternionf rotation = new Quaternionf();
+    private final Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
+    private final Vector3f translation = new Vector3f();
+    private final Quaternionf rotation = new Quaternionf();
     private final Matrix4f worldTransform = new Matrix4f();
+    private final Matrix4f worldTransform_backend = new Matrix4f();
     private final Matrix4f inverseWorldTransform = new Matrix4f();
+    private final Matrix4f inverseWorldTransform_backend = new Matrix4f();
     private final Matrix4f normalMatrix = new Matrix4f();
     private final List<RenderNode> children = new ArrayList<>();
     private boolean changed;
-    private Matrix4f localTransform = null;
+    private Matrix4f localTransform = new Matrix4f();
+    private Matrix4f localTransform_backend = new Matrix4f();
+    private GLTFNode gltfnode;
+    private RenderNode parent;
 
     public RenderNode(GLTFNode node, RenderNode parent) {
-
+        gltfnode = node;
+        this.parent = parent;
         if (node != null) {
-            node.getExtras().put(EXTRA_KEY, this);
+            //node.getExtras().put(EXTRA_KEY, this);
             if (node.getMatrix() != null) {
                 applyMatrix(node.getMatrix());
             } else {
                 Vector3f scalef = node.getScale();
-                scale = new Vector3f(scalef);
+                scale.set(scalef);
 
                 Quaternionf rotf = node.getRotation();
-                rotation = new Quaternionf().set(rotf);
+                rotation.set(rotf);
 
                 Vector3f traf = node.getTranslation();
-                translation = new Vector3f(traf);
+                translation.set(traf);
             }
             if (node.getSkin() != null) {
-                this.skin = new RenderSkin(node.getSkin());
+                this.skin = new RenderSkin(node.getSkin(), this);
             }
         }
 
@@ -58,14 +62,22 @@ public class RenderNode {
         }
     }
 
-    public static RenderNode from(GLTFNode node) {
+    public RenderNode from(GLTFNode node) {
         if (node == null) return null;
-        Map extras = node.getExtras();
-        if (extras.containsKey(EXTRA_KEY)) {
-            return (RenderNode) extras.get(EXTRA_KEY);
-        } else {
-            return null;
+        if (node == gltfnode) {
+            return this;
         }
+        for (RenderNode child : children) {
+            RenderNode rn = child.from(node);
+            if (rn != null) return rn;
+        }
+
+        return null;
+    }
+
+    public RenderNode getTopParent() {
+        if (parent != null) return parent.getTopParent();
+        return this;
     }
 
 
@@ -78,25 +90,26 @@ public class RenderNode {
     }
 
     private void applyMatrix(Matrix4f floatMatrix) {
-        Matrix4f matrix = new Matrix4f(floatMatrix);
-        localTransform = matrix;
-        matrix.getScale(scale);
-        matrix.getUnnormalizedRotation(rotation);
-        matrix.getTranslation(translation);
+        Gutil.mat4x4_dup(localTransform_backend.mat, floatMatrix.mat);
+        Gutil.mat4x4_dup(localTransform.mat, floatMatrix.mat);
+        localTransform.getScale(scale);
+        //localTransform.getUnnormalizedRotation(rotation);
+        Matrix4f.getRotation(rotation, localTransform);
+        localTransform.getTranslation(translation);
         changed = true;
     }
 
-    private Matrix4f getLocalTransform() {
-        if (localTransform == null) {
-            localTransform = new Matrix4f();
+    private Matrix4f getLocalTransform_backend() {
+        if (localTransform_backend == null) {
+            localTransform_backend = new Matrix4f();
             changed = true;
         }
         if (changed) {
-            localTransform.identity();
-            Matrix4f.translationRotateScale(translation, rotation, scale, localTransform);
+            localTransform_backend.identity();
+            Matrix4f.translationRotateScale(translation, rotation, scale, localTransform_backend);
             changed = false;
         }
-        return this.localTransform;
+        return this.localTransform_backend;
     }
 
     public Matrix4f getWorldTransform() {
@@ -109,13 +122,14 @@ public class RenderNode {
     }
 
     public void applyTransform(Matrix4f parentTransform) {
-        Matrix4f localTransform = getLocalTransform();
-        Matrix4f.mul(parentTransform, localTransform, worldTransform);
-        Matrix4f.invert(worldTransform, inverseWorldTransform);
-        inverseWorldTransform.transpose(normalMatrix);
+        Matrix4f localTransform = getLocalTransform_backend();
+        Matrix4f.mul(parentTransform, localTransform, worldTransform_backend);
+        Matrix4f.invert(worldTransform, inverseWorldTransform_backend);
+        inverseWorldTransform_backend.transpose(normalMatrix);
 
-        for (RenderNode child : children) {
-            child.applyTransform(this.getWorldTransform());
+        for (int i = 0, imax = children.size(); i < imax; i++) {
+            RenderNode child = children.get(i);
+            child.applyTransform(worldTransform_backend);
         }
     }
 
@@ -155,8 +169,21 @@ public class RenderNode {
     }
 
     public void updateSkin() {
-        for (RenderNode child : children) {
+        for (int i = 0, imax = children.size(); i < imax; i++) {
+            RenderNode child = children.get(i);
             child.updateSkin();
+        }
+    }
+
+    @Override
+    public void swap() {
+
+        Gutil.mat4x4_dup(worldTransform.mat, worldTransform_backend.mat);
+        Gutil.mat4x4_dup(inverseWorldTransform.mat, inverseWorldTransform_backend.mat);
+        Gutil.mat4x4_dup(localTransform.mat, localTransform_backend.mat);
+        for (int i = 0, imax = children.size(); i < imax; i++) {
+            RenderNode child = children.get(i);
+            child.swap();
         }
     }
 }

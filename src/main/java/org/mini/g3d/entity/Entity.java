@@ -8,7 +8,7 @@ public class Entity {
 
     protected TexturedModel model;
     protected Vector3f position;
-    protected Vector3f rotation=new Vector3f();//rotX, rotY, rotZ;
+    protected float rotX,rotY,rotZ;
     protected float scale;
 
     protected int textureIndex = 0;
@@ -19,9 +19,9 @@ public class Entity {
     public Entity(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
         this.model = model;
         this.position = position;
-        rotation.x = rotX;
-        rotation.y = rotY;
-        rotation.z = rotZ;
+        rotX = rotX;
+        rotY = rotY;
+        rotZ = rotZ;
         this.scale = scale;
     }
 
@@ -29,9 +29,9 @@ public class Entity {
         this.model = model;
         this.textureIndex = index;
         this.position = position;
-        rotation.x = rotX;
-        rotation.y = rotY;
-        rotation.z = rotZ;
+        rotX = rotX;
+        rotY = rotY;
+        rotZ = rotZ;
         this.scale = scale;
     }
 
@@ -52,9 +52,9 @@ public class Entity {
     }
 
     public void increaseRotation(float dx, float dy, float dz) {
-        rotation.x += dx;
-        rotation.y += dy;
-        rotation.z += dz;
+        rotX += dx;
+        rotY += dy;
+        rotZ += dz;
     }
 
     public TexturedModel getModel() {
@@ -74,27 +74,27 @@ public class Entity {
     }
 
     public float getRotX() {
-        return rotation.x;
+        return rotX;
     }
 
     public void setRotX(float rotX) {
-        this.rotation.x = rotX;
+        this.rotX = rotX;
     }
 
     public float getRotY() {
-        return rotation.y;
+        return rotY;
     }
 
     public void setRotY(float rotY) {
-        this.rotation.y = rotY;
+        this.rotY = rotY;
     }
 
     public float getRotZ() {
-        return rotation.z;
+        return rotZ;
     }
 
     public void setRotZ(float rotZ) {
-        this.rotation.z = rotZ;
+        this.rotZ = rotZ;
     }
 
     public float getScale() {

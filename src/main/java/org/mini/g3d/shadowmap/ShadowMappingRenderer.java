@@ -7,6 +7,7 @@ import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
+import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.entity.Entity;
 import org.mini.g3d.core.textures.ModelTexture;
 import org.mini.nanovg.Gutil;
@@ -18,12 +19,17 @@ import static org.mini.gl.GL.*;
 
 public class ShadowMappingRenderer extends AbstractRenderer {
 
-    private ShadowMappingShader shadowMappingShader = new ShadowMappingShader();
-    Matrix4f depthProjection = new Matrix4f();
-    Matrix4f depthView = new Matrix4f();
-    Matrix4f depthMVP = new Matrix4f();
-    Matrix4f depthPV = new Matrix4f();
-    Matrix4f depthBiasMVP = new Matrix4f();
+    private final ShadowMappingShader shadowMappingShader = new ShadowMappingShader();
+    private final Matrix4f depthProjection = new Matrix4f();
+    private final Matrix4f depthView = new Matrix4f();
+    private final Matrix4f depthMVP = new Matrix4f();
+    private final Matrix4f depthPV = new Matrix4f();
+    private final Matrix4f depthBiasMVP = new Matrix4f();
+    private final Matrix4f depthModel = new Matrix4f();
+    private final Matrix4f transformationMatrix = new Matrix4f();
+    float[] eye = new float[3];
+    float[] center = new float[]{0.0f, 0.0f, 0.0f};
+    float[] up = new float[]{0.0f, 1.0f, 0.0f};
 
     public static int triangles = 0;
 
@@ -41,16 +47,17 @@ public class ShadowMappingRenderer extends AbstractRenderer {
     }
 
     void updateDepthMVP(Light light) {
-
-        // MVP from light poisition
-        Gutil.mat4x4_ortho(depthProjection.mat, -20.0f, 1080.0f, -20.0f, 1080.0f, 400f, 1000.0f);
-        float[] eye = new float[]{light.getPosition().x, light.getPosition().y, light.getPosition().z};
-        Gutil.mat4x4_look_at(depthView.mat, eye, new float[]{0.0f, 0.0f, 0.0f}, new float[]{0.0f, 1.0f, 0.0f});
-        Matrix4f depthModel = new Matrix4f();
-        Gutil.mat4x4_identity(depthModel.mat);
-        Gutil.mat4x4_mul(depthPV.mat, depthProjection.mat, depthView.mat);
-        Gutil.mat4x4_mul(depthMVP.mat, depthPV.mat, depthModel.mat);
-        Gutil.mat4x4_mul(depthBiasMVP.mat, biasMatrix, depthMVP.mat);
+        Vector3f pos = light.getPosition();
+        if (pos.x != eye[0] || pos.y != eye[1] || pos.z != eye[2]) {
+            // MVP from light poisition
+            Gutil.mat4x4_ortho(depthProjection.mat, -20.0f, 1080.0f, -20.0f, 1080.0f, 400f, 1000.0f);
+            light.getPosition().store(eye);
+            Gutil.mat4x4_look_at(depthView.mat, eye, center, up);
+            Gutil.mat4x4_identity(depthModel.mat);
+            Gutil.mat4x4_mul(depthPV.mat, depthProjection.mat, depthView.mat);
+            Gutil.mat4x4_mul(depthMVP.mat, depthPV.mat, depthModel.mat);
+            Gutil.mat4x4_mul(depthBiasMVP.mat, biasMatrix, depthMVP.mat);
+        }
     }
 
     public Matrix4f getDepthBiasMVP() {
@@ -96,9 +103,10 @@ public class ShadowMappingRenderer extends AbstractRenderer {
             glBindTexture(GL_TEXTURE_2D, texture.getID());
 
             List<Entity> batch = entities.get(texturedModel);
-            for (Entity entity : batch) {
+            for (int i = 0, imax = batch.size(); i < imax; i++) {
+                Entity entity = batch.get(i);
 
-                Matrix4f transformationMatrix = G3dMath.createTransformationMatrix(entity.getPosition(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+                G3dMath.createTransformationMatrix(entity.getPosition(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale(), transformationMatrix);
                 Gutil.mat4x4_mul(transformationMatrix.mat, depthPV.mat, transformationMatrix.mat);
                 shadowMappingShader.loadDepthMVP(transformationMatrix);
                 glDrawElements(GL_TRIANGLES, rawModel.getVertexCount(), GL_UNSIGNED_INT, null, 0);

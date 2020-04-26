@@ -32,6 +32,13 @@ public class WidgetContainer extends Widget {
         }
     }
 
+    public float getX() {
+        return glPanel.getX() + left;
+    }
+
+    public float getY() {
+        return glPanel.getY() + top;
+    }
 
     public void keyEvent(int key, int scanCode, int action, int mods) {
         for (Widget w : widgets) {

@@ -30,7 +30,7 @@ public class GLTFChannel extends GLTFProperty {
      */
     private GLTFAnimationChannelTarget target;
 
-    public Integer getAnimationSamplerIndex() {
+    public int getAnimationSamplerIndex() {
         return indexAnimationSampler;
     }
 

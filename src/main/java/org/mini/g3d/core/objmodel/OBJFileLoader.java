@@ -1,4 +1,4 @@
-package org.mini.g3d.core.converter;
+package org.mini.g3d.core.objmodel;
 
 import org.mini.g3d.core.EngineManager;
 import org.mini.g3d.core.vector.Vector2f;
@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OBJFileLoader {
-
 
 
     public static ModelData loadOBJ(String objFileName) {
@@ -31,24 +30,34 @@ public class OBJFileLoader {
         try {
             while (true) {
                 line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
                 if (line.startsWith("v ")) {
-                    String[] currentLine = line.split(" ");
-                    Vector3f vertex = new Vector3f((float) Float.valueOf(currentLine[1]),
-                            (float) Float.valueOf(currentLine[2]),
-                            (float) Float.valueOf(currentLine[3]));
+                    String[] currentLine = line.trim().split("[ ]{1,}");
+                    try {
+                        Vector3f vertex = new Vector3f(Float.valueOf(currentLine[1]),
+                                Float.valueOf(currentLine[2]),
+                                Float.valueOf(currentLine[3]));
+                    } catch (Exception e) {
+                        int i = 0;
+                    }
+                    Vector3f vertex = new Vector3f(Float.valueOf(currentLine[1]),
+                            Float.valueOf(currentLine[2]),
+                            Float.valueOf(currentLine[3]));
                     Vertex newVertex = new Vertex(vertices.size(), vertex);
                     vertices.add(newVertex);
 
                 } else if (line.startsWith("vt ")) {
-                    String[] currentLine = line.split(" ");
-                    Vector2f texture = new Vector2f((float) Float.valueOf(currentLine[1]),
-                            (float) Float.valueOf(currentLine[2]));
+                    String[] currentLine = line.split("[ ]{1,}");
+                    Vector2f texture = new Vector2f(Float.valueOf(currentLine[1]),
+                            Float.valueOf(currentLine[2]));
                     textures.add(texture);
                 } else if (line.startsWith("vn ")) {
-                    String[] currentLine = line.split(" ");
-                    Vector3f normal = new Vector3f((float) Float.valueOf(currentLine[1]),
-                            (float) Float.valueOf(currentLine[2]),
-                            (float) Float.valueOf(currentLine[3]));
+                    String[] currentLine = line.split("[ ]{1,}");
+                    Vector3f normal = new Vector3f(Float.valueOf(currentLine[1]),
+                            Float.valueOf(currentLine[2]),
+                            Float.valueOf(currentLine[3]));
                     normals.add(normal);
                 } else if (line.startsWith("f ")) {
                     break;
@@ -104,8 +113,8 @@ public class OBJFileLoader {
     }
 
     private static float convertDataToArrays(List<Vertex> vertices, List<Vector2f> textures,
-            List<Vector3f> normals, float[] verticesArray, float[] texturesArray,
-            float[] normalsArray) {
+                                             List<Vector3f> normals, float[] verticesArray, float[] texturesArray,
+                                             float[] normalsArray) {
         float furthestPoint = 0;
         for (int i = 0; i < vertices.size(); i++) {
             Vertex currentVertex = vertices.get(i);
@@ -128,7 +137,7 @@ public class OBJFileLoader {
     }
 
     private static void dealWithAlreadyProcessedVertex(Vertex previousVertex, int newTextureIndex,
-            int newNormalIndex, List<Integer> indices, List<Vertex> vertices) {
+                                                       int newNormalIndex, List<Integer> indices, List<Vertex> vertices) {
         if (previousVertex.hasSameTextureAndNormal(newTextureIndex, newNormalIndex)) {
             indices.add(previousVertex.getIndex());
         } else {
@@ -157,4 +166,10 @@ public class OBJFileLoader {
         }
     }
 
+    static public void main(String[] args) {
+        String s = "v  0.1603 0.0000 0.0926";
+        String[] a = s.split("[ ]{1,}");
+        System.out.println(a.length);
+
+    }
 }

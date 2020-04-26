@@ -7,13 +7,13 @@ import org.mini.nanovg.Gutil;
 
 public class WorldCamera implements Camera {
 
-    private float distanceFromMaster = 50;
+    private float distanceFromMaster = 15;
     private float angleAroundMaster = 0;
 
 
     private final Vector3f up = new Vector3f(0, 1, 0);
     private Vector3f position = new Vector3f(0, 0, 0);
-    private float pitch = 0;
+    private float pitch = 0.1f;
     private float yaw = 0;
     private float roll;
 
@@ -21,8 +21,9 @@ public class WorldCamera implements Camera {
     private float fov, near, far;
 
 
-    private Matrix4f projectionMatrix;
-    private Matrix4f skyBoxProjectionMatrix;
+    private final Matrix4f viewMatrix = new Matrix4f();
+    private final Matrix4f projectionMatrix = new Matrix4f();
+    private final Matrix4f skyBoxProjectionMatrix = new Matrix4f();
 
     private boolean yawFollowPlayer;//target rotate Y axis effect camera if true
 
@@ -65,7 +66,7 @@ public class WorldCamera implements Camera {
         float offsetX = (float) (horizDistance * Math.sin(Math.toRadians(theta)));
         float offsetZ = (float) (horizDistance * Math.cos(Math.toRadians(theta)));
 
-        position.y = target.getPosition().y + verticDistance + 15;
+        position.y = target.getPosition().y + verticDistance + 5;
         position.x = target.getPosition().x - offsetX;
         position.z = target.getPosition().z - offsetZ;
     }
@@ -161,7 +162,6 @@ public class WorldCamera implements Camera {
 //        projectionMatrix.mat[Matrix4f.M32] = -((2 * NEAR_PLANE * FAR_PLANE) / frustum_length);
 //        projectionMatrix.mat[Matrix4f.M33] = 0;
 
-        projectionMatrix = new Matrix4f();
         float aspectRatio = viewW / viewH;
         Gutil.mat4x4_perspective(projectionMatrix.mat, fov, aspectRatio, near, far);
 //        Gutil.mat4x4_ortho(projectionMatrix.mat, -1500.0f, 1500.0f, -1500.0f, 1500.0f, 0.1f, 3000.0f);
@@ -169,8 +169,6 @@ public class WorldCamera implements Camera {
 
 
     public void createSkyboxProjectionMatrix() {
-
-        skyBoxProjectionMatrix = new Matrix4f();
         float aspectRatio = viewW / viewH;
         Gutil.mat4x4_perspective(skyBoxProjectionMatrix.mat, fov, aspectRatio, near, far * 8);
     }
@@ -225,12 +223,13 @@ public class WorldCamera implements Camera {
         createSkyboxProjectionMatrix();
     }
 
+
+
     public Matrix4f getViewMatrix() {
-        Matrix4f viewMatrix = new Matrix4f();
 
         viewMatrix.identity();
-        Matrix4f.rotate((float) Math.toRadians(pitch), new Vector3f(1, 0, 0), viewMatrix, viewMatrix);
-        Matrix4f.rotate((float) Math.toRadians(yaw), new Vector3f(0, 1, 0), viewMatrix, viewMatrix);
+        Matrix4f.rotate((float) Math.toRadians(pitch), 1, 0, 0, viewMatrix, viewMatrix);
+        Matrix4f.rotate((float) Math.toRadians(yaw), 0, 1, 0, viewMatrix, viewMatrix);
         Vector3f cameraPos = getPosition();
         Vector3f negativeCameraPos = new Vector3f(-cameraPos.x, -cameraPos.y, -cameraPos.z);
         Matrix4f.translate(negativeCameraPos, viewMatrix, viewMatrix);

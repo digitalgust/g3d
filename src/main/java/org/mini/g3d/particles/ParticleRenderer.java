@@ -115,7 +115,7 @@ public class ParticleRenderer {
         modelMatrix.mat[Matrix4f.M21] = viewMatrix.mat[Matrix4f.M12];
         modelMatrix.mat[Matrix4f.M22] = viewMatrix.mat[Matrix4f.M22];
         Matrix4f modelViewMatrix = Matrix4f.mul(viewMatrix, modelMatrix, null);
-        Matrix4f.rotate((float) Math.toRadians(rotation), new Vector3f(0, 0, 1), modelViewMatrix, modelViewMatrix);
+        Matrix4f.rotate((float) Math.toRadians(rotation), 0, 0, 1, modelViewMatrix, modelViewMatrix);
         Matrix4f.scale(new Vector3f(scale, scale, scale), modelViewMatrix, modelViewMatrix);
         modelViewMatrix.store(vboData);
         System.arraycopy(modelViewMatrix.mat, 0, vboData, pointer, 16);

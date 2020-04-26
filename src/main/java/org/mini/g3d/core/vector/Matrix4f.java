@@ -49,6 +49,28 @@ public class Matrix4f extends Matrix implements Serializable {
     public static final int MAT_LEN = 4 * 4;
     public float[] mat = new float[MAT_LEN];
 
+
+    static ThreadLocal<float[]> arr_f16A = new ThreadLocal() {
+        @Override
+        protected float[] initialValue() {
+            return new float[MAT_LEN];
+        }
+    };
+
+    static ThreadLocal<float[]> arr_f16B = new ThreadLocal() {
+        @Override
+        protected float[] initialValue() {
+            return new float[MAT_LEN];
+        }
+    };
+
+    static ThreadLocal<float[]> arr_f16C = new ThreadLocal() {
+        @Override
+        protected float[] initialValue() {
+            return new float[MAT_LEN];
+        }
+    };
+
     /**
      * Construct a new matrix, initialized to the identity.
      */
@@ -179,22 +201,25 @@ public class Matrix4f extends Matrix implements Serializable {
      * @return m
      */
     public static Matrix4f setZero(Matrix4f m) {
-        m.mat[M00] = 0.0f;
-        m.mat[M01] = 0.0f;
-        m.mat[M02] = 0.0f;
-        m.mat[M03] = 0.0f;
-        m.mat[M10] = 0.0f;
-        m.mat[M11] = 0.0f;
-        m.mat[M12] = 0.0f;
-        m.mat[M13] = 0.0f;
-        m.mat[M20] = 0.0f;
-        m.mat[M21] = 0.0f;
-        m.mat[M22] = 0.0f;
-        m.mat[M23] = 0.0f;
-        m.mat[M30] = 0.0f;
-        m.mat[M31] = 0.0f;
-        m.mat[M32] = 0.0f;
-        m.mat[M33] = 0.0f;
+        for (int i = 0; i < MAT_LEN; i++) {
+            m.mat[i] = 0;
+        }
+//        m.mat[M00] = 0.0f;
+//        m.mat[M01] = 0.0f;
+//        m.mat[M02] = 0.0f;
+//        m.mat[M03] = 0.0f;
+//        m.mat[M10] = 0.0f;
+//        m.mat[M11] = 0.0f;
+//        m.mat[M12] = 0.0f;
+//        m.mat[M13] = 0.0f;
+//        m.mat[M20] = 0.0f;
+//        m.mat[M21] = 0.0f;
+//        m.mat[M22] = 0.0f;
+//        m.mat[M23] = 0.0f;
+//        m.mat[M30] = 0.0f;
+//        m.mat[M31] = 0.0f;
+//        m.mat[M32] = 0.0f;
+//        m.mat[M33] = 0.0f;
 
         return m;
     }
@@ -475,46 +500,46 @@ public class Matrix4f extends Matrix implements Serializable {
         return dest;
     }
 
-
-    static float fma(float a, float b, float c) {
-        return a * b + c;
-    }
-
-    public static Matrix4f mulfma(Matrix4f left, Matrix4f right, Matrix4f dest) {
-        float nm00 = fma(left.mat[M00], right.mat[M00], fma(left.mat[M10], right.mat[M01], fma(left.mat[M20], right.mat[M02], left.mat[M30] * right.mat[M03])));
-        float nm01 = fma(left.mat[M01], right.mat[M00], fma(left.mat[M11], right.mat[M01], fma(left.mat[M21], right.mat[M02], left.mat[M31] * right.mat[M03])));
-        float nm02 = fma(left.mat[M02], right.mat[M00], fma(left.mat[M12], right.mat[M01], fma(left.mat[M22], right.mat[M02], left.mat[M32] * right.mat[M03])));
-        float nm03 = fma(left.mat[M03], right.mat[M00], fma(left.mat[M13], right.mat[M01], fma(left.mat[M23], right.mat[M02], left.mat[M33] * right.mat[M03])));
-        float nm10 = fma(left.mat[M00], right.mat[M10], fma(left.mat[M10], right.mat[M11], fma(left.mat[M20], right.mat[M12], left.mat[M30] * right.mat[M13])));
-        float nm11 = fma(left.mat[M01], right.mat[M10], fma(left.mat[M11], right.mat[M11], fma(left.mat[M21], right.mat[M12], left.mat[M31] * right.mat[M13])));
-        float nm12 = fma(left.mat[M02], right.mat[M10], fma(left.mat[M12], right.mat[M11], fma(left.mat[M22], right.mat[M12], left.mat[M32] * right.mat[M13])));
-        float nm13 = fma(left.mat[M03], right.mat[M10], fma(left.mat[M13], right.mat[M11], fma(left.mat[M23], right.mat[M12], left.mat[M33] * right.mat[M13])));
-        float nm20 = fma(left.mat[M00], right.mat[M20], fma(left.mat[M10], right.mat[M21], fma(left.mat[M20], right.mat[M22], left.mat[M30] * right.mat[M23])));
-        float nm21 = fma(left.mat[M01], right.mat[M20], fma(left.mat[M11], right.mat[M21], fma(left.mat[M21], right.mat[M22], left.mat[M31] * right.mat[M23])));
-        float nm22 = fma(left.mat[M02], right.mat[M20], fma(left.mat[M12], right.mat[M21], fma(left.mat[M22], right.mat[M22], left.mat[M32] * right.mat[M23])));
-        float nm23 = fma(left.mat[M03], right.mat[M20], fma(left.mat[M13], right.mat[M21], fma(left.mat[M23], right.mat[M22], left.mat[M33] * right.mat[M23])));
-        float nm30 = fma(left.mat[M00], right.mat[M30], fma(left.mat[M10], right.mat[M31], fma(left.mat[M20], right.mat[M32], left.mat[M30] * right.mat[M33])));
-        float nm31 = fma(left.mat[M01], right.mat[M30], fma(left.mat[M11], right.mat[M31], fma(left.mat[M21], right.mat[M32], left.mat[M31] * right.mat[M33])));
-        float nm32 = fma(left.mat[M02], right.mat[M30], fma(left.mat[M12], right.mat[M31], fma(left.mat[M22], right.mat[M32], left.mat[M32] * right.mat[M33])));
-        float nm33 = fma(left.mat[M03], right.mat[M30], fma(left.mat[M13], right.mat[M31], fma(left.mat[M23], right.mat[M32], left.mat[M33] * right.mat[M33])));
-        dest.mat[M00] = (nm00);
-        dest.mat[M01] = (nm01);
-        dest.mat[M02] = (nm02);
-        dest.mat[M03] = (nm03);
-        dest.mat[M10] = (nm10);
-        dest.mat[M11] = (nm11);
-        dest.mat[M12] = (nm12);
-        dest.mat[M13] = (nm13);
-        dest.mat[M20] = (nm20);
-        dest.mat[M21] = (nm21);
-        dest.mat[M22] = (nm22);
-        dest.mat[M23] = (nm23);
-        dest.mat[M30] = (nm30);
-        dest.mat[M31] = (nm31);
-        dest.mat[M32] = (nm32);
-        dest.mat[M33] = (nm33);
-        return dest;
-    }
+//
+//    static float fma(float a, float b, float c) {
+//        return a * b + c;
+//    }
+//
+//    public static Matrix4f mulfma(Matrix4f left, Matrix4f right, Matrix4f dest) {
+//        float nm00 = fma(left.mat[M00], right.mat[M00], fma(left.mat[M10], right.mat[M01], fma(left.mat[M20], right.mat[M02], left.mat[M30] * right.mat[M03])));
+//        float nm01 = fma(left.mat[M01], right.mat[M00], fma(left.mat[M11], right.mat[M01], fma(left.mat[M21], right.mat[M02], left.mat[M31] * right.mat[M03])));
+//        float nm02 = fma(left.mat[M02], right.mat[M00], fma(left.mat[M12], right.mat[M01], fma(left.mat[M22], right.mat[M02], left.mat[M32] * right.mat[M03])));
+//        float nm03 = fma(left.mat[M03], right.mat[M00], fma(left.mat[M13], right.mat[M01], fma(left.mat[M23], right.mat[M02], left.mat[M33] * right.mat[M03])));
+//        float nm10 = fma(left.mat[M00], right.mat[M10], fma(left.mat[M10], right.mat[M11], fma(left.mat[M20], right.mat[M12], left.mat[M30] * right.mat[M13])));
+//        float nm11 = fma(left.mat[M01], right.mat[M10], fma(left.mat[M11], right.mat[M11], fma(left.mat[M21], right.mat[M12], left.mat[M31] * right.mat[M13])));
+//        float nm12 = fma(left.mat[M02], right.mat[M10], fma(left.mat[M12], right.mat[M11], fma(left.mat[M22], right.mat[M12], left.mat[M32] * right.mat[M13])));
+//        float nm13 = fma(left.mat[M03], right.mat[M10], fma(left.mat[M13], right.mat[M11], fma(left.mat[M23], right.mat[M12], left.mat[M33] * right.mat[M13])));
+//        float nm20 = fma(left.mat[M00], right.mat[M20], fma(left.mat[M10], right.mat[M21], fma(left.mat[M20], right.mat[M22], left.mat[M30] * right.mat[M23])));
+//        float nm21 = fma(left.mat[M01], right.mat[M20], fma(left.mat[M11], right.mat[M21], fma(left.mat[M21], right.mat[M22], left.mat[M31] * right.mat[M23])));
+//        float nm22 = fma(left.mat[M02], right.mat[M20], fma(left.mat[M12], right.mat[M21], fma(left.mat[M22], right.mat[M22], left.mat[M32] * right.mat[M23])));
+//        float nm23 = fma(left.mat[M03], right.mat[M20], fma(left.mat[M13], right.mat[M21], fma(left.mat[M23], right.mat[M22], left.mat[M33] * right.mat[M23])));
+//        float nm30 = fma(left.mat[M00], right.mat[M30], fma(left.mat[M10], right.mat[M31], fma(left.mat[M20], right.mat[M32], left.mat[M30] * right.mat[M33])));
+//        float nm31 = fma(left.mat[M01], right.mat[M30], fma(left.mat[M11], right.mat[M31], fma(left.mat[M21], right.mat[M32], left.mat[M31] * right.mat[M33])));
+//        float nm32 = fma(left.mat[M02], right.mat[M30], fma(left.mat[M12], right.mat[M31], fma(left.mat[M22], right.mat[M32], left.mat[M32] * right.mat[M33])));
+//        float nm33 = fma(left.mat[M03], right.mat[M30], fma(left.mat[M13], right.mat[M31], fma(left.mat[M23], right.mat[M32], left.mat[M33] * right.mat[M33])));
+//        dest.mat[M00] = (nm00);
+//        dest.mat[M01] = (nm01);
+//        dest.mat[M02] = (nm02);
+//        dest.mat[M03] = (nm03);
+//        dest.mat[M10] = (nm10);
+//        dest.mat[M11] = (nm11);
+//        dest.mat[M12] = (nm12);
+//        dest.mat[M13] = (nm13);
+//        dest.mat[M20] = (nm20);
+//        dest.mat[M21] = (nm21);
+//        dest.mat[M22] = (nm22);
+//        dest.mat[M23] = (nm23);
+//        dest.mat[M30] = (nm30);
+//        dest.mat[M31] = (nm31);
+//        dest.mat[M32] = (nm32);
+//        dest.mat[M33] = (nm33);
+//        return dest;
+//    }
 
     /**
      * Transform a Vector by a matrix and return the result in a destination
@@ -529,19 +554,30 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest == null) {
             dest = new Vector4f();
         }
-
-        float x = left.mat[M00] * right.x + left.mat[M10] * right.y + left.mat[M20] * right.z + left.mat[M30] * right.w;
-        float y = left.mat[M01] * right.x + left.mat[M11] * right.y + left.mat[M21] * right.z + left.mat[M31] * right.w;
-        float z = left.mat[M02] * right.x + left.mat[M12] * right.y + left.mat[M22] * right.z + left.mat[M32] * right.w;
-        float w = left.mat[M03] * right.x + left.mat[M13] * right.y + left.mat[M23] * right.z + left.mat[M33] * right.w;
-
-        dest.x = x;
-        dest.y = y;
-        dest.z = z;
-        dest.w = w;
-
+//
+//        float x = left.mat[M00] * right.x + left.mat[M10] * right.y + left.mat[M20] * right.z + left.mat[M30] * right.w;
+//        float y = left.mat[M01] * right.x + left.mat[M11] * right.y + left.mat[M21] * right.z + left.mat[M31] * right.w;
+//        float z = left.mat[M02] * right.x + left.mat[M12] * right.y + left.mat[M22] * right.z + left.mat[M32] * right.w;
+//        float w = left.mat[M03] * right.x + left.mat[M13] * right.y + left.mat[M23] * right.z + left.mat[M33] * right.w;
+//
+//        dest.x = x;
+//        dest.y = y;
+//        dest.z = z;
+//        dest.w = w;
+        float[] f4 = arr_f16A.get();
+        f4[0] = right.x;
+        f4[1] = right.y;
+        f4[2] = right.z;
+        f4[3] = right.w;
+        float[] r = arr_f16B.get();
+        Gutil.mat4x4_mul_vec4(r, left.mat, f4);
+        dest.x = r[0];
+        dest.y = r[1];
+        dest.z = r[2];
+        dest.w = r[3];
         return dest;
     }
+
 
     /**
      * Transpose this matrix
@@ -592,10 +628,14 @@ public class Matrix4f extends Matrix implements Serializable {
      * @return The scaled matrix
      */
     public static Matrix4f scale(Vector3f vec, Matrix4f src, Matrix4f dest) {
+        return scale(vec.x, vec.y, vec.z, src, dest);
+    }
+
+    public static Matrix4f scale(float sx, float sy, float sz, Matrix4f src, Matrix4f dest) {
         if (dest == null) {
             dest = new Matrix4f();
         }
-        Gutil.mat4x4_scale_aniso(dest.mat, src.mat, vec.x, vec.y, vec.z);
+        Gutil.mat4x4_scale_aniso(dest.mat, src.mat, sx, sy, sz);
 //        dest.mat[M00] = src.mat[M00] * vec.left;
 //        dest.mat[M01] = src.mat[M01] * vec.left;
 //        dest.mat[M02] = src.mat[M02] * vec.left;
@@ -650,37 +690,41 @@ public class Matrix4f extends Matrix implements Serializable {
      * @return The rotated matrix
      */
     public static Matrix4f rotate(float angle, Vector3f axis, Matrix4f src, Matrix4f dest) {
+        return rotate(angle, axis.x, axis.y, axis.z, src, dest);
+    }
+
+    public static Matrix4f rotate(float angle, float ax, float ay, float az, Matrix4f src, Matrix4f dest) {
         if (dest == null) {
             dest = new Matrix4f();
         }
         if (src == dest) {
-            float[] tmp = new float[MAT_LEN];
-            Gutil.mat4x4_rotate(tmp, src.mat, axis.x, axis.y, axis.z, angle);
+            float[] tmp = arr_f16A.get();
+            Gutil.mat4x4_rotate(tmp, src.mat, ax, ay, az, angle);
             Gutil.mat4x4_dup(dest.mat, tmp);
         } else {
-            Gutil.mat4x4_rotate(dest.mat, src.mat, axis.x, axis.y, axis.z, angle);
+            Gutil.mat4x4_rotate(dest.mat, src.mat, ax, ay, az, angle);
         }
 //        float c = (float) Math.cos(angle);
 //        float s = (float) Math.sin(angle);
 //        float oneminusc = 1.0f - c;
-//        float xy = axis.left * axis.top;
-//        float yz = axis.top * axis.z;
-//        float xz = axis.left * axis.z;
-//        float xs = axis.left * s;
-//        float ys = axis.top * s;
-//        float zs = axis.z * s;
+//        float xy = aleft * atop;
+//        float yz = atop * az;
+//        float xz = aleft * az;
+//        float xs = aleft * s;
+//        float ys = atop * s;
+//        float zs = az * s;
 //
-//        float f00 = axis.left * axis.left * oneminusc + c;
+//        float f00 = aleft * aleft * oneminusc + c;
 //        float f01 = xy * oneminusc + zs;
 //        float f02 = xz * oneminusc - ys;
 //        // n[3] not used
 //        float f10 = xy * oneminusc - zs;
-//        float f11 = axis.top * axis.top * oneminusc + c;
+//        float f11 = atop * atop * oneminusc + c;
 //        float f12 = yz * oneminusc + xs;
 //        // n[7] not used
 //        float f20 = xz * oneminusc + ys;
 //        float f21 = yz * oneminusc - xs;
-//        float f22 = axis.z * axis.z * oneminusc + c;
+//        float f22 = az * az * oneminusc + c;
 //
 //        float t00 = src.mat[M00] * f00 + src.mat[M10] * f01 + src.mat[M20] * f02;
 //        float t01 = src.mat[M01] * f00 + src.mat[M11] * f01 + src.mat[M21] * f02;
@@ -804,7 +848,7 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest != src) {
             Gutil.mat4x4_transpose(dest.mat, src.mat);
         } else {
-            float[] tmp = new float[MAT_LEN];
+            float[] tmp = arr_f16A.get();
             Gutil.mat4x4_transpose(tmp, src.mat);
             Gutil.mat4x4_dup(dest.mat, tmp);
         }
@@ -833,26 +877,26 @@ public class Matrix4f extends Matrix implements Serializable {
      */
     public float determinant() {
         float f
-            = mat[M00]
-            * ((mat[M11] * mat[M22] * mat[M33] + mat[M12] * mat[M23] * mat[M31] + mat[M13] * mat[M21] * mat[M32])
-            - mat[M13] * mat[M22] * mat[M31]
-            - mat[M11] * mat[M23] * mat[M32]
-            - mat[M12] * mat[M21] * mat[M33]);
+                = mat[M00]
+                * ((mat[M11] * mat[M22] * mat[M33] + mat[M12] * mat[M23] * mat[M31] + mat[M13] * mat[M21] * mat[M32])
+                - mat[M13] * mat[M22] * mat[M31]
+                - mat[M11] * mat[M23] * mat[M32]
+                - mat[M12] * mat[M21] * mat[M33]);
         f -= mat[M01]
-            * ((mat[M10] * mat[M22] * mat[M33] + mat[M12] * mat[M23] * mat[M30] + mat[M13] * mat[M20] * mat[M32])
-            - mat[M13] * mat[M22] * mat[M30]
-            - mat[M10] * mat[M23] * mat[M32]
-            - mat[M12] * mat[M20] * mat[M33]);
+                * ((mat[M10] * mat[M22] * mat[M33] + mat[M12] * mat[M23] * mat[M30] + mat[M13] * mat[M20] * mat[M32])
+                - mat[M13] * mat[M22] * mat[M30]
+                - mat[M10] * mat[M23] * mat[M32]
+                - mat[M12] * mat[M20] * mat[M33]);
         f += mat[M02]
-            * ((mat[M10] * mat[M21] * mat[M33] + mat[M11] * mat[M23] * mat[M30] + mat[M13] * mat[M20] * mat[M31])
-            - mat[M13] * mat[M21] * mat[M30]
-            - mat[M10] * mat[M23] * mat[M31]
-            - mat[M11] * mat[M20] * mat[M33]);
+                * ((mat[M10] * mat[M21] * mat[M33] + mat[M11] * mat[M23] * mat[M30] + mat[M13] * mat[M20] * mat[M31])
+                - mat[M13] * mat[M21] * mat[M30]
+                - mat[M10] * mat[M23] * mat[M31]
+                - mat[M11] * mat[M20] * mat[M33]);
         f -= mat[M03]
-            * ((mat[M10] * mat[M21] * mat[M32] + mat[M11] * mat[M22] * mat[M30] + mat[M12] * mat[M20] * mat[M31])
-            - mat[M12] * mat[M21] * mat[M30]
-            - mat[M10] * mat[M22] * mat[M31]
-            - mat[M11] * mat[M20] * mat[M32]);
+                * ((mat[M10] * mat[M21] * mat[M32] + mat[M11] * mat[M22] * mat[M30] + mat[M12] * mat[M20] * mat[M31])
+                - mat[M12] * mat[M21] * mat[M30]
+                - mat[M10] * mat[M22] * mat[M31]
+                - mat[M11] * mat[M20] * mat[M32]);
         return f;
     }
 
@@ -865,8 +909,8 @@ public class Matrix4f extends Matrix implements Serializable {
                                         float t10, float t11, float t12,
                                         float t20, float t21, float t22) {
         return t00 * (t11 * t22 - t12 * t21)
-            + t01 * (t12 * t20 - t10 * t22)
-            + t02 * (t10 * t21 - t11 * t20);
+                + t01 * (t12 * t20 - t10 * t22)
+                + t02 * (t10 * t21 - t11 * t20);
     }
 
     /**
@@ -900,7 +944,7 @@ public class Matrix4f extends Matrix implements Serializable {
                 dest = new Matrix4f();
             }
             if (src == dest) {
-                float[] tmp = new float[MAT_LEN];
+                float[] tmp = arr_f16A.get();
                 Gutil.mat4x4_invert(tmp, src.mat);
                 Gutil.mat4x4_dup(dest.mat, tmp);
             } else {
@@ -1062,10 +1106,10 @@ public class Matrix4f extends Matrix implements Serializable {
                            float centerX, float centerY, float centerZ,
                            float upX, float upY, float upZ) {
         Gutil.mat4x4_look_at(
-            mat
-            , new float[]{eyeX, eyeY, eyeZ}
-            , new float[]{centerX, centerY, centerZ}
-            , new float[]{upX, upY, upZ});
+                mat
+                , new float[]{eyeX, eyeY, eyeZ}
+                , new float[]{centerX, centerY, centerZ}
+                , new float[]{upX, upY, upZ});
         return this;
     }
 
@@ -1073,10 +1117,10 @@ public class Matrix4f extends Matrix implements Serializable {
                            Vector3f center,
                            Vector3f up) {
         Gutil.mat4x4_look_at(
-            mat
-            , new float[]{eye.x, eye.y, eye.z}
-            , new float[]{center.x, center.y, center.z}
-            , new float[]{up.x, up.y, up.z});
+                mat
+                , new float[]{eye.x, eye.y, eye.z}
+                , new float[]{center.x, center.y, center.z}
+                , new float[]{up.x, up.y, up.z});
         return this;
     }
 
@@ -1118,34 +1162,51 @@ public class Matrix4f extends Matrix implements Serializable {
                                                   Quaternionf q,
                                                   Vector3f s,
                                                   Matrix4f dest) {
-        float dqx = q.x + q.x;
-        float dqy = q.y + q.y;
-        float dqz = q.z + q.z;
-        float q00 = dqx * q.x;
-        float q11 = dqy * q.y;
-        float q22 = dqz * q.z;
-        float q01 = dqx * q.y;
-        float q02 = dqx * q.z;
-        float q03 = dqx * q.w;
-        float q12 = dqy * q.z;
-        float q13 = dqy * q.w;
-        float q23 = dqz * q.w;
-        dest.mat[M00] = (s.x - (q11 + q22) * s.x);
-        dest.mat[M01] = ((q01 + q23) * s.x);
-        dest.mat[M02] = ((q02 - q13) * s.x);
-        dest.mat[M03] = (0.0f);
-        dest.mat[M10] = ((q01 - q23) * s.y);
-        dest.mat[M11] = (s.y - (q22 + q00) * s.y);
-        dest.mat[M12] = ((q12 + q03) * s.y);
-        dest.mat[M13] = (0.0f);
-        dest.mat[M20] = ((q02 + q13) * s.z);
-        dest.mat[M21] = ((q12 - q03) * s.z);
-        dest.mat[M22] = (s.z - (q11 + q00) * s.z);
-        dest.mat[M23] = (0.0f);
-        dest.mat[M30] = (t.x);
-        dest.mat[M31] = (t.y);
-        dest.mat[M32] = (t.z);
-        dest.mat[M33] = (1.0f);
+        float[] a = arr_f16A.get();
+        t.store(a);
+        float[] b = arr_f16B.get();
+        q.store(b);
+        float[] c = arr_f16C.get();
+        s.store(c);
+
+        Gutil.mat4x4_trans_rotate_scale(dest.mat, a, b, c);
+
+//        float dqx = q.x + q.x;
+//        float dqy = q.y + q.y;
+//        float dqz = q.z + q.z;
+//        float q00 = dqx * q.x;
+//        float q11 = dqy * q.y;
+//        float q22 = dqz * q.z;
+//        float q01 = dqx * q.y;
+//        float q02 = dqx * q.z;
+//        float q03 = dqx * q.w;
+//        float q12 = dqy * q.z;
+//        float q13 = dqy * q.w;
+//        float q23 = dqz * q.w;
+//        dest.mat[M00] = (s.x - (q11 + q22) * s.x);
+//        dest.mat[M01] = ((q01 + q23) * s.x);
+//        dest.mat[M02] = ((q02 - q13) * s.x);
+//        dest.mat[M03] = (0.0f);
+//        dest.mat[M10] = ((q01 - q23) * s.y);
+//        dest.mat[M11] = (s.y - (q22 + q00) * s.y);
+//        dest.mat[M12] = ((q12 + q03) * s.y);
+//        dest.mat[M13] = (0.0f);
+//        dest.mat[M20] = ((q02 + q13) * s.z);
+//        dest.mat[M21] = ((q12 - q03) * s.z);
+//        dest.mat[M22] = (s.z - (q11 + q00) * s.z);
+//        dest.mat[M23] = (0.0f);
+//        dest.mat[M30] = (t.x);
+//        dest.mat[M31] = (t.y);
+//        dest.mat[M32] = (t.z);
+//        dest.mat[M33] = (1.0f);
         return dest;
+    }
+
+
+    public static Quaternionf getRotation(Quaternionf q, Matrix4f mat) {
+        float[] a = arr_f16A.get();
+        Gutil.vec4_from_mat4x4(a, mat.mat);
+        q.load(a);
+        return q;
     }
 }

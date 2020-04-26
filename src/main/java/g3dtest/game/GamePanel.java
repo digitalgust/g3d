@@ -1,8 +1,12 @@
 package g3dtest.game;
 
+import org.mini.g3d.animation.AnimatedModel;
 import org.mini.g3d.core.*;
-import org.mini.g3d.core.converter.ModelData;
-import org.mini.g3d.core.converter.OBJFileLoader;
+import org.mini.g3d.core.objmodel.ModelData;
+import org.mini.g3d.core.objmodel.OBJFileLoader;
+import org.mini.g3d.core.gltf2.loader.GLTFImporter;
+import org.mini.g3d.core.gltf2.loader.data.AnimationClip;
+import org.mini.g3d.core.gltf2.loader.data.GLTF;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.textures.ModelTexture;
@@ -26,15 +30,15 @@ import org.mini.g3d.water.WaterTile;
 import org.mini.gui.GCallBack;
 import org.mini.gui.GOpenGLPanel;
 import org.mini.gui.GToolkit;
-import org.mini.nanovg.Gutil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static org.mini.gl.GL.*;
 
-public class GamePanel extends GOpenGLPanel {
+public class GamePanel extends GOpenGLPanel implements BackendSuported {
+    int renderCount = 0;
+    int logicCount = 0;
+    LogicUpdater updater = new LogicUpdater(this);
 
     List<Light> lights = new ArrayList<>();
     List<Terrain> terrains = new ArrayList<>();
@@ -61,6 +65,8 @@ public class GamePanel extends GOpenGLPanel {
     Entity lampa;
     Entity ball;
     Player player;
+    List<AnimatedModel> players = new ArrayList<>();
+    Map<String, GLTF> gltfData = new HashMap<>();
 
     ParticleSystemComplex particleSystemFire;
     ParticleSystemSimple particleSystemSimple;
@@ -73,6 +79,7 @@ public class GamePanel extends GOpenGLPanel {
     ViewMover viewMover;
     Joystick joystick;
     WButton jumpBtn;
+
 
     public GamePanel() {
         super(0f, 0f, 1f, 1f);
@@ -88,31 +95,31 @@ public class GamePanel extends GOpenGLPanel {
         EngineManager.createDisplay((int) getW(), (int) getH());
 
         loader = new Loader();
-        Gutil.checkGlError("Game glinit 0.1");
+        //Gutil.checkGlError("Game glinit 0.1");
         Random random = new Random();
 
         int smSize = 1024;
         shadowMappingPass = new ShadowMappingPass(smSize, smSize);
         shadowMappingPass.gl_init();
-        Gutil.checkGlError("Game glinit 0.3");
+        //Gutil.checkGlError("Game glinit 0.3");
         shadowMappingRenderer = new ShadowMappingRenderer(shadowMappingPass);
 
         masterPass = new MasterPass((int) getW(), (int) getH());
         masterPass.gl_init();
         setGlRendereredImg(masterPass.getFboimg());
-        Gutil.checkGlError("Game glinit 0.5");
+        //Gutil.checkGlError("Game glinit 0.5");
 
         camera = new WorldCamera(EngineManager.getWidth(), EngineManager.getHeight(), MasterRenderer.FOV, MasterRenderer.NEAR_PLANE, MasterRenderer.FAR_PLANE);
         masterRenderer = new MasterRenderer(camera);
 
-        Gutil.checkGlError("Game glinit 0.8");
+        //Gutil.checkGlError("Game glinit 0.8");
         guiRenderer = new GuiRenderer(loader);
-        Gutil.checkGlError("Game glinit 1");
+        //Gutil.checkGlError("Game glinit 1");
         // the sun
         sun = new Light(new Vector3f(-200, 500, 0), new Vector3f(1.0f, 1.0f, 1.0f));
         lights.add(sun);
 
-        Gutil.checkGlError("Game glinit 2");
+        //Gutil.checkGlError("Game glinit 2");
         // Terrain
         //textures to paint the terrain with
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("textures/terrain/grassy"));
@@ -129,7 +136,7 @@ public class GamePanel extends GOpenGLPanel {
 //        terrains.add(new Terrain(-1, 0, loader, texturePack, blendMap, "textures/terrain/heightmap"));
         terrain = new Terrain(0, 0, loader, texturePack, blendMap, "textures/terrain/heightmap", shadowMappingRenderer);
         terrains.add(terrain);
-        Gutil.checkGlError("Game glinit 3");
+        //Gutil.checkGlError("Game glinit 3");
         // Terrain end
         // Models
         // Environment Models
@@ -142,52 +149,77 @@ public class GamePanel extends GOpenGLPanel {
         TexturedModel flower = loadTexturedModel("models/grassModel", "textures/flower", 1, loader);
         flower.getTexture().setHasTransparency(true);
         flower.getTexture().setUseFakeLighting(true);
-        TexturedModel lamp = loadTexturedModel("models/lamp/lamp", "models/lamp/lamp", 1, loader);
+        TexturedModel lamp = loadTexturedModel("models/lamp", "textures/lamp", 1, loader);
         TexturedModel ballmode = loadTexturedModel("models/sun", "textures/grassy", 1, loader);
         //TODO: have to use the check system from CollisionMultipleTerrains. but the "check-system" has to be a own method, so it can be used multiple places.
+        float mapSize = terrain.getMapSize();
+        float tx, ty, tz;
         for (int i = 0; i < 30; i++) {
-            float x;
-            float z = random.nextFloat() * (Terrain.SIZE);
-            entities.add(new Entity(tree, new Vector3f(x = random.nextFloat() * Terrain.SIZE, terrains.get(0).getHeightOfTerrain(x, z), z), 0f, 0f, 0f, 3.0f));
-            entities.add(new Entity(grass, random.nextInt(6), new Vector3f(x = random.nextFloat() * Terrain.SIZE, terrains.get(0).getHeightOfTerrain(x, z), z), 0f, 0f, 0f, 1.5f));
-            entities.add(new Entity(flower, new Vector3f(x = random.nextFloat() * Terrain.SIZE, terrains.get(0).getHeightOfTerrain(x, z), z), 0f, 0f, 0f, 1.5f));
-            entities.add(new Entity(fern, random.nextInt(4), new Vector3f(x = random.nextFloat() * Terrain.SIZE, terrains.get(0).getHeightOfTerrain(x, z), z), 0f, 0f, 0f, 1.0f));
+            tx = Math.abs(random.nextFloat()) * mapSize;
+            tz = Math.abs(random.nextFloat()) * mapSize;
+            ty = terrains.get(0).getHeightOfTerrain(tx, tz);
+            entities.add(new Entity(tree, new Vector3f(tx, ty, tz), 0f, 0f, 0f, 1.0f));
+            tx = Math.abs(random.nextFloat()) * mapSize;
+            tz = Math.abs(random.nextFloat()) * mapSize;
+            ty = terrains.get(0).getHeightOfTerrain(tx, tz);
+            entities.add(new Entity(grass, random.nextInt(6), new Vector3f(tx, ty, tz), 0f, 0f, 0f, 1.f));
+            tx = Math.abs(random.nextFloat()) * mapSize;
+            tz = Math.abs(random.nextFloat()) * mapSize;
+            ty = terrains.get(0).getHeightOfTerrain(tx, tz);
+            entities.add(new Entity(flower, new Vector3f(tx, ty, tz), 0f, 0f, 0f, 1.5f));
+            tx = Math.abs(random.nextFloat()) * mapSize;
+            tz = Math.abs(random.nextFloat()) * mapSize;
+            ty = terrains.get(0).getHeightOfTerrain(tx, tz);
+            entities.add(new Entity(fern, random.nextInt(4), new Vector3f(tx, ty, tz), 0f, 0f, 0f, 1.0f));
 
         }
         ball = new Entity(ballmode, random.nextInt(4), new Vector3f(0, terrains.get(0).getHeightOfTerrain(0, 0), 0), 0f, 0f, 0f, 1.0f);
         entities.add(ball);
 
-        Gutil.checkGlError("Game glinit 4");
+        //Gutil.checkGlError("Game glinit 4");
         // Environment Models end
         // GUI
         // Health Bar
         guis.add(new GuiTexture(loader.loadTexture("textures/health"), new Vector2f(-0.745f, 0.94f), new Vector2f(0.25f, 0.25f)));
         // GUI end
 
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 10, 10, 250, "Green", 0);
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 120, 10, 275, "Green", 0);
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 230, 10, 300, "Green", 0);
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 340, 10, 325, "Green", 0);
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 450, 10, 350, "Green", 0);
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 660, 10, 105, "Green", 0);
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 770, 10, 200, "Green", 0);
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 80, 10, 425, "Green", 0);
-        modelWithLight(entities, lights, lamp, 1, terrains.get(0), 750, 10, 350, "Green", 0);
+        for (int i = 0; i < 10; i++) {
+            tx = Math.abs(random.nextFloat()) * mapSize;
+            tz = Math.abs(random.nextFloat()) * mapSize;
+            ty = terrains.get(0).getHeightOfTerrain(tx, tz);
+            modelWithLight(entities, lights, lamp, 1, terrains.get(0), tx, ty, tz, "Green", 0);
+        }
 
-        Gutil.checkGlError("Game glinit 5");
+        //Gutil.checkGlError("Game glinit 5");
         // Models end
         // Animation
 
-        player = new Player("res/ani/AiXi.gltf", new Vector3f(200, -4, 300), 0, 90, 0, 5f);
+        GLTF aixi = GLTFImporter.loadFile("/res/ani/AiXi.gltf");
+        gltfData.put(aixi.getSource(), aixi);
+        AnimationClip aniClip = GLTFImporter.loadAnimationClip("/res/ani/AiXi_ani.json");
+        aixi.setAnimationClip(aniClip);
+        player = new Player(aixi, new Vector3f(50, -4, 50), 0, 90, 0, 1f);
+        players.add(player);
 
+        GLTF gailun = GLTFImporter.loadFile("/res/ani/GaiLun.gltf");
+        aniClip = GLTFImporter.loadAnimationClip("/res/ani/GaiLun_ani.json");
+        gailun.setAnimationClip(aniClip);
+        for (int i = 0; i < 20; i++) {
+            float x = 55 + i * 5;
+            float z = 50;
+            float y = terrains.get(0).getHeightOfTerrain(x, z);
+            AnimatedModel player2 = new Player(gailun, new Vector3f(x, y, z), 0, 90, 0, 1f);
+            player2.setClipIndex(0);
+            players.add(player2);
+        }
 
-        Gutil.checkGlError("Game glinit 8");
+        //Gutil.checkGlError("Game glinit 8");
         waterShader = new WaterShader();
         waterRenderer = new WaterRenderer(loader, waterShader, camera);
 
         waters.add(new WaterTile(75, 75, -7));
 
-        Gutil.checkGlError("Game glinit 9");
+        //Gutil.checkGlError("Game glinit 9");
         skybox = new Skybox(loader);
 
         picker = new MousePicker(camera, terrain);
@@ -195,7 +227,7 @@ public class GamePanel extends GOpenGLPanel {
         particles = new ArrayList();
         createParticleSystems(particles);
         ParticleManager.init(loader, camera);
-        Gutil.checkGlError("Game glinit 10");
+        //Gutil.checkGlError("Game glinit 10");
 
         widgets = new WidgetContainer(this, 0, 0, getW(), getH());
         viewMover = new ViewMover("/res/textures/view.png", getW() * .5f, 0, getW() * .5f, getH());
@@ -213,9 +245,12 @@ public class GamePanel extends GOpenGLPanel {
         });
         widgets.add(jumpBtn);
 
+
         camera.setLookatTarget(player);
         //reload all projection matrix
         camera.getProjectionDispatcher().dispatch();
+
+        updater.start();
     }
 
 
@@ -267,18 +302,27 @@ public class GamePanel extends GOpenGLPanel {
         dy += 15f;
         GToolkit.drawText(vg, dx, dy, 300f, 20f, "shadow/render trig: " + ShadowMappingRenderer.triangles + "/" + MasterPass.triangles, 12f, GToolkit.getStyle().getTextFontColor());
         dy += 15f;
-        GToolkit.drawText(vg, dx, dy, 300f, 20f, "shadow/render/total cost: " + shadowMappingPass.cost + " / " + masterPass.cost + " / " + cost, 12f, GToolkit.getStyle().getTextFontColor());
+        GToolkit.drawText(vg, dx, dy, 300f, 20f, "shadow/render/update/ani: " + shadowMappingPass.cost + " / " + masterPass.cost + " / " + update + " / " + aniCost, 12f, GToolkit.getStyle().getTextFontColor());
 
         ShadowMappingRenderer.triangles = 0;
         MasterPass.triangles = 0;
         return true;
     }
 
-    long cost;
+    long cost, update;
 
     @Override
     public void gl_paint() {
-        cost = System.currentTimeMillis();
+        if (logicCount <= renderCount) {
+            synchronized (this) {
+                notifyAll();
+            }
+            return;
+        }
+        renderCount++;
+        swap();
+
+        long start = System.currentTimeMillis();
         if (!isGLInited()) {
             return;
         }
@@ -286,30 +330,33 @@ public class GamePanel extends GOpenGLPanel {
         glPolygonOffset(1.f, 1.f);
         // MainLoop
 
-        Gutil.checkGlError(this.getClass().getName()+" gl_paint 0");
+        //Gutil.checkGlError(this.getClass().getName() + " gl_paint 0");
         shadowMappingPass.begin();
         shadowMappingRenderer.processTerrain(terrain);
-        for (Entity entity : entities) {
+        for (int i = 0, imax = entities.size(); i < imax; i++) {
+            Entity entity = entities.get(i);
             shadowMappingRenderer.processEntity(entity);
         }
         //shadowMappingRenderer.processEntity(player);
         shadowMappingRenderer.render(sun);
         shadowMappingPass.end();
-        Gutil.checkGlError(this.getClass().getName()+" gl_paint 1");
-
+        //Gutil.checkGlError(this.getClass().getName() + " gl_paint 1");
 
 
         masterPass.begin();
         renderTerrain(masterRenderer, terrains);
         renderEntities(masterRenderer, entities); // All entities are gone if this is commented away. Player is still present
         // Render with animation
-        masterRenderer.render(camera, lights, player, skybox);
+        masterRenderer.render(camera, lights, players, skybox);
         waterRenderer.render(camera, waters);
         ParticleManager.renderParticles(camera);
         // render without animation
         guiRenderer.render(guis);
         masterPass.end();
-        Gutil.checkGlError(this.getClass().getName()+" gl_paint 2");
+        //Gutil.checkGlError(this.getClass().getName() + " gl_paint 2");
+
+
+        //update
 
         collisionMultipleTerrainsAnimatedModel(player, terrains); // Move method for player is inside this method
 //			collisionCameraTerrain(camera, terrains);
@@ -322,7 +369,7 @@ public class GamePanel extends GOpenGLPanel {
         } else {
             player.moveStop();
         }
-        player.update();
+
 
         Vector3f cpos = camera.getPosition();
         float hight = terrain.getHeightOfTerrain(cpos.x, cpos.z);
@@ -336,7 +383,30 @@ public class GamePanel extends GOpenGLPanel {
         ParticleManager.update(camera);
 
         EngineManager.updateDisplay();
-        cost = System.currentTimeMillis() - cost;
+
+        cost = System.currentTimeMillis() - start;
+
+    }
+
+    long aniCost = 0;
+
+    public void logicUpdate() {
+        long start = System.currentTimeMillis();
+        for (int i = 0, imax = players.size(); i < imax; i++) {
+            AnimatedModel p = players.get(i);
+            p.update();
+        }
+        update = System.currentTimeMillis() - start;
+
+        aniCost = AnimatedModel.cost;
+        AnimatedModel.cost = 0;
+    }
+
+    public void swap() {
+        for (int i = 0, imax = players.size(); i < imax; i++) {
+            AnimatedModel p = players.get(i);
+            p.swap();
+        }
     }
 
     @Override

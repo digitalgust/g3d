@@ -47,7 +47,7 @@ public class GLBLoader {
         this.importer = importer;
     }
 
-    void procesGLB(String path) throws IOException {
+    void parseGLB(String path) throws IOException {
         //12-byte preamble `header`
         //One or more `chunks` that contain JSON and binary data
         //Possible to reference external resources and other chunks

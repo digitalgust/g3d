@@ -1,4 +1,4 @@
-package org.mini.g3d.core.converter;
+package org.mini.g3d.core.objmodel;
  
 public class ModelData {
  

@@ -6,9 +6,12 @@
 
 package org.mini.g3d.core.gltf2.loader;
 
+import org.mini.g3d.core.gltf2.loader.data.AnimationClip;
 import org.mini.g3d.core.gltf2.loader.data.GLTF;
+import org.mini.gui.GToolkit;
 import org.mini.json.JsonParser;
 
+import java.io.File;
 import java.nio.ByteBuffer;
 
 public class GLTFImporter {
@@ -29,7 +32,7 @@ public class GLTFImporter {
             if (path.endsWith(".glb")) {
                 System.out.println("Loading .glb file: " + path);
                 GLBLoader glbLoader = new GLBLoader(this);
-                glbLoader.procesGLB(path);
+                glbLoader.parseGLB(path);
                 ByteBuffer jasonb = glbLoader.jsonData();
                 byte[] b = new byte[jasonb.capacity()];
                 jasonb.get(b);
@@ -60,4 +63,24 @@ public class GLTFImporter {
     }
 
 
+    static public GLTF loadFile(String path) {
+
+        File file = new File(path);
+        GLTFImporter gltfImporter = new GLTFImporter();
+        //Clear before loading
+
+        GLTF gltf;
+        gltf = gltfImporter.load(file.getPath());
+        if (gltf == null) {
+            throw new RuntimeException();
+        }
+        return gltf;
+    }
+
+
+    static public AnimationClip loadAnimationClip(String path) {
+        String json = GToolkit.readFileFromJarAsString(path, "utf-8");
+        AnimationClip aniClip = (AnimationClip) new JsonParser().deserial(json, AnimationClip.class);
+        return aniClip;
+    }
 }

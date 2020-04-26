@@ -4,7 +4,7 @@
  * See <https://github.com/MESLewis/SimpleGLTF2/blob/master/LICENSE> for more information
  */
 
-package org.mini.g3d.core.gltf2.render.light;
+package org.mini.g3d.core.gltf2.render;
 
 
 import org.mini.g3d.core.vector.Vector2f;

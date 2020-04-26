@@ -8,7 +8,6 @@ import org.mini.g3d.skybox.Skybox;
 import org.mini.g3d.skybox.SkyboxRenderer;
 import org.mini.g3d.terrain.TerrainRenderer;
 import org.mini.g3d.terrain.TerrainShader;
-import org.mini.nanovg.Gutil;
 
 import java.util.List;
 
@@ -57,7 +56,7 @@ public class MasterRenderer extends AbstractRenderer {
         glDisable(GL_CULL_FACE);
     }
 
-    public void render(Camera camera, List<Light> lights, AnimatedModel animatedPlayer, Skybox box) {
+    public void render(Camera camera, List<Light> lights, List<AnimatedModel> animatedPlayers, Skybox box) {
 
         updateFogColor();
         prepare();
@@ -67,15 +66,18 @@ public class MasterRenderer extends AbstractRenderer {
         masterShader.loadViewMatrix(camera);
         enitiyRenderer.render(entities);
         masterShader.stop();
-        Gutil.checkGlError(this.getClass().getCanonicalName()+"render 1");
+        //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 1");
 
+        for (int i = 0, imax = animatedPlayers.size(); i < imax; i++) {
+            AnimatedModel p = animatedPlayers.get(i);
 //        animatedModelShader.start();
 //        animatedModelShader.loadSkyColor(FOG_RED, FOG_GREEN, FOG_BLUE);
 //        animatedModelShader.loadLights(lights);
 //        animatedModelShader.loadViewMatrix(camera);
-        animatedModelRenderer.render(camera, animatedPlayer);
+            animatedModelRenderer.render(camera, p);
 //        animatedModelShader.stop();
-        Gutil.checkGlError(this.getClass().getCanonicalName()+"render 2");
+            //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 2");
+        }
 
         terrainShader.start();
         terrainShader.loadSkyColour(FOG_RED, FOG_GREEN, FOG_BLUE);
@@ -83,7 +85,7 @@ public class MasterRenderer extends AbstractRenderer {
         terrainShader.loadViewMatrix(camera);
         terrainRenderer.render(terrains);
         terrainShader.stop();
-        Gutil.checkGlError(this.getClass().getCanonicalName()+"render 3");
+        //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 3");
 
         skyboxRenderer.render(camera, box, FOG_RED, FOG_GREEN, FOG_BLUE);
 

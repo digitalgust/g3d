@@ -12,10 +12,7 @@ import org.mini.g3d.core.gltf2.loader.data.GLTFPBRMetallicRoughness;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.core.vector.Vector4f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RenderMaterial {
 
@@ -34,8 +31,8 @@ public class RenderMaterial {
     }
 
     private String type = "MR";
-    private final Map<String, RenderTexture> texturesMap = new HashMap<>();
-    private final Map<String, Object> properties = new HashMap<>();
+    private final Map<String, RenderTexture> texturesMap = new LinkedHashMap<>();
+    private final Map<String, Object> properties = new LinkedHashMap<>();
 
     private final List<String> defines = new ArrayList<>();
     private final GLTFMaterial material;

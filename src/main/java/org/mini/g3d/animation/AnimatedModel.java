@@ -1,46 +1,57 @@
 package org.mini.g3d.animation;
 
-import org.mini.g3d.core.gltf2.loader.GLTFImporter;
+import org.mini.g3d.core.BackendSuported;
 import org.mini.g3d.core.gltf2.loader.data.*;
 import org.mini.g3d.core.gltf2.render.RenderMesh;
 import org.mini.g3d.core.gltf2.render.RenderMeshPrimitive;
 import org.mini.g3d.core.gltf2.render.RenderNode;
-import org.mini.g3d.core.gltf2.render.animation.RenderAnimation;
+import org.mini.g3d.core.gltf2.render.RenderAnimation;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.textures.ModelTexture;
 import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.entity.Entity;
+import org.mini.nanovg.Gutil;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.mini.gl.GL.glGenVertexArrays;
-
-public class AnimatedModel extends Entity {
+public class AnimatedModel extends Entity implements Cloneable, BackendSuported {
 
     Random random = new Random();
-    Matrix4f mat = new Matrix4f();
+    protected Matrix4f transform = new Matrix4f();
+    protected Matrix4f transform_backend = new Matrix4f();
+    protected List<RenderAnimation> animations = new ArrayList<>();
+    protected RenderNode rootRenderNode;
+    protected long animationStartTime;
+    int animationIndex = 0;
 
-    public AnimatedModel() {
+    public int getClipIndex() {
+        return clipIndex;
+    }
 
+    public void setClipIndex(int clipIndex) {
+        this.clipIndex = clipIndex;
+    }
+
+    protected int clipIndex;
+
+    public AnimatedModel(GLTF gltf) {
+        loadGLTF(gltf);
     }
 
     public List<RenderAnimation> getAnimations() {
         return animations;
     }
 
-    private List<RenderAnimation> animations = new ArrayList<>();
 
     public void setRootRenderNode(RenderNode rootRenderNode) {
         this.rootRenderNode = rootRenderNode;
-        //mat.translate(new Vector3f(random.nextFloat() * 5f, 0, random.nextFloat() * 5f));
+        //transform.translate(new Vector3f(random.nextFloat() * 5f, 0, random.nextFloat() * 5f));
     }
 
-    private RenderNode rootRenderNode = new RenderNode(null, null);
 
     public long getAnimationStartTime() {
         return animationStartTime;
@@ -50,52 +61,36 @@ public class AnimatedModel extends Entity {
         this.animationStartTime = animationStartTime;
     }
 
-    private long animationStartTime;
-
 
     public RenderNode getRootRenderNode() {
         return rootRenderNode;
     }
 
+    public static long cost;
 
     public void update() {
+        long start = System.currentTimeMillis();
         animateNode();
-        mat.setZero();
-        G3dMath.createTransformationMatrix(getPosition(), getRotX(), getRotY(), getRotZ(), getScale(), mat);
-        rootRenderNode.applyTransform(mat);
+        cost += System.currentTimeMillis() - start;
+        transform_backend.setZero();
+        G3dMath.createTransformationMatrix(position, rotX, rotY, rotZ, scale, transform_backend);
+        rootRenderNode.applyTransform(transform_backend);
         rootRenderNode.updateSkin();
     }
 
     //  private static float debugStep = -0.25f;
     private void animateNode() {
         float animationTimeScale = 1.f;
-        float elapsedTime =
-                (System.currentTimeMillis() - animationStartTime) / 1000f * animationTimeScale;
-//    debugStep += 0.25f;
-//    float elapsedTime = debugStep;
+        float elapsedTime = (System.currentTimeMillis() - animationStartTime) / 1000f * animationTimeScale;
 
-        //TODO selecting animation
-
-        for (RenderAnimation anim : animations) {
-            anim.advance(elapsedTime);
-        }
+        animations.get(animationIndex).advance(elapsedTime, clipIndex);
     }
 
 
-    public void loadFile(String path) {
+    void loadGLTF(GLTF gltf) {
 
-        File file = new File(path);
-        GLTFImporter gltfImporter = new GLTFImporter();
-        //Clear before loading
 
-        RenderNode rootRenderNode = new RenderNode(null, null);
-        setRootRenderNode(rootRenderNode);
-
-        GLTF gltf;
-        gltf = gltfImporter.load(file.getPath());
-        if (gltf == null) {
-            throw new RuntimeException();
-        }
+        rootRenderNode = new RenderNode(null, null);
 
         if (gltf.getExtensionsRequired() != null) {
             throw new RuntimeException("Extensions not supported. Loading next file");
@@ -114,7 +109,7 @@ public class AnimatedModel extends Entity {
         //Generate Animations
         if (gltf.getAnimations() != null) {
             for (GLTFAnimation animation : gltf.getAnimations()) {
-                getAnimations().add(new RenderAnimation(animation));
+                getAnimations().add(new RenderAnimation(animation, rootRenderNode, gltf.getAnimationClip()));
             }
         }
 
@@ -134,11 +129,8 @@ public class AnimatedModel extends Entity {
 
         setAnimationStartTime(System.currentTimeMillis());
 
-        int[] vao = {0};
-        glGenVertexArrays(1, vao, 0);
-//        glBindVertexArray(vao[0]);
 
-        RawModel raw = new RawModel(vao[0], 0);
+        RawModel raw = new RawModel(-1, 0);
         ModelTexture mt = new ModelTexture(-1);
         model = new TexturedModel(raw, mt);
     }
@@ -164,5 +156,11 @@ public class AnimatedModel extends Entity {
             for (GLTFNode childNode : node.getChildren()) {
                 processNodeChildren(childNode, renderNode);
             }
+    }
+
+    @Override
+    public void swap() {
+        Gutil.mat4x4_dup(transform.mat, transform_backend.mat);
+        rootRenderNode.swap();
     }
 }

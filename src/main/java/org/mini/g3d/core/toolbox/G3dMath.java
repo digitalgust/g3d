@@ -7,11 +7,15 @@ import org.mini.g3d.core.vector.Vector3f;
 public class G3dMath {
 
     public static Matrix4f createTransformationMatrix(Vector2f translation, Vector2f scale) {
-        Matrix4f matrix = new Matrix4f();
-        matrix.identity();
-        Matrix4f.translate(translation, matrix, matrix);
-        Matrix4f.scale(new Vector3f(scale.x, scale.y, 1f), matrix, matrix);
-        return matrix;
+        return createTransformationMatrix(translation, scale, new Matrix4f());
+    }
+
+    public static Matrix4f createTransformationMatrix(Vector2f translation, Vector2f scale, Matrix4f dest) {
+        if (dest == null) dest = new Matrix4f();
+        dest.identity();
+        Matrix4f.translate(translation, dest, dest);
+        Matrix4f.scale(scale.x, scale.y, 1f, dest, dest);
+        return dest;
     }
 
     public static float barryCentric(Vector3f p1, Vector3f p2, Vector3f p3, Vector2f pos) {
@@ -32,10 +36,10 @@ public class G3dMath {
         }
         dest.identity();
         Matrix4f.translate(translation, dest, dest);
-        Matrix4f.rotate((float) Math.toRadians(rx), new Vector3f(1, 0, 0), dest, dest);
-        Matrix4f.rotate((float) Math.toRadians(ry), new Vector3f(0, 1, 0), dest, dest);
-        Matrix4f.rotate((float) Math.toRadians(rz), new Vector3f(0, 0, 1), dest, dest);
-        Matrix4f.scale(new Vector3f(scale, scale, scale), dest, dest);
+        Matrix4f.rotate((float) Math.toRadians(rx), 1, 0, 0, dest, dest);
+        Matrix4f.rotate((float) Math.toRadians(ry), 0, 1, 0, dest, dest);
+        Matrix4f.rotate((float) Math.toRadians(rz), 0, 0, 1, dest, dest);
+        Matrix4f.scale(scale, scale, scale, dest, dest);
         return dest;
     }
 

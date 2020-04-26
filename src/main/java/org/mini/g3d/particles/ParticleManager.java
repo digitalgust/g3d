@@ -4,7 +4,6 @@ package org.mini.g3d.particles;
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.Loader;
 import org.mini.g3d.core.WorldCamera;
-import org.mini.g3d.core.vector.Matrix4f;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -38,10 +37,6 @@ public class ParticleManager {
                 InsertionSort.sortHighToLow(list);
             }
         }
-    }
-
-    public static void reloadProjectionMatrix(Matrix4f projectionMatrix) {
-        renderer.reloadProjectionMatrix(projectionMatrix);
     }
 
 

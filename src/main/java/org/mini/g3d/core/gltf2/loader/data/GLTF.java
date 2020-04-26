@@ -7,7 +7,6 @@
 package org.mini.g3d.core.gltf2.loader.data;
 
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -106,9 +105,19 @@ public class GLTF extends GLTFProperty {
     }
 
     public void setSource(String source, ResourceFrom from) {
-        this.source = new File(source);
+        this.source = source.replace('\\', '/');
         fileFrom = from;
     }
+
+    public AnimationClip getAnimationClip() {
+        return animationClip;
+    }
+
+    public void setAnimationClip(AnimationClip animationClip) {
+        this.animationClip = animationClip;
+    }
+
+    private AnimationClip animationClip;
 
     /**
      * Names of glTF extensions used somewhere in this asset.
@@ -183,7 +192,7 @@ public class GLTF extends GLTFProperty {
     /**
      * The URI of the root file for this GLTF asset Used to resolve non-absolute file paths
      */
-    private File source;
+    private String source;
 
     public ByteBuffer getBin() {
         return bin;
@@ -219,15 +228,15 @@ public class GLTF extends GLTFProperty {
      * @return
      */
     public String getRelativePath() {
-        if (fileFrom.equals(ResourceFrom.JAR)) {
-            String s = source.toString();
-            if (s.indexOf(File.separator) >= 0) {
-                return s.substring(0, s.lastIndexOf(File.separator)) + File.separator;
-            }
-            return "";
-        } else {
-            return new File(source.getAbsolutePath()).getParent().toString() + File.separator;
+        String s = source;
+        if (s.indexOf('/') >= 0) {
+            return s.substring(0, s.lastIndexOf('/')) + "/";
         }
+        return "";
+    }
+
+    public String getSource() {
+        return source;
     }
 
     /**

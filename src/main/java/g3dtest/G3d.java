@@ -55,6 +55,7 @@ public class G3d extends GApplication {
                 gamePanel.reSize();
             }
         });
+        showGamePanel();
         return form;
 
 

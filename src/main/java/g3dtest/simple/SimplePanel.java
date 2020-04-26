@@ -222,7 +222,7 @@ public class SimplePanel extends GOpenGLPanel {
 
         glEnable(GL_DEPTH_TEST);
 
-        Gutil.checkGlError("gl_init");
+        //Gutil.checkGlError("gl_init");
     }
 
     @Override

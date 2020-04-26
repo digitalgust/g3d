@@ -9,7 +9,6 @@ package org.mini.g3d.core.gltf2.render;
 import org.mini.g3d.core.Camera;
 import org.mini.g3d.core.gltf2.loader.data.GLTFCamera;
 import org.mini.g3d.core.gltf2.loader.data.GLTFPerspective;
-import org.mini.g3d.core.gltf2.SimpleViewer;
 import org.mini.g3d.core.vector.AABBf;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Quaternionf;
@@ -25,7 +24,7 @@ public class RenderCamera implements Camera {
     private float rotateSpeed = (float) 1 / 180;
     private boolean staticView = false;
 
-    private float aspectRatio = ((float) SimpleViewer.WIDTH) / SimpleViewer.HEIGHT;
+    private float aspectRatio = ((float) 800) / 600f;
 
     private final Vector3f position = new Vector3f(0, 0, 0);
     private final Vector3f target = new Vector3f();

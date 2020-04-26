@@ -9,50 +9,49 @@ import org.mini.g3d.core.Loader;
 import org.mini.g3d.core.models.RawModel;
 
 /**
- *
  * @author Gust
  */
 public class Skybox {
-    
+
     private static final float SIZE = 1000f;
 
     private static final float[] VERTICES = {
-        -SIZE, SIZE, -SIZE,
-        -SIZE, -SIZE, -SIZE,
-        SIZE, -SIZE, -SIZE,
-        SIZE, -SIZE, -SIZE,
-        SIZE, SIZE, -SIZE,
-        -SIZE, SIZE, -SIZE,
-        -SIZE, -SIZE, SIZE,
-        -SIZE, -SIZE, -SIZE,
-        -SIZE, SIZE, -SIZE,
-        -SIZE, SIZE, -SIZE,
-        -SIZE, SIZE, SIZE,
-        -SIZE, -SIZE, SIZE,
-        SIZE, -SIZE, -SIZE,
-        SIZE, -SIZE, SIZE,
-        SIZE, SIZE, SIZE,
-        SIZE, SIZE, SIZE,
-        SIZE, SIZE, -SIZE,
-        SIZE, -SIZE, -SIZE,
-        -SIZE, -SIZE, SIZE,
-        -SIZE, SIZE, SIZE,
-        SIZE, SIZE, SIZE,
-        SIZE, SIZE, SIZE,
-        SIZE, -SIZE, SIZE,
-        -SIZE, -SIZE, SIZE,
-        -SIZE, SIZE, -SIZE,
-        SIZE, SIZE, -SIZE,
-        SIZE, SIZE, SIZE,
-        SIZE, SIZE, SIZE,
-        -SIZE, SIZE, SIZE,
-        -SIZE, SIZE, -SIZE,
-        -SIZE, -SIZE, -SIZE,
-        -SIZE, -SIZE, SIZE,
-        SIZE, -SIZE, -SIZE,
-        SIZE, -SIZE, -SIZE,
-        -SIZE, -SIZE, SIZE,
-        SIZE, -SIZE, SIZE
+            -SIZE, SIZE, -SIZE,
+            -SIZE, -SIZE, -SIZE,
+            SIZE, -SIZE, -SIZE,
+            SIZE, -SIZE, -SIZE,
+            SIZE, SIZE, -SIZE,
+            -SIZE, SIZE, -SIZE,
+            -SIZE, -SIZE, SIZE,
+            -SIZE, -SIZE, -SIZE,
+            -SIZE, SIZE, -SIZE,
+            -SIZE, SIZE, -SIZE,
+            -SIZE, SIZE, SIZE,
+            -SIZE, -SIZE, SIZE,
+            SIZE, -SIZE, -SIZE,
+            SIZE, -SIZE, SIZE,
+            SIZE, SIZE, SIZE,
+            SIZE, SIZE, SIZE,
+            SIZE, SIZE, -SIZE,
+            SIZE, -SIZE, -SIZE,
+            -SIZE, -SIZE, SIZE,
+            -SIZE, SIZE, SIZE,
+            SIZE, SIZE, SIZE,
+            SIZE, SIZE, SIZE,
+            SIZE, -SIZE, SIZE,
+            -SIZE, -SIZE, SIZE,
+            -SIZE, SIZE, -SIZE,
+            SIZE, SIZE, -SIZE,
+            SIZE, SIZE, SIZE,
+            SIZE, SIZE, SIZE,
+            -SIZE, SIZE, SIZE,
+            -SIZE, SIZE, -SIZE,
+            -SIZE, -SIZE, -SIZE,
+            -SIZE, -SIZE, SIZE,
+            SIZE, -SIZE, -SIZE,
+            SIZE, -SIZE, -SIZE,
+            -SIZE, -SIZE, SIZE,
+            SIZE, -SIZE, SIZE
     };
 
     private static final String[] TEXTURE_FILES = {"textures/skybox/right", "textures/skybox/left", "textures/skybox/top", "textures/skybox/bottom", "textures/skybox/back", "textures/skybox/front"};
@@ -66,14 +65,14 @@ public class Skybox {
         cube = loader.loadToVAO(VERTICES, 3);
         texture = loader.loadCubeMap(TEXTURE_FILES);
         nightTexture = loader.loadCubeMap(NIGHT_TEXTURE_FILES);
-        
+
     }
-    
-    public int getVaoID(){
+
+    public int getVaoID() {
         return cube.getVaoID();
     }
-    
-    public int getVertexCount(){
+
+    public int getVertexCount() {
         return cube.getVertexCount();
     }
 
@@ -97,6 +96,6 @@ public class Skybox {
     public int getNightTexture() {
         return nightTexture;
     }
-    
-   
+
+
 }

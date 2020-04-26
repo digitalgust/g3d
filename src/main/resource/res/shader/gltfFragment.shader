@@ -27,7 +27,7 @@
 precision highp float;
 uniform float u_Exposure;
 
-layout(location=0) out vec4 fragColor;
+out vec4 fragColor;
 
 const float GAMMA = 2.2;
 const float INV_GAMMA = 1.0 / GAMMA;

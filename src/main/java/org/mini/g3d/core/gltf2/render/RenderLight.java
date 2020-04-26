@@ -7,7 +7,6 @@
 package org.mini.g3d.core.gltf2.render;
 
 import org.mini.g3d.core.gltf2.loader.data.GLTFNode;
-import org.mini.g3d.core.gltf2.render.light.UniformLight;
 
 public class RenderLight extends RenderNode {
     private final UniformLight uLight;

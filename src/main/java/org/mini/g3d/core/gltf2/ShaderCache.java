@@ -7,6 +7,7 @@
 package org.mini.g3d.core.gltf2;
 
 
+import org.mini.g3d.core.EngineManager;
 import org.mini.gui.GToolkit;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.Map.Entry;
  * Shader programs vary depending on attributes in a GLTFMeshPrimitive The shader files that
  * glTF-Sample-Viewer uses take configurations as #define [name] before the shader code.
  * <p>
- * This class looks at a GLTFMeshPrimitive and returns a correct ShaderProgram to render it.
+ * This class looks at a GLTFMeshPrimitive and returns a correct AnimatedShader to render it.
  */
 public class ShaderCache {
 
@@ -47,15 +48,13 @@ public class ShaderCache {
     /**
      * (vertex shader, fragment shader) -> program
      */
-    private static Map<Integer, ShaderProgram> programs = new HashMap<>();
+    private static Map<Integer, AnimatedShader> programs = new HashMap<>();
 
     static {
         sources = new HashMap<>();
         //Set up shader sources
-        sources.put("gltfVertex.shader",
-                GToolkit.readFileFromJarAsString("/res/shader/gltfVertex.shader", "utf-8"));
-        sources.put("gltfFragment.shader",
-                GToolkit.readFileFromJarAsString("/res/shader/gltfFragment.shader", "utf-8"));
+        sources.put("gltfVertex.shader", GToolkit.readFileFromJarAsString("/res/shader/gltfVertex.shader", "utf-8"));
+        sources.put("gltfFragment.shader", GToolkit.readFileFromJarAsString("/res/shader/gltfFragment.shader", "utf-8"));
 
         //key, source
         for (Entry<String, String> entry : sources.entrySet()) {
@@ -97,7 +96,11 @@ public class ShaderCache {
         int hash = shaderIdentifier.hashCode();
 
         StringBuilder sb = new StringBuilder();
-        sb.append("#version 330\n"); //Put this in so it doesn't give a warning
+        if (EngineManager.getGlVersion().toLowerCase().contains("opengl es")) {
+            sb.append("#version 300 es\n");
+        } else {
+            sb.append("#version 330\n"); //Put this in so it doesn't give a warning
+        }
         for (String define : permutationDefines) {
             sb.append("#define ").append(define).append('\n');
         }
@@ -113,7 +116,7 @@ public class ShaderCache {
         return hash;
     }
 
-    public static ShaderProgram getShaderProgram(int vertexShaderHash, int fragmentShaderHash) {
+    public static AnimatedShader getShaderProgram(int vertexShaderHash, int fragmentShaderHash) {
         int hash = vertexShaderHash * fragmentShaderHash;
 
         if (programs.containsKey(hash)) {
@@ -122,8 +125,8 @@ public class ShaderCache {
 
         ShaderVars vertVars = shaders.get(vertexShaderHash);
         ShaderVars fragVars = shaders.get(fragmentShaderHash);
-        int linkedProg = GlUtil.linkProgram(vertVars.glRef, fragVars.glRef);
-        ShaderProgram program = new ShaderProgram(linkedProg, hash);
+        AnimatedShader program = new AnimatedShader(vertVars.glRef.intValue(), fragVars.glRef.intValue());
+
 
         //Initialize data locations
         int programId = program.getProgramId();
@@ -134,7 +137,7 @@ public class ShaderCache {
         return program;
     }
 
-    public static ShaderProgram getDebugShaderProgram() {
+    public static AnimatedShader getDebugShaderProgram() {
         List<String> vertDefines = new ArrayList<>();
         List<String> fragDefines = new ArrayList<>();
         fragDefines.add("DEBUG 1");

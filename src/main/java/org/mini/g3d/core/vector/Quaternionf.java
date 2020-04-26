@@ -31,6 +31,8 @@
  */
 package org.mini.g3d.core.vector;
 
+import org.mini.nanovg.Gutil;
+
 import java.io.Serializable;
 
 /**
@@ -43,7 +45,30 @@ public class Quaternionf extends Vector3f implements Serializable, ReadableVecto
 
     private static final long serialVersionUID = 1L;
 
-    public float  w;
+    public float w;
+
+
+    static ThreadLocal<float[]> arr_f4A = new ThreadLocal() {
+        @Override
+        protected float[] initialValue() {
+            return new float[4];
+        }
+    };
+
+    static ThreadLocal<float[]> arr_f4B = new ThreadLocal() {
+        @Override
+        protected float[] initialValue() {
+            return new float[4];
+        }
+    };
+
+    static ThreadLocal<float[]> arr_f4C = new ThreadLocal() {
+        @Override
+        protected float[] initialValue() {
+            return new float[4];
+        }
+    };
+
 
     /**
      * C'tor. The quaternion will be initialized to the identity.
@@ -160,14 +185,19 @@ public class Quaternionf extends Vector3f implements Serializable, ReadableVecto
      * @return The normalised quaternion
      */
     public static Quaternionf normalise(Quaternionf src, Quaternionf dest) {
-        float inv_l = 1f / src.length();
 
         if (dest == null) {
             dest = new Quaternionf();
         }
 
-        dest.set(src.x * inv_l, src.y * inv_l, src.z * inv_l, src.w * inv_l);
+//        float inv_l = 1f / src.length();
+//        dest.set(src.x * inv_l, src.y * inv_l, src.z * inv_l, src.w * inv_l);
 
+        float[] a = arr_f4B.get();
+        float[] b = arr_f4C.get();
+        src.store(a);
+        Gutil.vec_normal(b, a);
+        dest.load(b);
         return dest;
     }
 
@@ -657,24 +687,32 @@ public class Quaternionf extends Vector3f implements Serializable, ReadableVecto
      * @see org.joml.Quaternionfc#slerp(org.joml.Quaternionfc, float, org.joml.Quaternionf)
      */
     public Quaternionf slerp(Quaternionf target, float alpha, Quaternionf dest) {
-        float cosom = x * target.x + y * target.y + z * target.z + w * target.w;
-        float absCosom = Math.abs(cosom);
-        float scale0, scale1;
-        if (1.0f - absCosom > 1E-6f) {
-            float sinSqr = 1.0f - absCosom * absCosom;
-            float sinom = (float) (1.0 / Math.sqrt(sinSqr));
-            float omega = (float) Math.atan2(sinSqr * sinom, absCosom);
-            scale0 = (float) (Math.sin((1.0 - alpha) * omega) * sinom);
-            scale1 = (float) (Math.sin(alpha * omega) * sinom);
-        } else {
-            scale0 = 1.0f - alpha;
-            scale1 = alpha;
-        }
-        scale1 = cosom >= 0.0f ? scale1 : -scale1;
-        dest.x = scale0 * x + scale1 * target.x;
-        dest.y = scale0 * y + scale1 * target.y;
-        dest.z = scale0 * z + scale1 * target.z;
-        dest.w = scale0 * w + scale1 * target.w;
+        float[] r = arr_f4A.get();
+        float[] a = arr_f4B.get();
+        float[] b = arr_f4C.get();
+        store(a);
+        target.store(b);
+        Gutil.vec4_slerp(r, a, b, alpha);
+        dest.load(r);
+
+//        float cosom = x * target.x + y * target.y + z * target.z + w * target.w;
+//        float absCosom = Math.abs(cosom);
+//        float scale0, scale1;
+//        if (1.0f - absCosom > 1E-6f) {
+//            float sinSqr = 1.0f - absCosom * absCosom;
+//            float sinom = (float) (1.0 / Math.sqrt(sinSqr));
+//            float omega = (float) Math.atan2(sinSqr * sinom, absCosom);
+//            scale0 = (float) (Math.sin((1.0 - alpha) * omega) * sinom);
+//            scale1 = (float) (Math.sin(alpha * omega) * sinom);
+//        } else {
+//            scale0 = 1.0f - alpha;
+//            scale1 = alpha;
+//        }
+//        scale1 = cosom >= 0.0f ? scale1 : -scale1;
+//        dest.x = scale0 * x + scale1 * target.x;
+//        dest.y = scale0 * y + scale1 * target.y;
+//        dest.z = scale0 * z + scale1 * target.z;
+//        dest.w = scale0 * w + scale1 * target.w;
         return dest;
     }
 

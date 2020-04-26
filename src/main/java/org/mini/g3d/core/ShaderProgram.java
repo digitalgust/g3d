@@ -1,8 +1,6 @@
 package org.mini.g3d.core;
 
-import org.mini.g3d.core.vector.Matrix4f;
-import org.mini.g3d.core.vector.Vector2f;
-import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.core.vector.*;
 import org.mini.gl.GL;
 import org.mini.gui.GCmd;
 import org.mini.gui.GForm;
@@ -23,9 +21,19 @@ public abstract class ShaderProgram {
     float[] mbuf = new float[16];
 
     public ShaderProgram(String vertexFile, String fragmentFile) {
-
         vertexShaderID = loadShader(vertexFile, GL_VERTEX_SHADER);
         fragmentShaderID = loadShader(fragmentFile, GL_FRAGMENT_SHADER);
+        init(vertexShaderID, fragmentShaderID);
+        glDeleteShader(vertexShaderID);
+        glDeleteShader(fragmentShaderID);
+    }
+
+    public ShaderProgram(int vertexShaderID, int fragmentShaderID) {
+        init(vertexShaderID, fragmentShaderID);
+    }
+
+    public void init(int vertexShaderID, int fragmentShaderID) {
+
         programID = glCreateProgram();
         glAttachShader(programID, vertexShaderID);
         glAttachShader(programID, fragmentShaderID);
@@ -34,8 +42,7 @@ public abstract class ShaderProgram {
 
         glDetachShader(programID, vertexShaderID);
         glDetachShader(programID, fragmentShaderID);
-        glDeleteShader(vertexShaderID);
-        glDeleteShader(fragmentShaderID);
+
 
         glValidateProgram(programID);
         getAllUniformLocations();
@@ -61,7 +68,9 @@ public abstract class ShaderProgram {
         glDeleteProgram(programID);
     }
 
-
+    public int getProgramId() {
+        return programID;
+    }
     /**
      * must be static,because finalize would be destroy ext class in minijvm
      */
@@ -90,6 +99,10 @@ public abstract class ShaderProgram {
         glBindAttribLocation(programID, attribute, toUtf8(variableName));
     }
 
+    public void loadFloatArr(int location, float[] value) {
+        glUniform1fv(location, 1, value, 0);
+    }
+
     protected void loadFloat(int location, float value) {
         glUniform1f(location, value);
     }
@@ -100,6 +113,10 @@ public abstract class ShaderProgram {
 
     protected void loadVector(int location, Vector3f vector) {
         glUniform3f(location, vector.x, vector.y, vector.z);
+    }
+
+    protected void loadVector4f(int location, Vector4f vector) {
+        glUniform4f(location, vector.x, vector.y, vector.z, vector.w);
     }
 
     protected void loadVector2D(int location, Vector2f vector) {
@@ -118,6 +135,37 @@ public abstract class ShaderProgram {
         //matrix.store(mbuf);
         glUniformMatrix4fv(location, 1, GL_FALSE, matrix.mat, 0);//gust
     }
+
+
+    public void loadUniform(int location, Object value) {
+        if (value instanceof Float) {
+            loadFloat(location, (float) value);
+            return;
+        }
+        if (value instanceof Vector4f) {
+            loadVector4f(location, (Vector4f) value);
+            return;
+        }
+        if (value instanceof Vector3f) {
+            loadVector(location, (Vector3f) value);
+            return;
+        }
+        if (value instanceof Vector2f) {
+            loadVector2D(location, (Vector2f) value);
+            return;
+        }
+        if (value instanceof Integer) {
+            loadInt(location, (int) value);
+            return;
+        }
+        if (value instanceof Matrix4f[]) {//We most likely don't want this to actually be called
+            loadMatrix(location, (Matrix4f) value);
+            return;
+        }
+        System.out.println("Unhandled type in setUniform: " + value.getClass());
+        assert false;
+    }
+
 
     private static int loadShader(String file, int type) {
 

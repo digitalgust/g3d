@@ -8,19 +8,16 @@ package org.mini.g3d.core.gltf2.render;
 
 
 import org.mini.g3d.core.Camera;
+import org.mini.g3d.core.gltf2.AnimatedShader;
 import org.mini.g3d.core.gltf2.GlUtil;
 import org.mini.g3d.core.gltf2.ShaderCache;
 import org.mini.g3d.core.gltf2.ShaderDebugType;
-import org.mini.g3d.core.gltf2.ShaderProgram;
 import org.mini.g3d.core.gltf2.loader.data.GLTFAccessor;
 import org.mini.g3d.core.gltf2.loader.data.GLTFAlphaMode;
-import org.mini.g3d.core.gltf2.render.light.UniformLight;
 import org.mini.g3d.core.vector.Matrix4f;
-import org.mini.nanovg.Gutil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import static org.mini.gl.GL.*;
 
@@ -36,7 +33,6 @@ public class Renderer {
     private boolean drawInvisibleNodes = false; //Draw all nodes on the scene tree
 
     private Camera camera;
-    private RenderEnvironmentMap envData;
 
     private final int[] debugBuf = new int[1];
     private final int[] debugEle = new int[1];
@@ -59,7 +55,6 @@ public class Renderer {
 //    ul2.position = ul2.position.add(-5, 2, -5);
 
         visibleLights.add(light1);
-//    visibleLights.add(light2);
 
         //Setup debug box
         float[] debugBox = {
@@ -74,10 +69,6 @@ public class Renderer {
         };
         glGenBuffers(1, debugBuf, 0);
         glBindBuffer(GL_ARRAY_BUFFER, debugBuf[0]);
-//    DoubleBuffer nBuffer = ByteBuffer.allocateDirect(debugBox.length * Double.BYTES).order(
-//        ByteOrder.nativeOrder()).asDoubleBuffer();
-//    nBuffer.put(debugBox);
-//    nBuffer.flip();
         glBufferData(GL_ARRAY_BUFFER, debugBox.length * Float.BYTES, debugBox, 0, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -98,31 +89,26 @@ public class Renderer {
 
         glGenBuffers(1, debugEle, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, debugEle[0]);
-//    ShortBuffer nShortBuffer = ByteBuffer.allocateDirect(debugElements.length * Short.BYTES)
-//        .order(ByteOrder.nativeOrder()).asShortBuffer();
-//    nShortBuffer.put(debugElements);
-//    nShortBuffer.flip();
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, debugElements.length * Short.BYTES, debugElements, 0, GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        //Set up environment map
-        envData = new RenderEnvironmentMap("environments/studio_grey/");
     }
 
     public void draw(Camera camera, RenderNode rootNode, int targetDrawLimit) {
-        Gutil.checkGlError("draw 0");
+        //Gutil.checkGlError("draw 0");
         this.camera = camera;
+        //System.out.println("================================");
 
         nodeDrawLimit = targetDrawLimit;
         List<RenderMeshPrimitive> transparentNodes = new ArrayList<>();
         draw(rootNode, transparentNodes);
 
-        Gutil.checkGlError("draw 1");
+        //Gutil.checkGlError("draw 1");
         //TODO sort by distance
         for (RenderMeshPrimitive renderMeshPrimitive : transparentNodes) {
             drawRenderObject(renderMeshPrimitive);
         }
-        Gutil.checkGlError("draw 2");
+        //Gutil.checkGlError("draw 2");
     }
 
     /**
@@ -138,6 +124,7 @@ public class Renderer {
                 if (nodeObj.getMaterial().getAlphaMode() == GLTFAlphaMode.BLEND) {
                     transparentNodes.add(nodeObj);
                 } else {
+                    //System.out.println(node);
                     drawRenderObject((RenderMeshPrimitive) node);
                 }
             }
@@ -147,93 +134,94 @@ public class Renderer {
                 drawInvisibleNode(node);
             }
         }
-        for (RenderNode child : node.getChildren()) {
+        for (int i = 0, imax = node.getChildren().size(); i < imax; i++) {
+            RenderNode child = node.getChildren().get(i);
             draw(child, transparentNodes);
         }
     }
 
     private void drawInvisibleNode(RenderNode node) {
-        ShaderProgram shader = ShaderCache.getDebugShaderProgram();
+        AnimatedShader shader = ShaderCache.getDebugShaderProgram();
         glUseProgram(shader.getProgramId());
-        Gutil.checkGlError("drawInvisibleNode 1");
+        //Gutil.checkGlError("drawInvisibleNode 1");
 
         this.projMatrix = camera.getProjectionMatrix();
         this.viewMatrix = camera.getViewMatrix();
         Matrix4f.mul(projMatrix, viewMatrix, viewProjectionMatrix);
 
-        shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
-        shader.setUniform("u_ModelMatrix", node.getWorldTransform());
-        shader.setUniform("u_NormalMatrix", node.getNormalMatrix());
-        shader.setUniform("u_Exposure", 0.1f);
-        shader.setUniform("u_Camera", camera.getPosition());
+        shader.load_u_ViewProjectionMatrix(viewProjectionMatrix);
+        shader.load_u_ModelMatrix(node.getWorldTransform());
+        shader.load_u_NormalMatrix(node.getNormalMatrix());
+        shader.load_u_Exposure(0.1f);
+        shader.load_u_Camera(camera.getPosition());
 
-        Gutil.checkGlError("drawInvisibleNode 2");
+        //Gutil.checkGlError("drawInvisibleNode 2");
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, debugEle[0]);
         glBindBuffer(GL_ARRAY_BUFFER, debugBuf[0]);
 
-        int positionAttribute = shader.getAttributeLocation("a_Position");
+        int positionAttribute = shader.location_a_Position;
 
         glVertexAttribPointer(positionAttribute, 4, GL_FLOAT, GL_FALSE, 0, null, 0);
         glEnableVertexAttribArray(positionAttribute);
 
-        Gutil.checkGlError("drawInvisibleNode 3");
+        //Gutil.checkGlError("drawInvisibleNode 3");
         glDrawElements(GL_TRIANGLES, 32, GL_UNSIGNED_SHORT, null, 0);
 
         glDisableVertexAttribArray(positionAttribute);
 
-        Gutil.checkGlError("drawInvisibleNode 4");
+        //Gutil.checkGlError("drawInvisibleNode 4");
     }
 
     private void drawRenderObject(RenderMeshPrimitive rmp) {
-        Gutil.checkGlError("drawRenderObject 0");
+        //Gutil.checkGlError("drawRenderObject 0");
         if (rmp.isSkip()) {
             return;
         }
-        //select shader permutation, compile and link program.
-        List<String> vertDefines = new ArrayList<>();
-        pushVertParameterDefines(vertDefines, rmp);
-        vertDefines.addAll(rmp.getDefines());
-
         RenderMaterial material = rmp.getMaterial();
+        AnimatedShader shader = rmp.getShader();
+        if (shader == null) {
+            //select shader permutation, compile and link program.
+            List<String> vertDefines = new ArrayList<>();
+            pushVertParameterDefines(vertDefines, rmp);
+            vertDefines.addAll(rmp.getDefines());
 
-        List<String> fragDefines = new ArrayList<>();
-        fragDefines.addAll(vertDefines);//Add all the vert defines, some are needed
-        fragDefines.addAll(material.getDefines());
-        if (usePunctualLighting) {
-            fragDefines.add("USE_PUNCTUAL 1");
-            fragDefines.add("LIGHT_COUNT " + visibleLights.size());
-        }
-        if (useIBL) {
-            fragDefines.add("USE_IBL 1");
-            fragDefines.add("USE_TEX_LOD 1");
-            fragDefines.add("USE_HDR 1");
-        }
 
-        //DEBUG
-        if (debugType != ShaderDebugType.NONE) {
-            fragDefines.add("DEBUG_OUTPUT 1");
-            fragDefines.add(debugType.getDefine());
-        }
-
-        int vertexHash = ShaderCache.selectShader(rmp.getShaderIdentifier(), vertDefines);
-        Gutil.checkGlError("drawRenderObject 0.1");
-        int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
-        Gutil.checkGlError("drawRenderObject 0.2");
-
-        ShaderProgram shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
-        Gutil.checkGlError("drawRenderObject 1");
-        glUseProgram(shader.getProgramId());
-
-        if (usePunctualLighting) {
-            //applyLights
-            List<UniformLight> uniformLights = new ArrayList<>();
-            for (RenderLight light : visibleLights) {
-                uniformLights.add(light.getUniformLight());
+            List<String> fragDefines = new ArrayList<>();
+            fragDefines.addAll(vertDefines);//Add all the vert defines, some are needed
+            fragDefines.addAll(material.getDefines());
+            if (usePunctualLighting) {
+                fragDefines.add("USE_PUNCTUAL 1");
+                fragDefines.add("LIGHT_COUNT " + visibleLights.size());
             }
-            shader.setUniform("u_Lights", uniformLights);
+            if (useIBL) {
+                fragDefines.add("USE_IBL 1");
+                fragDefines.add("USE_TEX_LOD 1");
+                fragDefines.add("USE_HDR 1");
+            }
+
+            //DEBUG
+            if (debugType != ShaderDebugType.NONE) {
+                fragDefines.add("DEBUG_OUTPUT 1");
+                fragDefines.add(debugType.getDefine());
+            }
+
+            int vertexHash = ShaderCache.selectShader(rmp.getShaderIdentifier(), vertDefines);
+            //Gutil.checkGlError("drawRenderObject 0.1");
+            int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
+            //Gutil.checkGlError("drawRenderObject 0.2");
+
+            shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
+            shader.getAllUniformLocations(rmp, visibleLights.size());
+            rmp.setShader(shader);
+            //Gutil.checkGlError("drawRenderObject 1");
+        }
+        shader.start();
+
+        if (usePunctualLighting) {
+            shader.load_u_Lights(visibleLights);
         }
 
-        camera.update();
+        //Gutil.checkGlError("drawRenderObject 1.3");
 
         this.projMatrix = camera.getProjectionMatrix();
         this.viewMatrix = camera.getViewMatrix();
@@ -242,19 +230,24 @@ public class Renderer {
         //Assert viewProjectionMatrix is filled out
         assert (!viewProjectionMatrix.toString().contains("nan"));
 
-        shader.setUniform("u_ViewProjectionMatrix", viewProjectionMatrix);
-        shader.setUniform("u_ModelMatrix", rmp.getWorldTransform());
-        shader.setUniform("u_NormalMatrix", rmp.getNormalMatrix());
-        shader.setUniform("u_Exposure", 1.0f);
-        shader.setUniform("u_Camera", camera.getPosition());
+        shader.load_u_ViewProjectionMatrix(viewProjectionMatrix);
+        shader.load_u_ModelMatrix(rmp.getWorldTransform());
+//        System.out.println(rmp + "," + rmp.getWorldTransform());
+        shader.load_u_NormalMatrix(rmp.getNormalMatrix());
+        shader.load_u_Exposure(1.0f);
+        shader.load_u_Camera(camera.getPosition());
+
+        //Gutil.checkGlError("drawRenderObject 1.4");
 
         boolean drawIndexed = rmp.getPrimitive().getIndicesAccessor() != null;
 
         if (drawIndexed) {
             GlUtil.setIndices(rmp.getPrimitive().getIndicesAccessor());
         }
+        //Gutil.checkGlError("drawRenderObject 1.5");
 
         updateAnimationUniforms(shader, rmp.getMesh(), rmp);
+        //Gutil.checkGlError("drawRenderObject 2");
 
         if (material.getGLTFMaterial().isDoubleSided()) {
             glDisable(GL_CULL_FACE);
@@ -269,42 +262,16 @@ public class Renderer {
         } else {
             glDisable(GL_BLEND);
         }
+        //Gutil.checkGlError("drawRenderObject 3");
 
-        int vertexCount = 0;
-        for (Entry<String, GLTFAccessor> entry : rmp.getGlAttributes().entrySet()) {
-            String attributeName = entry.getKey();
-            GLTFAccessor accessor = entry.getValue();
+        int vertexCount = shader.bindAttributes(rmp.getGlAttributes());
 
-            vertexCount = accessor.getCount();
+        //Gutil.checkGlError("drawRenderObject 4");
 
-            int location = shader.getAttributeLocation(attributeName);
+        shader.load_materialProperties(material);
+        shader.load_materialTextures(material);
 
-            if (location < 0) {
-                continue;
-            }
-            GlUtil.enableAttribute(location, accessor);
-        }
-
-        for (Entry<String, Object> entry : material.getProperties().entrySet()) {
-            shader.setUniform(entry.getKey(), entry.getValue());
-        }
-
-        int texSlot = 1;
-        for (Entry<String, RenderTexture> entry : material.getTexturesMap()
-                .entrySet()) {
-            RenderTexture info = entry.getValue();
-            int location = shader.getUniformLocation(entry.getKey());
-
-            if (location < 0) {
-                continue;
-            }
-            GlUtil.setTexture(location, info, texSlot++);
-        }
-
-        Gutil.checkGlError("drawRenderObject 6");
-        if (useIBL) {
-            applyEnvironmentMap(shader, this.envData, texSlot);
-        }
+        //Gutil.checkGlError("drawRenderObject 6");
 
         if (drawIndexed) {
             GLTFAccessor indexAccessor = rmp.getPrimitive().getIndicesAccessor();
@@ -312,32 +279,28 @@ public class Renderer {
         } else {
             glDrawArrays(rmp.getPrimitive().getMode(), 0, vertexCount);
         }
-        Gutil.checkGlError("drawRenderObject 7");
+        //Gutil.checkGlError("drawRenderObject 7 " + this + " " + drawIndexed);
 
-        for (String attribute : rmp.getGlAttributes().keySet()) {
-            int location = shader.getAttributeLocation(attribute);
-            if (location < 0) {
-                continue;
-            }
-            glDisableVertexAttribArray(location);
-        }
-        Gutil.checkGlError("drawRenderObject 10");
+        shader.unbindAttributes();
+        shader.stop();
+        //Gutil.checkGlError("drawRenderObject 10");
+
     }
 
-    private void updateAnimationUniforms(ShaderProgram program, RenderMesh mesh,
+    private void updateAnimationUniforms(AnimatedShader shader, RenderMesh mesh,
                                          RenderMeshPrimitive renderMeshPrimitive) {
 
-        Gutil.checkGlError("updateAnimationUniforms 1");
+        //Gutil.checkGlError("updateAnimationUniforms 1");
         // Skinning
         if (mesh.getSkin() != null) {
             RenderSkin skin = mesh.getSkin();
-            program.setUniform("u_jointMatrix", skin.getJointMatrices());
-            program.setUniform("u_jointNormalMatrix", skin.getJointNormalMatrices());
+            shader.load_u_jointMatrices(skin.getJointMatrices());
+            shader.load_u_jointNormalMatrices(skin.getJointNormalMatrices());
         }
         if (renderMeshPrimitive.getPrimitive().getMorphTargets() != null
                 && renderMeshPrimitive.getPrimitive().getMorphTargets().size() > 0) {
             if (mesh.getWeights() != null && mesh.getWeights().length > 0) {
-                program.setUniform("u_morphWeights", mesh.getWeights());
+                shader.load_u_morphWeights(mesh.getWeights());
             }
         }
     }
@@ -362,13 +325,6 @@ public class Renderer {
         }
     }
 
-    private void applyEnvironmentMap(ShaderProgram shader, RenderEnvironmentMap envData,
-                                     int texSlotOffset) {
-        GlUtil.setCubeMap(shader, envData, texSlotOffset);
-        if (generateMipmaps) {
-            shader.setUniform("u_MipCount", 1); //TODO global setting for mip count
-        }
-    }
 
     public ShaderDebugType getDebugType() {
         return debugType;

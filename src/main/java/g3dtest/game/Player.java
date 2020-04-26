@@ -2,18 +2,22 @@ package g3dtest.game;
 
 import org.mini.g3d.animation.AnimatedModel;
 import org.mini.g3d.core.EngineManager;
+import org.mini.g3d.core.gltf2.loader.data.GLTF;
+import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.terrain.Terrain;
 import org.mini.glfw.Glfw;
 
+import java.util.ArrayList;
+
 import static org.mini.glfw.Glfw.*;
 
-public class Player extends AnimatedModel {
+public class Player extends AnimatedModel implements Cloneable {
 
-    private static final float RUN_SPEED = 20;
+    private static final float RUN_SPEED = 5f;
     private static final float TURN_SPEED = 160;
     private static final float GRAVITY = -50;
-    private static final float JUMP_POWER = 30;
+    private static final float JUMP_POWER = 3;
     private static final float TERRAIN_HEIGHT = 0;
 
 
@@ -23,8 +27,9 @@ public class Player extends AnimatedModel {
 
     private boolean isInAir = false;
 
-    public Player(String path, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
-        loadFile(path);
+
+    public Player(GLTF gltf, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
+        super(gltf);
         super.setPosition(position);
         super.setRotX(rotX);
         super.setRotY(rotY);
@@ -109,20 +114,24 @@ public class Player extends AnimatedModel {
 
 
     public void move(Terrain terrain) {
-        rotateAnimatedPlayer();
-        float distance = currentSpeed * EngineManager.getFrameTimeSeconds();
-        float dx = (float) (distance * Math.sin(Math.toRadians(super.getRotY())));
-        float dz = (float) (distance * Math.cos(Math.toRadians(super.getRotY())));
-        super.increasePosition(dx, 0, dz);
-        upwardsSpeed += GRAVITY * EngineManager.getFrameTimeSeconds();
-        super.increasePosition(0, upwardsSpeed * EngineManager.getFrameTimeSeconds(), 0);
-        float terrainHeight = terrain.getHeightOfTerrain(super.getPosition().x, super.getPosition().z);
-
-        if (super.getPosition().y < terrainHeight) {
-            upwardsSpeed = 0;
-            isInAir = false;
-            super.getPosition().y = terrainHeight;
-            //setAnimation(runAnimation);
+        if (currentTurnSpeed != 0) rotateAnimatedPlayer();
+        if (currentSpeed != 0) {
+            float distance = currentSpeed * EngineManager.getFrameTimeSeconds();
+            float dx = (float) (distance * Math.sin(Math.toRadians(super.getRotY())));
+            float dz = (float) (distance * Math.cos(Math.toRadians(super.getRotY())));
+            super.increasePosition(dx, 0, dz);
+            setClipIndex(1);
+            upwardsSpeed += GRAVITY * EngineManager.getFrameTimeSeconds();
+            super.increasePosition(0, upwardsSpeed * EngineManager.getFrameTimeSeconds(), 0);
+            float terrainHeight = terrain.getHeightOfTerrain(super.getPosition().x, super.getPosition().z);
+            if (super.getPosition().y < terrainHeight) {
+                upwardsSpeed = 0;
+                isInAir = false;
+                super.getPosition().y = terrainHeight;
+                setClipIndex(1);
+            }
+        } else {
+            setClipIndex(0);
         }
     }
 
@@ -130,7 +139,7 @@ public class Player extends AnimatedModel {
         if (!isInAir) {
             this.upwardsSpeed = JUMP_POWER;
             isInAir = true;
-            //setAnimation(null); // Dont want to model to look like its running in the air. Would have applied a jumping animation here.
+            setClipIndex(0); // Dont want to model to look like its running in the air. Would have applied a jumping animation here.
         }
     }
 
@@ -161,4 +170,19 @@ public class Player extends AnimatedModel {
 //		}
 //		
 //	}
+
+
+    public Object clone() {
+        try {
+            Player p = (Player) super.clone();
+            p.position = new Vector3f(position);
+            p.transform = new Matrix4f(transform);
+            p.animations = new ArrayList<>();
+            p.animations.addAll(animations);
+            return p;
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
 }
