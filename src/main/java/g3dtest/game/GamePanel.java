@@ -281,8 +281,9 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         }
     }
 
-    public boolean update(long vg) {
-        super.update(vg);
+    @Override
+    public boolean paint(long vg) {
+        super.paint(vg);
         if (widgets == null) {
             return true;
         }
@@ -475,6 +476,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
     }
 
 
+    @Override
     public boolean dragEvent(float dx, float dy, float x, float y) {
         return widgets.dragEvent(dx, dy, x, y);
     }
@@ -486,6 +488,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
     }
 
 
+    @Override
     public void mouseButtonEvent(int button, boolean pressed, int x, int y) {
         widgets.mouseButtonEvent(button, pressed, x, y);
 
@@ -502,6 +505,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
     }
 
 
+    @Override
     public void reSize() {
         if (masterPass == null) {
             return;
