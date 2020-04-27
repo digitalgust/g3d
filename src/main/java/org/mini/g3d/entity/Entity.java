@@ -19,9 +19,9 @@ public class Entity {
     public Entity(TexturedModel model, Vector3f position, float rotX, float rotY, float rotZ, float scale) {
         this.model = model;
         this.position = position;
-        rotX = rotX;
-        rotY = rotY;
-        rotZ = rotZ;
+        this.rotX = rotX;
+        this.rotY = rotY;
+        this.rotZ = rotZ;
         this.scale = scale;
     }
 
@@ -29,9 +29,9 @@ public class Entity {
         this.model = model;
         this.textureIndex = index;
         this.position = position;
-        rotX = rotX;
-        rotY = rotY;
-        rotZ = rotZ;
+        this.rotX = rotX;
+        this.rotY = rotY;
+        this.rotZ = rotZ;
         this.scale = scale;
     }
 

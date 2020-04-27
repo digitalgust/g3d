@@ -68,39 +68,20 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
         if (node instanceof RenderMeshPrimitive) {
             RenderMeshPrimitive rmp = (RenderMeshPrimitive) node;
             //
+            int c = 0;
+            location_attribute = new int[rmp.getGlAttributes().size()];
             for (Map.Entry<String, GLTFAccessor> entry : rmp.getGlAttributes().entrySet()) {
                 String attributeName = entry.getKey();
                 GLTFAccessor accessor = entry.getValue();
 
 
                 int location = glGetAttribLocation(getProgramId(), Gutil.toUtf8(attributeName));
-
+                location_attribute[c++] = location;
                 if (location < 0) {
                     continue;
                 }
                 GlUtil.enableAttribute(location, accessor);
             }
-
-            int[] sizeB = {0};
-            int[] typeB = {0};
-            int[] strLen = {0};
-            glGetProgramiv(getProgramId(), GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, strLen, 0);
-
-
-            int[] attribCount = {0};
-            byte[] namebuf = new byte[strLen[0]];
-            int[] actuallyLen = {0};
-            glGetProgramiv(getProgramId(), GL_ACTIVE_ATTRIBUTES, attribCount, 0);
-
-            location_attribute = new int[attribCount[0]];
-            for (int i = 0; i < attribCount[0]; ++i) {
-                sizeB[0] = 0;
-                typeB[0] = 0;
-                glGetActiveAttrib(getProgramId(), i, strLen[0], actuallyLen, 0, sizeB, 0, typeB, 0, namebuf);
-                //String info = Gutil.fromUtf8(namebuf);
-                location_attribute[i] = glGetAttribLocation(getProgramId(), namebuf);
-            }
-
 
             RenderMesh mesh = rmp.getMesh();
             if (mesh.getSkin() != null) {

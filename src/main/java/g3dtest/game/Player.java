@@ -128,7 +128,6 @@ public class Player extends AnimatedModel implements Cloneable {
                 upwardsSpeed = 0;
                 isInAir = false;
                 super.getPosition().y = terrainHeight;
-                setClipIndex(1);
             }
         } else {
             setClipIndex(0);

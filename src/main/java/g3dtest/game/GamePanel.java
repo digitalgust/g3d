@@ -198,7 +198,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         gltfData.put(aixi.getSource(), aixi);
         AnimationClip aniClip = GLTFImporter.loadAnimationClip("/res/ani/AiXi_ani.json");
         aixi.setAnimationClip(aniClip);
-        player = new Player(aixi, new Vector3f(50, -4, 50), 0, 90, 0, 1f);
+        player = new Player(aixi, new Vector3f(50, terrains.get(0).getHeightOfTerrain(50, 50), 50), 0, 90, 0, 1f);
         players.add(player);
 
         GLTF gailun = GLTFImporter.loadFile("/res/ani/GaiLun.gltf");

@@ -2,7 +2,6 @@ package org.mini.g3d.core;
 
 import org.mini.g3d.animation.AnimatedModel;
 import org.mini.g3d.animation.AnimatedModelRenderer;
-import org.mini.g3d.animation.AnimatedModelShader;
 import org.mini.g3d.entity.EntityRenderer;
 import org.mini.g3d.skybox.Skybox;
 import org.mini.g3d.skybox.SkyboxRenderer;
@@ -32,7 +31,6 @@ public class MasterRenderer extends AbstractRenderer {
     private TerrainShader terrainShader = new TerrainShader();
 
     // ADDED Variables needed to render animated entity
-    private AnimatedModelShader animatedModelShader = new AnimatedModelShader();
     private AnimatedModelRenderer animatedModelRenderer;
 
     private SkyboxRenderer skyboxRenderer;
@@ -42,7 +40,7 @@ public class MasterRenderer extends AbstractRenderer {
 
         enitiyRenderer = new EntityRenderer(masterShader, camera);
         terrainRenderer = new TerrainRenderer(terrainShader, camera);
-        animatedModelRenderer = new AnimatedModelRenderer(animatedModelShader, camera);
+        animatedModelRenderer = new AnimatedModelRenderer(camera);
         skyboxRenderer = new SkyboxRenderer(camera);
     }
 
