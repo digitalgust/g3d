@@ -167,9 +167,15 @@ public class Terrain {
     }
 
     private float getHeight(int x, int z, TextureData image) {
-        if (x < 0 || x >= image.getHeight() || z < 0 || z >= image.getWidth()) {
-            return 0;
+        if (x < 0) x = 0;
+        if (z < 0) z = 0;
+        if (x >= image.getHeight()) {
+            x = image.getHeight() - 1;
         }
+        if (z >= image.getWidth()) {
+            x = image.getWidth() - 1;
+        }
+
 
         float height = image.getRGB(x, z);
         height += MAX_PIXEL_COLOUR / 2f;

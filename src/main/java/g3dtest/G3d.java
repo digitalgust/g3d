@@ -36,10 +36,9 @@ public class G3d extends GApplication {
         for (String key : uit.getVariable()) {
             uit.setVar(key, GLanguage.getString(key));
         }
-        XContainer xc = new XForm(null);
-        xc.parseXml(uit.parse());
-        xc.build((int) GCallBack.getInstance().getDeviceWidth(), (int) GCallBack.getInstance().getDeviceHeight(), eventHandle);
-        form = (GForm) xc.getGui();
+        XForm xform = (XForm) XContainer.parseXml(uit.parse());
+        xform.build(GCallBack.getInstance().getDeviceWidth(), GCallBack.getInstance().getDeviceHeight(), eventHandle);
+        form = (GForm) xform.getGui();
         eventHandle.setForm(form);
 
         simplePanel = (SimplePanel) form.findByName("GLP_SIMPLE");
@@ -59,61 +58,28 @@ public class G3d extends GApplication {
         return form;
 
 
-//        if (form != null) {
-//            return form;
-//        }
-//        GLanguage.setCurLang(GLanguage.ID_CHN);
-//        form = new GForm();
-//
-//        GCallBack.getInstance().setFps(30f);
-//
-//        int menuH = 80;
-//        GImage img = GImage.createImageFromJar("/res/hello.png");
-//        menu = new GMenu(0, form.getDeviceHeight() - menuH, form.getDeviceWidth(), menuH);
-//        menu.setFixed(true);
-//        GMenuItem item = menu.addItem("Test", img);
-//        item.setActionListener(new GActionListener() {
-//            @Override
-//            public void action(GObject gobj) {
-//                if (game != null) form.remove(game);
-//                if (test == null) test = new SimplePanel(0, 0, form.getDeviceWidth(), form.getDeviceHeight() - menuH);
-//                form.add(test);
-//            }
-//        });
-//        GMenuItem item1 = menu.addItem("GamePanel", img);
-//        item1.setActionListener(new GActionListener() {
-//            @Override
-//            public void action(GObject gobj) {
-//                if (test != null) form.remove(test);
-//                if (game == null) game = new GamePanel(0, 0, form.getDeviceWidth(), form.getDeviceHeight() - menuH);
-//                form.add(game);
-//            }
-//        });
-//
-//        img = GImage.createImageFromJar("/res/appmgr.png");
-//        item = menu.addItem("Exit", img);
-//        item.setActionListener(new GActionListener() {
-//            @Override
-//            public void action(GObject gobj) {
-//                AppManager.getInstance().active();
-//            }
-//        });
-//
-//        form.add(menu);
-//        return form;
     }
 
     void showGamePanel() {
         form.remove(simplePanel);
-        gamePanel.setLocation(0, (int)(form.getH()*.1));
+        gamePanel.setLocation(0, (int) (form.getH() * .1));
         form.add(gamePanel);
         gamePanel.reSize();
     }
 
     void showSimplePanel() {
         form.remove(gamePanel);
-        simplePanel.setLocation(0, (int)(form.getH()*.1));
+        simplePanel.setLocation(0, (int) (form.getH() * .1));
         form.add(simplePanel);
         simplePanel.reSize();
+    }
+
+    void exit() {
+        if (simplePanel != null) {
+
+        }
+        if (gamePanel != null) {
+            gamePanel.exit();
+        }
     }
 }

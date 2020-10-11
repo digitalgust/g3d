@@ -8,6 +8,7 @@ package org.mini.g3d.core.gltf2.loader;
 
 import org.mini.g3d.core.gltf2.loader.data.AnimationClip;
 import org.mini.g3d.core.gltf2.loader.data.GLTF;
+import org.mini.gui.GCallBack;
 import org.mini.gui.GToolkit;
 import org.mini.json.JsonParser;
 
@@ -16,7 +17,7 @@ import java.nio.ByteBuffer;
 
 public class GLTFImporter {
 
-    JsonParser<GLTF> mapper = new JsonParser();
+    JsonParser<GLTF> mapper = new JsonParser(GCallBack.getInstance().getApplication().getClass().getClassLoader());
 
 
     public GLTFImporter() {
@@ -80,7 +81,7 @@ public class GLTFImporter {
 
     static public AnimationClip loadAnimationClip(String path) {
         String json = GToolkit.readFileFromJarAsString(path, "utf-8");
-        AnimationClip aniClip = (AnimationClip) new JsonParser().deserial(json, AnimationClip.class);
+        AnimationClip aniClip = (AnimationClip) new JsonParser(GCallBack.getInstance().getApplication().getClass().getClassLoader()).deserial(json, AnimationClip.class);
         return aniClip;
     }
 }

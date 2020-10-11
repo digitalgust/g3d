@@ -704,22 +704,22 @@ public class AABBf {
     }
 
 
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeFloat(minX);
-        out.writeFloat(minY);
-        out.writeFloat(minZ);
-        out.writeFloat(maxX);
-        out.writeFloat(maxY);
-        out.writeFloat(maxZ);
-    }
-
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        minX = in.readFloat();
-        minY = in.readFloat();
-        minZ = in.readFloat();
-        maxX = in.readFloat();
-        maxY = in.readFloat();
-        maxZ = in.readFloat();
-    }
+//    public void writeExternal(ObjectOutput out) throws IOException {
+//        out.writeFloat(minX);
+//        out.writeFloat(minY);
+//        out.writeFloat(minZ);
+//        out.writeFloat(maxX);
+//        out.writeFloat(maxY);
+//        out.writeFloat(maxZ);
+//    }
+//
+//    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+//        minX = in.readFloat();
+//        minY = in.readFloat();
+//        minZ = in.readFloat();
+//        maxX = in.readFloat();
+//        maxY = in.readFloat();
+//        maxZ = in.readFloat();
+//    }
 
 }

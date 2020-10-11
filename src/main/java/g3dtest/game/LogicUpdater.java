@@ -2,13 +2,14 @@ package g3dtest.game;
 
 public class LogicUpdater extends Thread {
     GamePanel gpanel;
+    boolean exit=false;
 
     public LogicUpdater(GamePanel gamePanel) {
         this.gpanel = gamePanel;
     }
 
     public void run() {
-        while (true) {
+        while (!exit) {
             try {
 
                 if (gpanel.logicCount == gpanel.renderCount) {
@@ -19,7 +20,7 @@ public class LogicUpdater extends Thread {
                     }
                 }
                 synchronized (gpanel) {
-                    gpanel.wait();
+                    gpanel.wait(1000);
                 }
 
             } catch (Exception e) {

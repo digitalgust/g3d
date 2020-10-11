@@ -17,7 +17,7 @@ public class OBJFileLoader {
     public static ModelData loadOBJ(String objFileName) {
         BufferedReader reader = null;
         try {
-            InputStream is = "".getClass().getResourceAsStream(EngineManager.RES_LOC + objFileName + ".obj");
+            InputStream is = OBJFileLoader.class.getResourceAsStream(EngineManager.RES_LOC + objFileName + ".obj");
             reader = new BufferedReader(new InputStreamReader(is));
         } catch (Exception e) {
             System.err.println("File not found in res; don't use any extention");

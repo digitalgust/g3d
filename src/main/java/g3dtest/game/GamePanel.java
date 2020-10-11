@@ -526,4 +526,13 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         viewMover.setLocation(getW() - viewMover.getW(), getH() - viewMover.getH());
         jumpBtn.setLocation(getW() - 100, 100);
     }
+
+    public void exit() {
+        if (updater != null) {
+            updater.exit = true;
+            synchronized (this) {
+                notifyAll();
+            }
+        }
+    }
 }

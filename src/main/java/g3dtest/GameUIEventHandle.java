@@ -25,6 +25,7 @@ public class GameUIEventHandle extends XEventHandler {
         } else if ("MI_GAME".equals(name)) {
             g3d.showGamePanel();
         } else if ("MI_EXIT".equals(name)) {
+            g3d.exit();
             AppManager.getInstance().active();
         }
     }

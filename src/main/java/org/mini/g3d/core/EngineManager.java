@@ -86,7 +86,7 @@ public class EngineManager {
     static public byte[] loadFileFromJar(String fileName) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            InputStream is = Loader.class.getResourceAsStream(fileName);
+            InputStream is = EngineManager.class.getResourceAsStream(fileName);
             byte[] b = new byte[4096];
             if (is != null) {
                 int r;
