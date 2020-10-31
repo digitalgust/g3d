@@ -12,7 +12,6 @@ import org.mini.gui.GCallBack;
 import org.mini.gui.GToolkit;
 import org.mini.json.JsonParser;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 
 public class GLTFImporter {
@@ -66,12 +65,12 @@ public class GLTFImporter {
 
     static public GLTF loadFile(String path) {
 
-        File file = new File(path);
         GLTFImporter gltfImporter = new GLTFImporter();
         //Clear before loading
 
         GLTF gltf;
-        gltf = gltfImporter.load(file.getPath());
+        path = path.replace('\\', '/');
+        gltf = gltfImporter.load(path);
         if (gltf == null) {
             throw new RuntimeException();
         }

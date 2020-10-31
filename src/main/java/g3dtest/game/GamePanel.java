@@ -483,7 +483,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
 
 
     @Override
-    public void keyEvent(int key, int scanCode, int action, int mods) {
+    public void keyEventGlfw(int key, int scanCode, int action, int mods) {
         widgets.keyEvent(key, scanCode, action, mods);
     }
 
