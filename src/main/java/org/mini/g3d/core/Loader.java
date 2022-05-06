@@ -4,7 +4,7 @@ import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.textures.TextureData;
 import org.mini.gui.GCmd;
 import org.mini.gui.GForm;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +51,7 @@ public class Loader {
 
     public int loadTexture(String fileName) {
         byte[] filecont = loadFileFromJar(EngineManager.RES_LOC + fileName + ".png");
-        int textureID = Gutil.gl_image_load(filecont, w_h_d);
+        int textureID = GLUtil.gl_image_load(filecont, w_h_d);
         textures.add(textureID);
         return textureID;
     }
@@ -80,7 +80,7 @@ public class Loader {
 
     private TextureData decodeTextureFile(String fileName) {
         byte[] filecont = EngineManager.loadFileFromJar(fileName);
-        byte[] b = Gutil.image_parse_from_file_content(filecont, w_h_d);
+        byte[] b = GLUtil.image_parse_from_file_content(filecont, w_h_d);
         //System.out.println("load " + fileName + " whn:" + w_h_d[0] + "," + w_h_d[1] + "," + w_h_d[2]);
         return new TextureData(b, w_h_d[0], w_h_d[1], w_h_d[2]);
     }

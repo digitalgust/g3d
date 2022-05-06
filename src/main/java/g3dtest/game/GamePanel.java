@@ -95,31 +95,31 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         EngineManager.createDisplay((int) getW(), (int) getH());
 
         loader = new Loader();
-        //Gutil.checkGlError("Game glinit 0.1");
+        //GLUtil.checkGlError("Game glinit 0.1");
         Random random = new Random();
 
         int smSize = 1024;
         shadowMappingPass = new ShadowMappingPass(smSize, smSize);
         shadowMappingPass.gl_init();
-        //Gutil.checkGlError("Game glinit 0.3");
+        //GLUtil.checkGlError("Game glinit 0.3");
         shadowMappingRenderer = new ShadowMappingRenderer(shadowMappingPass);
 
         masterPass = new MasterPass((int) getW(), (int) getH());
         masterPass.gl_init();
         setGlRendereredImg(masterPass.getFboimg());
-        //Gutil.checkGlError("Game glinit 0.5");
+        //GLUtil.checkGlError("Game glinit 0.5");
 
         camera = new WorldCamera(EngineManager.getWidth(), EngineManager.getHeight(), MasterRenderer.FOV, MasterRenderer.NEAR_PLANE, MasterRenderer.FAR_PLANE);
         masterRenderer = new MasterRenderer(camera);
 
-        //Gutil.checkGlError("Game glinit 0.8");
+        //GLUtil.checkGlError("Game glinit 0.8");
         guiRenderer = new GuiRenderer(loader);
-        //Gutil.checkGlError("Game glinit 1");
+        //GLUtil.checkGlError("Game glinit 1");
         // the sun
         sun = new Light(new Vector3f(-200, 500, 0), new Vector3f(1.0f, 1.0f, 1.0f));
         lights.add(sun);
 
-        //Gutil.checkGlError("Game glinit 2");
+        //GLUtil.checkGlError("Game glinit 2");
         // Terrain
         //textures to paint the terrain with
         TerrainTexture backgroundTexture = new TerrainTexture(loader.loadTexture("textures/terrain/grassy"));
@@ -136,7 +136,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
 //        terrains.add(new Terrain(-1, 0, loader, texturePack, blendMap, "textures/terrain/heightmap"));
         terrain = new Terrain(0, 0, loader, texturePack, blendMap, "textures/terrain/heightmap", shadowMappingRenderer);
         terrains.add(terrain);
-        //Gutil.checkGlError("Game glinit 3");
+        //GLUtil.checkGlError("Game glinit 3");
         // Terrain end
         // Models
         // Environment Models
@@ -176,7 +176,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         ball = new Entity(ballmode, random.nextInt(4), new Vector3f(0, terrains.get(0).getHeightOfTerrain(0, 0), 0), 0f, 0f, 0f, 1.0f);
         entities.add(ball);
 
-        //Gutil.checkGlError("Game glinit 4");
+        //GLUtil.checkGlError("Game glinit 4");
         // Environment Models end
         // GUI
         // Health Bar
@@ -190,7 +190,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
             modelWithLight(entities, lights, lamp, 1, terrains.get(0), tx, ty, tz, "Green", 0);
         }
 
-        //Gutil.checkGlError("Game glinit 5");
+        //GLUtil.checkGlError("Game glinit 5");
         // Models end
         // Animation
 
@@ -213,13 +213,13 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
             players.add(player2);
         }
 
-        //Gutil.checkGlError("Game glinit 8");
+        //GLUtil.checkGlError("Game glinit 8");
         waterShader = new WaterShader();
         waterRenderer = new WaterRenderer(loader, waterShader, camera);
 
         waters.add(new WaterTile(75, 75, -7));
 
-        //Gutil.checkGlError("Game glinit 9");
+        //GLUtil.checkGlError("Game glinit 9");
         skybox = new Skybox(loader);
 
         picker = new MousePicker(camera, terrain);
@@ -227,7 +227,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         particles = new ArrayList();
         createParticleSystems(particles);
         ParticleManager.init(loader, camera);
-        //Gutil.checkGlError("Game glinit 10");
+        //GLUtil.checkGlError("Game glinit 10");
 
         widgets = new WidgetContainer(this, 0, 0, getW(), getH());
         viewMover = new ViewMover("/res/textures/view.png", getW() * .5f, 0, getW() * .5f, getH());
@@ -331,7 +331,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         glPolygonOffset(1.f, 1.f);
         // MainLoop
 
-        //Gutil.checkGlError(this.getClass().getName() + " gl_paint 0");
+        //GLUtil.checkGlError(this.getClass().getName() + " gl_paint 0");
         shadowMappingPass.begin();
         shadowMappingRenderer.processTerrain(terrain);
         for (int i = 0, imax = entities.size(); i < imax; i++) {
@@ -341,7 +341,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         //shadowMappingRenderer.processEntity(player);
         shadowMappingRenderer.render(sun);
         shadowMappingPass.end();
-        //Gutil.checkGlError(this.getClass().getName() + " gl_paint 1");
+        //GLUtil.checkGlError(this.getClass().getName() + " gl_paint 1");
 
 
         masterPass.begin();
@@ -354,7 +354,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
         // render without animation
         guiRenderer.render(guis);
         masterPass.end();
-        //Gutil.checkGlError(this.getClass().getName() + " gl_paint 2");
+        //GLUtil.checkGlError(this.getClass().getName() + " gl_paint 2");
 
 
         //update
@@ -477,7 +477,7 @@ public class GamePanel extends GOpenGLPanel implements BackendSuported {
 
 
     @Override
-    public boolean dragEvent(float dx, float dy, float x, float y) {
+    public boolean dragEvent(int button, float dx, float dy, float x, float y) {
         return widgets.dragEvent(dx, dy, x, y);
     }
 

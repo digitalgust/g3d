@@ -7,7 +7,7 @@ import org.mini.gui.GForm;
 import org.mini.gui.GToolkit;
 
 import static org.mini.gl.GL.*;
-import static org.mini.nanovg.Gutil.toUtf8;
+import static org.mini.glwrap.GLUtil.toUtf8;
 
 public abstract class ShaderProgram {
 

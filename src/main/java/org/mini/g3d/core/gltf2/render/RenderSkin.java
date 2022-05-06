@@ -11,7 +11,8 @@ import org.mini.g3d.core.gltf2.loader.data.GLTFAccessor;
 import org.mini.g3d.core.gltf2.loader.data.GLTFNode;
 import org.mini.g3d.core.gltf2.loader.data.GLTFSkin;
 import org.mini.g3d.core.vector.Matrix4f;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
+import org.mini.gl.GLMath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,8 +110,8 @@ public class RenderSkin implements BackendSuported {
     public void swap() {
         for (int i = 0, imax = getJoints().size(); i < imax; i++) {
             RenderNode renderNode = getJoints().get(i);
-            Gutil.mat4x4_dup(jointMatrices.get(i).mat, jointMatrices_backend.get(i).mat);
-            Gutil.mat4x4_dup(jointNormalMatrices.get(i).mat, jointNormalMatrices_backend.get(i).mat);
+            GLMath.mat4x4_dup(jointMatrices.get(i).mat, jointMatrices_backend.get(i).mat);
+            GLMath.mat4x4_dup(jointNormalMatrices.get(i).mat, jointNormalMatrices_backend.get(i).mat);
         }
     }
 }

@@ -1,6 +1,6 @@
 package org.mini.g3d.core;
 
-import org.mini.gl.warp.GLFrameBuffer;
+import org.mini.glwrap.GLFrameBuffer;
 
 public class MasterPass extends GLFrameBuffer {
     public static int triangles = 0;

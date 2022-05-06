@@ -9,7 +9,8 @@ package org.mini.g3d.core.gltf2.render;
 import org.mini.g3d.core.BackendSuported;
 import org.mini.g3d.core.gltf2.loader.data.GLTFNode;
 import org.mini.g3d.core.vector.*;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
+import org.mini.gl.GLMath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,8 +91,8 @@ public class RenderNode implements BackendSuported {
     }
 
     private void applyMatrix(Matrix4f floatMatrix) {
-        Gutil.mat4x4_dup(localTransform_backend.mat, floatMatrix.mat);
-        Gutil.mat4x4_dup(localTransform.mat, floatMatrix.mat);
+        GLMath.mat4x4_dup(localTransform_backend.mat, floatMatrix.mat);
+        GLMath.mat4x4_dup(localTransform.mat, floatMatrix.mat);
         localTransform.getScale(scale);
         //localTransform.getUnnormalizedRotation(rotation);
         Matrix4f.getRotation(rotation, localTransform);
@@ -178,9 +179,9 @@ public class RenderNode implements BackendSuported {
     @Override
     public void swap() {
 
-        Gutil.mat4x4_dup(worldTransform.mat, worldTransform_backend.mat);
-        Gutil.mat4x4_dup(inverseWorldTransform.mat, inverseWorldTransform_backend.mat);
-        Gutil.mat4x4_dup(localTransform.mat, localTransform_backend.mat);
+        GLMath.mat4x4_dup(worldTransform.mat, worldTransform_backend.mat);
+        GLMath.mat4x4_dup(inverseWorldTransform.mat, inverseWorldTransform_backend.mat);
+        GLMath.mat4x4_dup(localTransform.mat, localTransform_backend.mat);
         for (int i = 0, imax = children.size(); i < imax; i++) {
             RenderNode child = children.get(i);
             child.swap();

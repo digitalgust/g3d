@@ -3,11 +3,12 @@ package g3dtest;
 import g3dtest.game.GamePanel;
 import g3dtest.simple.SimplePanel;
 import org.mini.gui.*;
+import org.mini.apploader.GApplication;
 import org.mini.gui.event.GSizeChangeListener;
 import org.mini.layout.UITemplate;
 import org.mini.layout.XContainer;
 import org.mini.layout.XForm;
-
+import org.mini.layout.XmlExtAssist;
 
 /**
  * @author gust
@@ -28,15 +29,16 @@ public class G3d extends GApplication {
         GLanguage.setCurLang(GLanguage.ID_CHN);
 
         eventHandle = new GameUIEventHandle(this);
+        XmlExtAssist assist = new XmlExtAssist();
 
-        XContainer.registerGUI("g3dtest.simple.XSimplePanel");
-        XContainer.registerGUI("g3dtest.game.XGamePanel");
+        assist.registerGUI("g3dtest.simple.XSimplePanel");
+        assist.registerGUI("g3dtest.game.XGamePanel");
         String xmlStr = GToolkit.readFileFromJarAsString("/res/ui/G3dForm.xml", "utf-8");
         UITemplate uit = new UITemplate(xmlStr);
         for (String key : uit.getVariable()) {
             uit.setVar(key, GLanguage.getString(key));
         }
-        XForm xform = (XForm) XContainer.parseXml(uit.parse());
+        XForm xform = (XForm) XContainer.parseXml(uit.parse(), assist);
         xform.build(GCallBack.getInstance().getDeviceWidth(), GCallBack.getInstance().getDeviceHeight(), eventHandle);
         form = (GForm) xform.getGui();
         eventHandle.setForm(form);

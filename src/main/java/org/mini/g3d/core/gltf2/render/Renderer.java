@@ -95,7 +95,7 @@ public class Renderer {
     }
 
     public void draw(Camera camera, RenderNode rootNode, int targetDrawLimit) {
-        //Gutil.checkGlError("draw 0");
+        //GLUtil.checkGlError("draw 0");
         this.camera = camera;
         //System.out.println("================================");
 
@@ -103,12 +103,12 @@ public class Renderer {
         List<RenderMeshPrimitive> transparentNodes = new ArrayList<>();
         draw(rootNode, transparentNodes);
 
-        //Gutil.checkGlError("draw 1");
+        //GLUtil.checkGlError("draw 1");
         //TODO sort by distance
         for (RenderMeshPrimitive renderMeshPrimitive : transparentNodes) {
             drawRenderObject(renderMeshPrimitive);
         }
-        //Gutil.checkGlError("draw 2");
+        //GLUtil.checkGlError("draw 2");
     }
 
     /**
@@ -143,7 +143,7 @@ public class Renderer {
     private void drawInvisibleNode(RenderNode node) {
         AnimatedShader shader = ShaderCache.getDebugShaderProgram();
         glUseProgram(shader.getProgramId());
-        //Gutil.checkGlError("drawInvisibleNode 1");
+        //GLUtil.checkGlError("drawInvisibleNode 1");
 
         this.projMatrix = camera.getProjectionMatrix();
         this.viewMatrix = camera.getViewMatrix();
@@ -155,7 +155,7 @@ public class Renderer {
         shader.load_u_Exposure(0.1f);
         shader.load_u_Camera(camera.getPosition());
 
-        //Gutil.checkGlError("drawInvisibleNode 2");
+        //GLUtil.checkGlError("drawInvisibleNode 2");
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, debugEle[0]);
         glBindBuffer(GL_ARRAY_BUFFER, debugBuf[0]);
 
@@ -164,16 +164,16 @@ public class Renderer {
         glVertexAttribPointer(positionAttribute, 4, GL_FLOAT, GL_FALSE, 0, null, 0);
         glEnableVertexAttribArray(positionAttribute);
 
-        //Gutil.checkGlError("drawInvisibleNode 3");
+        //GLUtil.checkGlError("drawInvisibleNode 3");
         glDrawElements(GL_TRIANGLES, 32, GL_UNSIGNED_SHORT, null, 0);
 
         glDisableVertexAttribArray(positionAttribute);
 
-        //Gutil.checkGlError("drawInvisibleNode 4");
+        //GLUtil.checkGlError("drawInvisibleNode 4");
     }
 
     private void drawRenderObject(RenderMeshPrimitive rmp) {
-        //Gutil.checkGlError("drawRenderObject 0");
+        //GLUtil.checkGlError("drawRenderObject 0");
         if (rmp.isSkip()) {
             return;
         }
@@ -206,14 +206,14 @@ public class Renderer {
             }
 
             int vertexHash = ShaderCache.selectShader(rmp.getShaderIdentifier(), vertDefines);
-            //Gutil.checkGlError("drawRenderObject 0.1");
+            //GLUtil.checkGlError("drawRenderObject 0.1");
             int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
-            //Gutil.checkGlError("drawRenderObject 0.2");
+            //GLUtil.checkGlError("drawRenderObject 0.2");
 
             shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
             shader.getAllUniformLocations(rmp, visibleLights.size());
             rmp.setShader(shader);
-            //Gutil.checkGlError("drawRenderObject 1");
+            //GLUtil.checkGlError("drawRenderObject 1");
         }
         shader.start();
 
@@ -221,7 +221,7 @@ public class Renderer {
             shader.load_u_Lights(visibleLights);
         }
 
-        //Gutil.checkGlError("drawRenderObject 1.3");
+        //GLUtil.checkGlError("drawRenderObject 1.3");
 
         this.projMatrix = camera.getProjectionMatrix();
         this.viewMatrix = camera.getViewMatrix();
@@ -237,17 +237,17 @@ public class Renderer {
         shader.load_u_Exposure(1.0f);
         shader.load_u_Camera(camera.getPosition());
 
-        //Gutil.checkGlError("drawRenderObject 1.4");
+        //GLUtil.checkGlError("drawRenderObject 1.4");
 
         boolean drawIndexed = rmp.getPrimitive().getIndicesAccessor() != null;
 
         if (drawIndexed) {
             GlUtil.setIndices(rmp.getPrimitive().getIndicesAccessor());
         }
-        //Gutil.checkGlError("drawRenderObject 1.5");
+        //GLUtil.checkGlError("drawRenderObject 1.5");
 
         updateAnimationUniforms(shader, rmp.getMesh(), rmp);
-        //Gutil.checkGlError("drawRenderObject 2");
+        //GLUtil.checkGlError("drawRenderObject 2");
 
         if (material.getGLTFMaterial().isDoubleSided()) {
             glDisable(GL_CULL_FACE);
@@ -262,16 +262,16 @@ public class Renderer {
         } else {
             glDisable(GL_BLEND);
         }
-        //Gutil.checkGlError("drawRenderObject 3");
+        //GLUtil.checkGlError("drawRenderObject 3");
 
         int vertexCount = shader.bindAttributes(rmp.getGlAttributes());
 
-        //Gutil.checkGlError("drawRenderObject 4");
+        //GLUtil.checkGlError("drawRenderObject 4");
 
         shader.load_materialProperties(material);
         shader.load_materialTextures(material);
 
-        //Gutil.checkGlError("drawRenderObject 6");
+        //GLUtil.checkGlError("drawRenderObject 6");
 
         if (drawIndexed) {
             GLTFAccessor indexAccessor = rmp.getPrimitive().getIndicesAccessor();
@@ -279,18 +279,18 @@ public class Renderer {
         } else {
             glDrawArrays(rmp.getPrimitive().getMode(), 0, vertexCount);
         }
-        //Gutil.checkGlError("drawRenderObject 7 " + this + " " + drawIndexed);
+        //GLUtil.checkGlError("drawRenderObject 7 " + this + " " + drawIndexed);
 
         shader.unbindAttributes();
         shader.stop();
-        //Gutil.checkGlError("drawRenderObject 10");
+        //GLUtil.checkGlError("drawRenderObject 10");
 
     }
 
     private void updateAnimationUniforms(AnimatedShader shader, RenderMesh mesh,
                                          RenderMeshPrimitive renderMeshPrimitive) {
 
-        //Gutil.checkGlError("updateAnimationUniforms 1");
+        //GLUtil.checkGlError("updateAnimationUniforms 1");
         // Skinning
         if (mesh.getSkin() != null) {
             RenderSkin skin = mesh.getSkin();

@@ -12,7 +12,7 @@ import org.mini.g3d.core.gltf2.render.*;
 import org.mini.g3d.core.gltf2.render.UniformLight;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -75,7 +75,7 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
                 GLTFAccessor accessor = entry.getValue();
 
 
-                int location = glGetAttribLocation(getProgramId(), Gutil.toUtf8(attributeName));
+                int location = glGetAttribLocation(getProgramId(), GLUtil.toUtf8(attributeName));
                 location_attribute[c++] = location;
                 if (location < 0) {
                     continue;
@@ -117,7 +117,7 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
             location_u_Lights[i] = getUniformLocation("u_Lights[" + i + "]");
         }
 
-        location_a_Position = glGetAttribLocation(getProgramId(), Gutil.toUtf8("a_Position"));
+        location_a_Position = glGetAttribLocation(getProgramId(), GLUtil.toUtf8("a_Position"));
     }
 
 

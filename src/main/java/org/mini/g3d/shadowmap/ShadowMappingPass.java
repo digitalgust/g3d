@@ -1,9 +1,9 @@
 package org.mini.g3d.shadowmap;
 
 import org.mini.gl.GL;
-import org.mini.gl.warp.GLShadowMapping;
+import org.mini.glwrap.GLShadowMapping;
 import org.mini.gui.GImage;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
 
 import static org.mini.gl.GL.*;
 
@@ -32,7 +32,7 @@ public class ShadowMappingPass extends GLShadowMapping {
 //            rgb[i * 3 + 1] = b;
 //            rgb[i * 3 + 2] = b;
 //        }
-//        int texid = Gutil.genTexture2D(rgb, getTexWidth(), getTexHeight(), GL_RGB, GL_RGB);
+//        int texid = GLUtil.genTexture2D(rgb, getTexWidth(), getTexHeight(), GL_RGB, GL_RGB);
 //        GImage shadowMapImg = GImage.createImage(texid, getTexWidth(), getTexHeight());
 //        return shadowMapImg;
 //    }
