@@ -10,7 +10,7 @@ import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector2f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.core.textures.TextureData;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
 
 public class Terrain {
 
@@ -78,7 +78,7 @@ public class Terrain {
 
         int[] w_h_d = {0, 0, 0};
         byte[] filecont = EngineManager.loadFileFromJar(EngineManager.RES_LOC + heightMap + ".png");
-        byte[] b = Gutil.image_parse_from_file_content(filecont, w_h_d);
+        byte[] b = GLUtil.image_parse_from_file_content(filecont, w_h_d);
 
         int VERTEX_COUNT = w_h_d[1];
         mapSize = w_h_d[1] * 2;

@@ -31,7 +31,8 @@
  */
 package org.mini.g3d.core.vector;
 
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
+import org.mini.gl.GLMath;
 
 import java.io.Serializable;
 
@@ -164,7 +165,7 @@ public class Matrix4f extends Matrix implements Serializable {
      * @return m
      */
     public static Matrix4f identity(Matrix4f m) {
-        Gutil.mat4x4_identity(m.mat);
+        GLMath.mat4x4_identity(m.mat);
 //        m.mat[M00] = 1.0f;
 //        m.mat[M01] = 0.0f;
 //        m.mat[M02] = 0.0f;
@@ -245,7 +246,7 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest == null) {
             dest = new Matrix4f();
         }
-        Gutil.mat4x4_dup(dest.mat, src.mat);
+        GLMath.mat4x4_dup(dest.mat, src.mat);
 //        dest.mat[M00] = src.mat[M00];
 //        dest.mat[M01] = src.mat[M01];
 //        dest.mat[M02] = src.mat[M02];
@@ -275,7 +276,7 @@ public class Matrix4f extends Matrix implements Serializable {
      */
     public Matrix load(float[] buf) {
 
-        Gutil.mat4x4_dup(mat, buf);
+        GLMath.mat4x4_dup(mat, buf);
 
 //        mat[M00] = buf[0];
 //        mat[M01] = buf[1];
@@ -305,7 +306,7 @@ public class Matrix4f extends Matrix implements Serializable {
      */
     public Matrix loadTranspose(float[] buf) {
 
-        Gutil.mat4x4_transpose(mat, buf);
+        GLMath.mat4x4_transpose(mat, buf);
 
 //        mat[M00] = buf[0];
 //        mat[M10] = buf[1];
@@ -333,7 +334,7 @@ public class Matrix4f extends Matrix implements Serializable {
      * @param buf The buffer to store this matrix in
      */
     public Matrix store(float[] buf) {
-        Gutil.mat4x4_dup(buf, mat);
+        GLMath.mat4x4_dup(buf, mat);
 //        buf[0] = (mat[M00]);
 //        buf[1] = (mat[M01]);
 //        buf[2] = (mat[M02]);
@@ -360,7 +361,7 @@ public class Matrix4f extends Matrix implements Serializable {
      * @param buf The buffer to store this matrix in
      */
     public Matrix storeTranspose(float[] buf) {
-        Gutil.mat4x4_transpose(buf, mat);
+        GLMath.mat4x4_transpose(buf, mat);
 //        buf[0] = (mat[M00]);
 //        buf[1] = (mat[M10]);
 //        buf[2] = (mat[M20]);
@@ -411,7 +412,7 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest == null) {
             dest = new Matrix4f();
         }
-        Gutil.mat4x4_add(dest.mat, left.mat, right.mat);
+        GLMath.mat4x4_add(dest.mat, left.mat, right.mat);
 
 //        dest.mat[M00] = left.mat[M00] + right.mat[M00];
 //        dest.mat[M01] = left.mat[M01] + right.mat[M01];
@@ -445,7 +446,7 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest == null) {
             dest = new Matrix4f();
         }
-        Gutil.mat4x4_sub(dest.mat, left.mat, right.mat);
+        GLMath.mat4x4_sub(dest.mat, left.mat, right.mat);
 
 //        dest.mat[M00] = left.mat[M00] - right.mat[M00];
 //        dest.mat[M01] = left.mat[M01] - right.mat[M01];
@@ -479,7 +480,7 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest == null) {
             dest = new Matrix4f();
         }
-        Gutil.mat4x4_mul(dest.mat, left.mat, right.mat);
+        GLMath.mat4x4_mul(dest.mat, left.mat, right.mat);
 
 //        dest.mat[M00] = left.mat[M00] * right.mat[M00] + left.mat[M10] * right.mat[M01] + left.mat[M20] * right.mat[M02] + left.mat[M30] * right.mat[M03];
 //        dest.mat[M01] = left.mat[M01] * right.mat[M00] + left.mat[M11] * right.mat[M01] + left.mat[M21] * right.mat[M02] + left.mat[M31] * right.mat[M03];
@@ -570,7 +571,7 @@ public class Matrix4f extends Matrix implements Serializable {
         f4[2] = right.z;
         f4[3] = right.w;
         float[] r = arr_f16B.get();
-        Gutil.mat4x4_mul_vec4(r, left.mat, f4);
+        GLMath.mat4x4_mul_vec4(r, left.mat, f4);
         dest.x = r[0];
         dest.y = r[1];
         dest.z = r[2];
@@ -635,7 +636,7 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest == null) {
             dest = new Matrix4f();
         }
-        Gutil.mat4x4_scale_aniso(dest.mat, src.mat, sx, sy, sz);
+        GLMath.mat4x4_scale_aniso(dest.mat, src.mat, sx, sy, sz);
 //        dest.mat[M00] = src.mat[M00] * vec.left;
 //        dest.mat[M01] = src.mat[M01] * vec.left;
 //        dest.mat[M02] = src.mat[M02] * vec.left;
@@ -699,10 +700,10 @@ public class Matrix4f extends Matrix implements Serializable {
         }
         if (src == dest) {
             float[] tmp = arr_f16A.get();
-            Gutil.mat4x4_rotate(tmp, src.mat, ax, ay, az, angle);
-            Gutil.mat4x4_dup(dest.mat, tmp);
+            GLMath.mat4x4_rotate(tmp, src.mat, ax, ay, az, angle);
+            GLMath.mat4x4_dup(dest.mat, tmp);
         } else {
-            Gutil.mat4x4_rotate(dest.mat, src.mat, ax, ay, az, angle);
+            GLMath.mat4x4_rotate(dest.mat, src.mat, ax, ay, az, angle);
         }
 //        float c = (float) Math.cos(angle);
 //        float s = (float) Math.sin(angle);
@@ -775,8 +776,8 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest == null) {
             dest = new Matrix4f();
         }
-        Gutil.mat4x4_dup(dest.mat, src.mat);
-        Gutil.mat4x4_translate_in_place(dest.mat, vec.x, vec.y, vec.z);
+        GLMath.mat4x4_dup(dest.mat, src.mat);
+        GLMath.mat4x4_translate_in_place(dest.mat, vec.x, vec.y, vec.z);
 //        dest.mat[M30] += src.mat[M00] * vec.left + src.mat[M10] * vec.top + src.mat[M20] * vec.z;
 //        dest.mat[M31] += src.mat[M01] * vec.left + src.mat[M11] * vec.top + src.mat[M21] * vec.z;
 //        dest.mat[M32] += src.mat[M02] * vec.left + src.mat[M12] * vec.top + src.mat[M22] * vec.z;
@@ -811,8 +812,8 @@ public class Matrix4f extends Matrix implements Serializable {
         if (dest == null) {
             dest = new Matrix4f();
         }
-        Gutil.mat4x4_dup(dest.mat, src.mat);
-        Gutil.mat4x4_translate_in_place(dest.mat, vec.x, vec.y, 0.f);
+        GLMath.mat4x4_dup(dest.mat, src.mat);
+        GLMath.mat4x4_translate_in_place(dest.mat, vec.x, vec.y, 0.f);
 
 //        dest.mat[M30] += src.mat[M00] * vec.left + src.mat[M10] * vec.top;
 //        dest.mat[M31] += src.mat[M01] * vec.left + src.mat[M11] * vec.top;
@@ -846,11 +847,11 @@ public class Matrix4f extends Matrix implements Serializable {
             dest = new Matrix4f();
         }
         if (dest != src) {
-            Gutil.mat4x4_transpose(dest.mat, src.mat);
+            GLMath.mat4x4_transpose(dest.mat, src.mat);
         } else {
             float[] tmp = arr_f16A.get();
-            Gutil.mat4x4_transpose(tmp, src.mat);
-            Gutil.mat4x4_dup(dest.mat, tmp);
+            GLMath.mat4x4_transpose(tmp, src.mat);
+            GLMath.mat4x4_dup(dest.mat, tmp);
         }
 
 //            dest.mat[M00] = src.mat[M00];
@@ -945,10 +946,10 @@ public class Matrix4f extends Matrix implements Serializable {
             }
             if (src == dest) {
                 float[] tmp = arr_f16A.get();
-                Gutil.mat4x4_invert(tmp, src.mat);
-                Gutil.mat4x4_dup(dest.mat, tmp);
+                GLMath.mat4x4_invert(tmp, src.mat);
+                GLMath.mat4x4_dup(dest.mat, tmp);
             } else {
-                Gutil.mat4x4_invert(dest.mat, src.mat);
+                GLMath.mat4x4_invert(dest.mat, src.mat);
             }
 
 //            float determinant_inv = 1f / determinant;
@@ -1073,7 +1074,7 @@ public class Matrix4f extends Matrix implements Serializable {
      * @see #perspective(float, float, float, float)
      */
     public Matrix4f perspective(float fovy, float aspect, float zNear, float zFar) {
-        Gutil.mat4x4_perspective(this.mat, fovy, aspect, zNear, zFar);
+        GLMath.mat4x4_perspective(this.mat, fovy, aspect, zNear, zFar);
         return this;
     }
 
@@ -1105,7 +1106,7 @@ public class Matrix4f extends Matrix implements Serializable {
     public Matrix4f lookAt(float eyeX, float eyeY, float eyeZ,
                            float centerX, float centerY, float centerZ,
                            float upX, float upY, float upZ) {
-        Gutil.mat4x4_look_at(
+        GLMath.mat4x4_look_at(
                 mat
                 , new float[]{eyeX, eyeY, eyeZ}
                 , new float[]{centerX, centerY, centerZ}
@@ -1116,7 +1117,7 @@ public class Matrix4f extends Matrix implements Serializable {
     public Matrix4f lookAt(Vector3f eye,
                            Vector3f center,
                            Vector3f up) {
-        Gutil.mat4x4_look_at(
+        GLMath.mat4x4_look_at(
                 mat
                 , new float[]{eye.x, eye.y, eye.z}
                 , new float[]{center.x, center.y, center.z}
@@ -1169,7 +1170,7 @@ public class Matrix4f extends Matrix implements Serializable {
         float[] c = arr_f16C.get();
         s.store(c);
 
-        Gutil.mat4x4_trans_rotate_scale(dest.mat, a, b, c);
+        GLMath.mat4x4_trans_rotate_scale(dest.mat, a, b, c);
 
 //        float dqx = q.x + q.x;
 //        float dqy = q.y + q.y;
@@ -1205,7 +1206,7 @@ public class Matrix4f extends Matrix implements Serializable {
 
     public static Quaternionf getRotation(Quaternionf q, Matrix4f mat) {
         float[] a = arr_f16A.get();
-        Gutil.vec4_from_mat4x4(a, mat.mat);
+        GLMath.vec4_from_mat4x4(a, mat.mat);
         q.load(a);
         return q;
     }

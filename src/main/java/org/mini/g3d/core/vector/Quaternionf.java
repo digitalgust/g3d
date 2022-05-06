@@ -31,7 +31,8 @@
  */
 package org.mini.g3d.core.vector;
 
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
+import org.mini.gl.GLMath;
 
 import java.io.Serializable;
 
@@ -196,7 +197,7 @@ public class Quaternionf extends Vector3f implements Serializable, ReadableVecto
         float[] a = arr_f4B.get();
         float[] b = arr_f4C.get();
         src.store(a);
-        Gutil.vec_normal(b, a);
+        GLMath.vec_normal(b, a);
         dest.load(b);
         return dest;
     }
@@ -692,7 +693,7 @@ public class Quaternionf extends Vector3f implements Serializable, ReadableVecto
         float[] b = arr_f4C.get();
         store(a);
         target.store(b);
-        Gutil.vec4_slerp(r, a, b, alpha);
+        GLMath.vec4_slerp(r, a, b, alpha);
         dest.load(r);
 
 //        float cosom = x * target.x + y * target.y + z * target.z + w * target.w;

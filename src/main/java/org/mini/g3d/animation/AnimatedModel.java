@@ -12,7 +12,8 @@ import org.mini.g3d.core.textures.ModelTexture;
 import org.mini.g3d.core.toolbox.G3dMath;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.entity.Entity;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
+import org.mini.gl.GLMath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,7 +161,7 @@ public class AnimatedModel extends Entity implements Cloneable, BackendSuported 
 
     @Override
     public void swap() {
-        Gutil.mat4x4_dup(transform.mat, transform_backend.mat);
+        GLMath.mat4x4_dup(transform.mat, transform_backend.mat);
         rootRenderNode.swap();
     }
 }

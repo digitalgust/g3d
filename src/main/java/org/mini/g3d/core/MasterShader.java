@@ -100,7 +100,7 @@ public class MasterShader extends ShaderProgram {
     public void loadViewMatrix(Camera camera) {
 //        Matrix4f viewMatrix = new Matrix4f();
 //        float[] eye = new float[]{GamePanel.sun.getPosition().left, GamePanel.sun.getPosition().top, GamePanel.sun.getPosition().z};
-//        Gutil.mat4x4_look_at(viewMatrix.mat, eye, new float[]{-GamePanel.sun.getPosition().left, -GamePanel.sun.getPosition().top, -GamePanel.sun.getPosition().z}, new float[]{0.0f, 1.0f, 0.0f});
+//        GLMath.mat4x4_look_at(viewMatrix.mat, eye, new float[]{-GamePanel.sun.getPosition().left, -GamePanel.sun.getPosition().top, -GamePanel.sun.getPosition().z}, new float[]{0.0f, 1.0f, 0.0f});
         super.loadMatrix(location_viewMatrix, camera.getViewMatrix());
     }
 

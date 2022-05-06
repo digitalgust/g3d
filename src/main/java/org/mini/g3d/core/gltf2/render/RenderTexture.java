@@ -11,7 +11,7 @@ import org.mini.g3d.core.gltf2.GlUtil;
 import org.mini.g3d.core.gltf2.loader.data.GLTF;
 import org.mini.g3d.core.gltf2.loader.data.GLTFSampler;
 import org.mini.g3d.core.gltf2.loader.data.GLTFTextureInfo;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -144,7 +144,7 @@ public class RenderTexture {
         if (data == null) {
             ByteBuffer dataBuffer = getData.get();
             int[] whd = new int[3];
-            byte[] b = Gutil.image_parse_from_file_content(dataBuffer.array(), dataBuffer.arrayOffset(), dataBuffer.capacity(), whd);
+            byte[] b = GLUtil.image_parse_from_file_content(dataBuffer.array(), dataBuffer.arrayOffset(), dataBuffer.capacity(), whd);
 
             //TODO not sure how different this buffer is from dataBuffer
             data = ByteBuffer.wrap(b);

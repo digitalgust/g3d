@@ -10,7 +10,7 @@ package org.mini.g3d.core.gltf2;
 import org.mini.g3d.core.gltf2.loader.data.GLTFAccessor;
 import org.mini.g3d.core.gltf2.render.RenderTexture;
 import org.mini.gl.GL;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class GlUtil {
 //    System.out.println(shaderSource);
         int shader = glCreateShader(isVert ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
 //    glShaderSource(shader, shaderSource);
-        glShaderSource(shader, 1, new byte[][]{Gutil.toUtf8(shaderSource)}, null, 0);
+        glShaderSource(shader, 1, new byte[][]{GLUtil.toUtf8(shaderSource)}, null, 0);
         glCompileShader(shader);
 
         int[] return_val = {0};

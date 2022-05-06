@@ -1,6 +1,6 @@
-name=G3D
+name=G3D-Game
 app=g3dtest.G3d
 icon=/res/logo.png
-desc=  G3d test.\n  you can upgrade it.
+desc=This is a Game\n  It can be run in web, mobile, or desktop using miniJVM.\n  Just for fun;
 version=1.0.0
 upgradeurl=http://192.168.0.10/g3d.jar

@@ -16,10 +16,11 @@ import java.nio.ByteBuffer;
 
 public class GLTFImporter {
 
-    JsonParser<GLTF> mapper = new JsonParser(GCallBack.getInstance().getApplication().getClass().getClassLoader());
+    JsonParser<GLTF> mapper = new JsonParser<>();
 
 
     public GLTFImporter() {
+        mapper.setClassLoader(GCallBack.getInstance().getApplication().getClass().getClassLoader());
         mapper.registerModule(GLTFJsonModule.getModule());
     }
 
@@ -80,7 +81,9 @@ public class GLTFImporter {
 
     static public AnimationClip loadAnimationClip(String path) {
         String json = GToolkit.readFileFromJarAsString(path, "utf-8");
-        AnimationClip aniClip = (AnimationClip) new JsonParser(GCallBack.getInstance().getApplication().getClass().getClassLoader()).deserial(json, AnimationClip.class);
+        JsonParser parser = new JsonParser();
+        parser.setClassLoader(GCallBack.getInstance().getApplication().getClass().getClassLoader());
+        AnimationClip aniClip = (AnimationClip) parser.deserial(json, AnimationClip.class);
         return aniClip;
     }
 }

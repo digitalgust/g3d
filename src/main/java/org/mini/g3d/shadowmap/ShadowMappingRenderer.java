@@ -10,7 +10,8 @@ import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.entity.Entity;
 import org.mini.g3d.core.textures.ModelTexture;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
+import org.mini.gl.GLMath;
 
 import java.util.List;
 import java.util.Map;
@@ -50,13 +51,13 @@ public class ShadowMappingRenderer extends AbstractRenderer {
         Vector3f pos = light.getPosition();
         if (pos.x != eye[0] || pos.y != eye[1] || pos.z != eye[2]) {
             // MVP from light poisition
-            Gutil.mat4x4_ortho(depthProjection.mat, -20.0f, 1080.0f, -20.0f, 1080.0f, 400f, 1000.0f);
+            GLMath.mat4x4_ortho(depthProjection.mat, -20.0f, 1080.0f, -20.0f, 1080.0f, 400f, 1000.0f);
             light.getPosition().store(eye);
-            Gutil.mat4x4_look_at(depthView.mat, eye, center, up);
-            Gutil.mat4x4_identity(depthModel.mat);
-            Gutil.mat4x4_mul(depthPV.mat, depthProjection.mat, depthView.mat);
-            Gutil.mat4x4_mul(depthMVP.mat, depthPV.mat, depthModel.mat);
-            Gutil.mat4x4_mul(depthBiasMVP.mat, biasMatrix, depthMVP.mat);
+            GLMath.mat4x4_look_at(depthView.mat, eye, center, up);
+            GLMath.mat4x4_identity(depthModel.mat);
+            GLMath.mat4x4_mul(depthPV.mat, depthProjection.mat, depthView.mat);
+            GLMath.mat4x4_mul(depthMVP.mat, depthPV.mat, depthModel.mat);
+            GLMath.mat4x4_mul(depthBiasMVP.mat, biasMatrix, depthMVP.mat);
         }
     }
 
@@ -76,7 +77,7 @@ public class ShadowMappingRenderer extends AbstractRenderer {
 //            glEnableVertexAttribArray(2);
 //
 //            Matrix4f transformationMatrix = G3dMath.createTransformationMatrix(new Vector3f(t.getX(), 0, t.getZ()), 0, 0, 0, 1);
-//            Gutil.mat4x4_mul(transformationMatrix.mat, depthPV.mat, transformationMatrix.mat);
+//            GLMath.mat4x4_mul(transformationMatrix.mat, depthPV.mat, transformationMatrix.mat);
 //            shadowMappingShader.loadDepthMVP(transformationMatrix);
 //            glDrawElements(GL_TRIANGLES, t.getModel().getVertexCount(), GL_UNSIGNED_INT, null, 0);//gust
 //            triangles += t.getModel().getVertexCount();
@@ -107,7 +108,7 @@ public class ShadowMappingRenderer extends AbstractRenderer {
                 Entity entity = batch.get(i);
 
                 G3dMath.createTransformationMatrix(entity.getPosition(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale(), transformationMatrix);
-                Gutil.mat4x4_mul(transformationMatrix.mat, depthPV.mat, transformationMatrix.mat);
+                GLMath.mat4x4_mul(transformationMatrix.mat, depthPV.mat, transformationMatrix.mat);
                 shadowMappingShader.loadDepthMVP(transformationMatrix);
                 glDrawElements(GL_TRIANGLES, rawModel.getVertexCount(), GL_UNSIGNED_INT, null, 0);
                 triangles += rawModel.getVertexCount();

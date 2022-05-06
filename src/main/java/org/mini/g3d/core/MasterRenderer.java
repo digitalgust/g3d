@@ -64,7 +64,7 @@ public class MasterRenderer extends AbstractRenderer {
         masterShader.loadViewMatrix(camera);
         enitiyRenderer.render(entities);
         masterShader.stop();
-        //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 1");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + "render 1");
 
         for (int i = 0, imax = animatedPlayers.size(); i < imax; i++) {
             AnimatedModel p = animatedPlayers.get(i);
@@ -74,7 +74,7 @@ public class MasterRenderer extends AbstractRenderer {
 //        animatedModelShader.loadViewMatrix(camera);
             animatedModelRenderer.render(camera, p);
 //        animatedModelShader.stop();
-            //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 2");
+            //GLUtil.checkGlError(this.getClass().getCanonicalName() + "render 2");
         }
 
         terrainShader.start();
@@ -83,7 +83,7 @@ public class MasterRenderer extends AbstractRenderer {
         terrainShader.loadViewMatrix(camera);
         terrainRenderer.render(terrains);
         terrainShader.stop();
-        //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 3");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + "render 3");
 
         skyboxRenderer.render(camera, box, FOG_RED, FOG_GREEN, FOG_BLUE);
 

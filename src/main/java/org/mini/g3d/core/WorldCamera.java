@@ -3,7 +3,8 @@ package org.mini.g3d.core;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.entity.Entity;
-import org.mini.nanovg.Gutil;
+import org.mini.glwrap.GLUtil;
+import org.mini.gl.GLMath;
 
 public class WorldCamera implements Camera {
 
@@ -163,14 +164,14 @@ public class WorldCamera implements Camera {
 //        projectionMatrix.mat[Matrix4f.M33] = 0;
 
         float aspectRatio = viewW / viewH;
-        Gutil.mat4x4_perspective(projectionMatrix.mat, fov, aspectRatio, near, far);
-//        Gutil.mat4x4_ortho(projectionMatrix.mat, -1500.0f, 1500.0f, -1500.0f, 1500.0f, 0.1f, 3000.0f);
+        GLMath.mat4x4_perspective(projectionMatrix.mat, fov, aspectRatio, near, far);
+//        GLMath.mat4x4_ortho(projectionMatrix.mat, -1500.0f, 1500.0f, -1500.0f, 1500.0f, 0.1f, 3000.0f);
     }
 
 
     public void createSkyboxProjectionMatrix() {
         float aspectRatio = viewW / viewH;
-        Gutil.mat4x4_perspective(skyBoxProjectionMatrix.mat, fov, aspectRatio, near, far * 8);
+        GLMath.mat4x4_perspective(skyBoxProjectionMatrix.mat, fov, aspectRatio, near, far * 8);
     }
 
     public Matrix4f getProjectionMatrix() {
