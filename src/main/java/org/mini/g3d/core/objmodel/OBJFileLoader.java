@@ -1,11 +1,10 @@
 package org.mini.g3d.core.objmodel;
 
-import org.mini.g3d.core.EngineManager;
+import org.mini.g3d.core.DisplayManager;
 import org.mini.g3d.core.vector.Vector2f;
 import org.mini.g3d.core.vector.Vector3f;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -17,10 +16,10 @@ public class OBJFileLoader {
     public static ModelData loadOBJ(String objFileName) {
         BufferedReader reader = null;
         try {
-            InputStream is = OBJFileLoader.class.getResourceAsStream(EngineManager.RES_LOC + objFileName + ".obj");
+            InputStream is = OBJFileLoader.class.getResourceAsStream(objFileName);
             reader = new BufferedReader(new InputStreamReader(is));
         } catch (Exception e) {
-            System.err.println("File not found in res; don't use any extention");
+            System.err.println("[G3D][ERROR]File not found in res; don't use any extention");
         }
         String line;
         List<Vertex> vertices = new ArrayList<>();
@@ -74,8 +73,9 @@ public class OBJFileLoader {
                 line = reader.readLine();
             }
             reader.close();
-        } catch (IOException e) {
-            System.err.println("Error reading the file");
+        } catch (Exception e) {
+            System.err.println("[G3D][ERROR]Error reading the file :" + objFileName);
+            e.printStackTrace();
         }
         removeUnusedVertices(vertices);
         float[] verticesArray = new float[vertices.size() * 3];
@@ -89,7 +89,10 @@ public class OBJFileLoader {
         return data;
     }
 
-    private static void processVertex(String[] vertex, List<Vertex> vertices, List<Integer> indices) {
+    private static void processVertex(String[] vertex, List<Vertex> vertices, List<Integer> indices) throws RuntimeException {
+        if (vertex.length < 3) {
+            throw new RuntimeException(".obj file \"f 1/2/3 1/2/3 1/2/3\" need vertex/uv/normal format");
+        }
         int index = Integer.parseInt(vertex[0]) - 1;
         Vertex currentVertex = vertices.get(index);
         int textureIndex = Integer.parseInt(vertex[1]) - 1;
@@ -166,10 +169,10 @@ public class OBJFileLoader {
         }
     }
 
-    static public void main(String[] args) {
-        String s = "v  0.1603 0.0000 0.0926";
-        String[] a = s.split("[ ]{1,}");
-        System.out.println(a.length);
-
-    }
+//    static public void main(String[] args) {
+//        String s = "v  0.1603 0.0000 0.0926";
+//        String[] a = s.split("[ ]{1,}");
+//        System.out.println(a.length);
+//
+//    }
 }

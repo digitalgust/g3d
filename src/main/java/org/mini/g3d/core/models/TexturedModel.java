@@ -1,13 +1,13 @@
 package org.mini.g3d.core.models;
 
-import org.mini.g3d.core.textures.ModelTexture;
+import org.mini.g3d.core.textures.Texture;
 
 public class TexturedModel {
 	
 	private RawModel rawModel;
-	private ModelTexture texture;
+	private Texture texture;
 	
-	public TexturedModel(RawModel model, ModelTexture texture) {
+	public TexturedModel(RawModel model, Texture texture) {
 		this.rawModel = model;
 		this.texture = texture;
 	}
@@ -16,7 +16,7 @@ public class TexturedModel {
 		return rawModel;
 	}
 
-	public ModelTexture getTexture() {
+	public Texture getTexture() {
 		return texture;
 	}
 	

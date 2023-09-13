@@ -1,121 +1,153 @@
 package org.mini.g3d.core;
 
-import org.mini.g3d.animation.AnimatedModel;
 import org.mini.g3d.animation.AnimatedModelRenderer;
 import org.mini.g3d.entity.EntityRenderer;
-import org.mini.g3d.skybox.Skybox;
+import org.mini.g3d.gui.GuiRenderer;
+import org.mini.g3d.particles.ParticleMaster;
+import org.mini.g3d.particles.ParticleRenderer;
+import org.mini.g3d.shadowmap.ShadowMappingFrameBuffer;
+import org.mini.g3d.shadowmap.ShadowMappingRenderer;
 import org.mini.g3d.skybox.SkyboxRenderer;
 import org.mini.g3d.terrain.TerrainRenderer;
-import org.mini.g3d.terrain.TerrainShader;
-
-import java.util.List;
+import org.mini.g3d.water.WaterFrameBuffers;
+import org.mini.g3d.water.WaterRenderer;
+import org.mini.glwrap.GLUtil;
 
 import static org.mini.gl.GL.*;
 
 public class MasterRenderer extends AbstractRenderer {
 
-    public static final float FOV = 70;
-    public static final float NEAR_PLANE = 0.1f;
-    public static final float FAR_PLANE = 500;
-
-    float fogTime;
-    private static float FOG_RED = 0.f;
-    private static float FOG_GREEN = 0.f;
-    private static float FOG_BLUE = 0.f;
+    MainFrameBuffer mainFbo;
+    ShadowMappingFrameBuffer shadowMappingFbo;
+    WaterFrameBuffers waterFbos;
 
 
-    private MasterShader masterShader = new MasterShader();
+    private ShadowMappingRenderer shadowMappingRenderer;
     private EntityRenderer enitiyRenderer;
-
     private TerrainRenderer terrainRenderer;
-    private TerrainShader terrainShader = new TerrainShader();
-
-    // ADDED Variables needed to render animated entity
     private AnimatedModelRenderer animatedModelRenderer;
-
     private SkyboxRenderer skyboxRenderer;
+    private WaterRenderer waterRenderer;
+    private GuiRenderer guiRenderer;
+    private ParticleRenderer particleRenderer;
 
-    public MasterRenderer(WorldCamera camera) {
+    public MasterRenderer(MainFrameBuffer mainFbo, ShadowMappingFrameBuffer shadowMappingFbo, WaterFrameBuffers waterFrameBuffers) {
+        this.mainFbo = mainFbo;
+        this.shadowMappingFbo = shadowMappingFbo;
+        this.waterFbos = waterFrameBuffers;
+
+
+        shadowMappingRenderer = new ShadowMappingRenderer(shadowMappingFbo);
+        enitiyRenderer = new EntityRenderer();
+        terrainRenderer = new TerrainRenderer(shadowMappingFbo);
+        animatedModelRenderer = new AnimatedModelRenderer();
+        skyboxRenderer = new SkyboxRenderer();
+        waterRenderer = new WaterRenderer(waterFbos);
+        guiRenderer = new GuiRenderer();
+        particleRenderer = new ParticleRenderer();
+    }
+
+
+    public void render(Scene scene) {
+        renderShadowPass(scene);
+
+        glEnable(GL_CLIP_DISTANCE0);
+        renderWaterRefractionPass(scene);
+        renderWaterReflectionPass(scene);
+        glDisable(GL_CLIP_DISTANCE0);
+
+        renderMainPass(scene);
+    }
+
+    private void renderMainPass(Scene scene) {
+        mainFbo.begin();
+        prepare();
         enableCulling();
 
-        enitiyRenderer = new EntityRenderer(masterShader, camera);
-        terrainRenderer = new TerrainRenderer(terrainShader, camera);
-        animatedModelRenderer = new AnimatedModelRenderer(camera);
-        skyboxRenderer = new SkyboxRenderer(camera);
+        enitiyRenderer.render(scene);
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass enitiyRenderer");
+
+        animatedModelRenderer.render(scene.getCamera(), scene.getAnimatedModelsIterator());
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass animatedModelRenderer");
+
+        terrainRenderer.render(scene);
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass terrainRenderer");
+
+        skyboxRenderer.render(scene);
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass skyboxRenderer");
+
+        waterRenderer.render(scene.getWaters(), scene.getCamera(), scene.getSun().getDirection());
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass waterRenderer");
+
+        particleRenderer.render(ParticleMaster.getParticles(), scene);
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass particleRenderer");
+
+        guiRenderer.render(scene.getGuis());
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass guiRenderer");
+
+        mainFbo.end();
+    }
+
+    private void renderShadowPass(Scene scene) {
+        if (scene.getTerrain() == null) return;
+
+        scene.setShadowRender(true);
+        shadowMappingFbo.begin();
+
+        shadowMappingRenderer.render(scene);
+        shadowMappingFbo.end();
+        scene.setShadowRender(false);
+        //GLUtil.checkGlError(this.getClass().getName() + " gl_paint 1");
+
     }
 
 
-    public static void enableCulling() {
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-    }
+    /**
+     * 水底折射
+     *
+     * @param scene
+     */
+    private void renderWaterRefractionPass(Scene scene) {
+        if (scene.getWaters().isEmpty()) return;
 
-    public static void disableCulling() {
-        glDisable(GL_CULL_FACE);
-    }
-
-    public void render(Camera camera, List<Light> lights, List<AnimatedModel> animatedPlayers, Skybox box) {
-
-        updateFogColor();
+        waterFbos.bindRefractionFrameBuffer();
         prepare();
-        masterShader.start();
-        masterShader.loadSkyColour(FOG_RED, FOG_GREEN, FOG_BLUE);
-        masterShader.loadLights(lights);
-        masterShader.loadViewMatrix(camera);
-        enitiyRenderer.render(entities);
-        masterShader.stop();
-        //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 1");
+        terrainRenderer.render(scene);
+        //animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModels());//人走到水底下也可以看见,影响性能
+        waterFbos.unbindCurrentFrameBuffer();
+    }
 
-        for (int i = 0, imax = animatedPlayers.size(); i < imax; i++) {
-            AnimatedModel p = animatedPlayers.get(i);
-//        animatedModelShader.start();
-//        animatedModelShader.loadSkyColor(FOG_RED, FOG_GREEN, FOG_BLUE);
-//        animatedModelShader.loadLights(lights);
-//        animatedModelShader.loadViewMatrix(camera);
-            animatedModelRenderer.render(camera, p);
-//        animatedModelShader.stop();
-            //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 2");
-        }
 
-        terrainShader.start();
-        terrainShader.loadSkyColour(FOG_RED, FOG_GREEN, FOG_BLUE);
-        terrainShader.loadLights(lights);
-        terrainShader.loadViewMatrix(camera);
-        terrainRenderer.render(terrains);
-        terrainShader.stop();
-        //Gutil.checkGlError(this.getClass().getCanonicalName() + "render 3");
+    /**
+     * 水中倒影
+     *
+     * @param scene
+     */
+    private void renderWaterReflectionPass(Scene scene) {
+        if (scene.getWaters().isEmpty()) return;
 
-        skyboxRenderer.render(camera, box, FOG_RED, FOG_GREEN, FOG_BLUE);
-
-        clear();
+        waterFbos.bindReflectionFrameBuffer();
+        prepare();
+        scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
+        enitiyRenderer.render(scene);
+        //terrainRenderer.render(scene);
+        skyboxRenderer.render(scene);
+        //animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModels()); //人会产生倒影,影响性能
+        waterFbos.unbindCurrentFrameBuffer();
+        scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
     }
 
 
     public void cleanUp() {
-        masterShader.cleanUp();
-        terrainShader.cleanUp();
     }
 
-    public void prepare() {
+    void prepare() {
         glEnable(GL_DEPTH_TEST);
+        glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(FOG_RED, FOG_GREEN, FOG_BLUE, 1);
     }
 
-
-    private void updateFogColor() {
-        float sec = EngineManager.getFrameTimeSeconds();
-        fogTime += sec * 1000;
-        fogTime %= 24000;
-        if (fogTime >= 0 && fogTime < 5000) {
-            FOG_RED = FOG_GREEN = FOG_BLUE = 0.1f;
-        } else if (fogTime >= 5000 && fogTime < 8000) {
-            FOG_RED = FOG_GREEN = FOG_BLUE = 0.1f + (fogTime - 5000) / 3000 * 0.4f;
-        } else if (fogTime >= 8000 && fogTime < 21000) {
-            FOG_RED = FOG_GREEN = FOG_BLUE = 0.5f;
-        } else {
-            FOG_RED = FOG_GREEN = FOG_BLUE = 0.5f - (fogTime - 21000) / 3000 * 0.4f;
-        }
+    public void resetShadowMap() {
+        shadowMappingRenderer.reset();
     }
-
 }

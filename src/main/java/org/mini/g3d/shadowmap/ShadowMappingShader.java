@@ -6,8 +6,8 @@ import org.mini.g3d.core.vector.Matrix4f;
 public class ShadowMappingShader extends ShaderProgram {
 
 
-    private static final String VERTEX_FILE = "/res/shader/shadowMappingVertex.shader";
-    private static final String FRAGMENT_FILE = "/res/shader/shadowMappingFragment.shader";
+    private static final String VERTEX_FILE = "/org/mini/g3d/res/shader/shadowMappingVertex.glsl";
+    private static final String FRAGMENT_FILE = "/org/mini/g3d/res/shader/shadowMappingFragment.glsl";
 
     private int location_depthMVP;
 

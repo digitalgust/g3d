@@ -5,8 +5,9 @@
  */
 package org.mini.g3d.skybox;
 
-import org.mini.g3d.core.Loader;
 import org.mini.g3d.core.models.RawModel;
+import org.mini.g3d.core.util.G3dUtil;
+import org.mini.g3d.core.util.Loader;
 
 /**
  * @author Gust
@@ -54,18 +55,14 @@ public class Skybox {
             SIZE, -SIZE, SIZE
     };
 
-    private static final String[] TEXTURE_FILES = {"textures/skybox/right", "textures/skybox/left", "textures/skybox/top", "textures/skybox/bottom", "textures/skybox/back", "textures/skybox/front"};
-    private static final String[] NIGHT_TEXTURE_FILES = {"textures/skybox/nightRight", "textures/skybox/nightLeft", "textures/skybox/nightTop", "textures/skybox/nightBottom", "textures/skybox/nightBack", "textures/skybox/nightFront"};
-
     RawModel cube;
     int texture;
     int nightTexture;
 
-    public Skybox(Loader loader) {
+    public Skybox(Loader loader, String[] dayTexturePath, String[] nightTexturePath) {
         cube = loader.loadToVAO(VERTICES, 3);
-        texture = loader.loadCubeMap(TEXTURE_FILES);
-        nightTexture = loader.loadCubeMap(NIGHT_TEXTURE_FILES);
-
+        texture = loader.loadCubeMap(dayTexturePath);
+        nightTexture = loader.loadCubeMap(nightTexturePath);
     }
 
     public int getVaoID() {

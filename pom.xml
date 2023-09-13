@@ -18,28 +18,39 @@
 <!--            <artifactId>minijvm_rt</artifactId>-->
 <!--            <version>1.0</version>-->
 <!--            <scope>system</scope>-->
-<!--            <systemPath>${basedir}/../miniJVM/mobile/assets/resfiles/minijvm_rt.jar</systemPath>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.minijvm</groupId>-->
-<!--            <artifactId>glfm_gui</artifactId>-->
-<!--            <version>1.0</version>-->
-<!--            <scope>system</scope>-->
-<!--            <systemPath>${basedir}/../miniJVM/mobile/assets/resfiles/glfm_gui.jar</systemPath>-->
-<!--        </dependency>-->
+        <!--            <systemPath>${basedir}/../miniJVM/mobile/assets/resfiles/minijvm_rt.jar</systemPath>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.minijvm</groupId>-->
+        <!--            <artifactId>glfm_gui</artifactId>-->
+        <!--            <version>1.0</version>-->
+        <!--            <scope>system</scope>-->
+        <!--            <systemPath>${basedir}/../miniJVM/mobile/assets/resfiles/glfm_gui.jar</systemPath>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.minijvm</groupId>-->
+        <!--            <artifactId>minijvm_rt</artifactId>-->
+        <!--            <version>1.0</version>-->
+        <!--            <scope>system</scope>-->
+        <!--            <systemPath>${basedir}/../miniJVM/binary/lib/minijvm_rt.jar</systemPath>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.minijvm</groupId>-->
+        <!--            <artifactId>glfw_gui</artifactId>-->
+        <!--            <version>1.0</version>-->
+        <!--            <scope>system</scope>-->
+        <!--            <systemPath>${basedir}/../miniJVM/binary/libex/glfw_gui.jar</systemPath>-->
+        <!--        </dependency>-->
         <dependency>
-            <groupId>org.minijvm</groupId>
+            <groupId>io.github.digitalgust</groupId>
             <artifactId>minijvm_rt</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../miniJVM/binary/lib/minijvm_rt.jar</systemPath>
         </dependency>
+
         <dependency>
-            <groupId>org.minijvm</groupId>
-            <artifactId>glfm_gui</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../miniJVM/binary/libex/glfw_gui.jar</systemPath>
+            <groupId>io.github.digitalgust</groupId>
+            <artifactId>glfw_gui</artifactId>
+            <version>1.0.1</version>
         </dependency>
     </dependencies>
     
@@ -57,14 +68,8 @@
                         <configuration>       
                             <tasks>
                                 <!--  copy to binary lib dir -->
-                                <mkdir dir="${basedir}/../BiBiX/srv_res/webserver/htmls/down"/>
-                                <copy todir="${basedir}/../BiBiX/srv_res/webserver/htmls/down/" overwrite="true" >
-                                    <fileset dir="${project.build.directory}" erroronmissingdir="false">
-                                        <include name="${project.artifactId}.jar"/>
-                                    </fileset>
-                                </copy>
-                                <mkdir dir="${basedir}/../miniJVM/binary/macos/apps/"/>
-                                <copy todir="${basedir}/../miniJVM/binary/macos/apps/" overwrite="true" >
+                                <mkdir dir="${basedir}/../shl/src/main/resource/lib/"/>
+                                <copy todir="${basedir}/../shl/src/main/resource/lib/" overwrite="true">
                                     <fileset dir="${project.build.directory}" erroronmissingdir="false">
                                         <include name="${project.artifactId}.jar"/>
                                     </fileset>
@@ -73,11 +78,26 @@
                         </configuration>        
                     </execution>    
                 </executions>  
-            </plugin>   
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
         </plugins>
         
             
         <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.png</include>
+                    <include>**/*.glsl</include>
+                </includes>
+            </resource>
             <resource>
                 <directory>src/main/resource</directory>
                 <includes>

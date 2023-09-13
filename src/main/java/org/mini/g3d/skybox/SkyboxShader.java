@@ -1,15 +1,15 @@
 package org.mini.g3d.skybox;
 
-import org.mini.g3d.core.Camera;
-import org.mini.g3d.core.EngineManager;
+import org.mini.g3d.core.ICamera;
+import org.mini.g3d.core.DisplayManager;
 import org.mini.g3d.core.ShaderProgram;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 
 public class SkyboxShader extends ShaderProgram {
 
-    private static final String VERTEX_FILE = "/res/shader/skyboxVertex.shader";
-    private static final String FRAGMENT_FILE = "/res/shader/skyboxFragment.shader";
+    private static final String VERTEX_FILE = "/org/mini/g3d/res/shader/skyboxVertex.glsl";
+    private static final String FRAGMENT_FILE = "/org/mini/g3d/res/shader/skyboxFragment.glsl";
 
     private int location_projectionMatrix;
     private int location_viewMatrix;
@@ -22,6 +22,8 @@ public class SkyboxShader extends ShaderProgram {
 
     private float rotation = 0;
 
+    Matrix4f viewMatrix = new Matrix4f();
+
     public SkyboxShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
     }
@@ -30,14 +32,14 @@ public class SkyboxShader extends ShaderProgram {
         super.loadMatrix(location_projectionMatrix, matrix);
     }
 
-    public void loadViewMatrix(Camera camera) {
-        Matrix4f matrix = camera.getViewMatrix();
-        matrix.mat[Matrix4f.M30] = 0;
-        matrix.mat[Matrix4f.M31] = 0;
-        matrix.mat[Matrix4f.M32] = 0;
-        rotation += ROTATE_SPEED * EngineManager.getFrameTimeSeconds();
-        Matrix4f.rotate((float) Math.toRadians(rotation), 0, 1, 0, matrix, matrix);
-        super.loadMatrix(location_viewMatrix, matrix);
+    public void loadViewMatrix(ICamera camera) {
+        camera.getViewMatrix(viewMatrix);
+        viewMatrix.mat[Matrix4f.M30] = 0;
+        viewMatrix.mat[Matrix4f.M31] = 0;
+        viewMatrix.mat[Matrix4f.M32] = 0;
+        rotation += ROTATE_SPEED * DisplayManager.getFrameTimeSeconds();
+        Matrix4f.rotate((float) Math.toRadians(rotation), 0, 1, 0, viewMatrix, viewMatrix);
+        super.loadMatrix(location_viewMatrix, viewMatrix);
     }
 
     @Override
@@ -59,8 +61,8 @@ public class SkyboxShader extends ShaderProgram {
         super.loadInt(location_cubeMap2, 1);
     }
 
-    protected void loadFogColour(float r, float g, float b) {
-        super.loadVector(location_fogColour, new Vector3f(r, g, b));
+    protected void loadFogColour(Vector3f fogColor) {
+        super.loadVector(location_fogColour, fogColor);
     }
 
     @Override

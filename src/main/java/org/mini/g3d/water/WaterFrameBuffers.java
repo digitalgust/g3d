@@ -1,51 +1,28 @@
 package org.mini.g3d.water;
 
-import org.mini.g3d.core.EngineManager;
+import org.mini.g3d.core.DisplayManager;
 import org.mini.gl.GL;
-import static org.mini.gl.GL.GL_COLOR_ATTACHMENT0;
-import static org.mini.gl.GL.GL_DEPTH_ATTACHMENT;
-import static org.mini.gl.GL.GL_DEPTH_COMPONENT;
-import static org.mini.gl.GL.GL_FLOAT;
-import static org.mini.gl.GL.GL_FRAMEBUFFER;
-import static org.mini.gl.GL.GL_LINEAR;
-import static org.mini.gl.GL.GL_RENDERBUFFER;
-import static org.mini.gl.GL.GL_RGB;
-import static org.mini.gl.GL.GL_TEXTURE_2D;
-import static org.mini.gl.GL.GL_TEXTURE_MAG_FILTER;
-import static org.mini.gl.GL.GL_TEXTURE_MIN_FILTER;
-import static org.mini.gl.GL.GL_UNSIGNED_BYTE;
-import static org.mini.gl.GL.glBindFramebuffer;
-import static org.mini.gl.GL.glBindRenderbuffer;
-import static org.mini.gl.GL.glBindTexture;
-import static org.mini.gl.GL.glDeleteFramebuffers;
-import static org.mini.gl.GL.glDeleteRenderbuffers;
-import static org.mini.gl.GL.glDeleteTextures;
-import static org.mini.gl.GL.glDrawBuffers;
-import static org.mini.gl.GL.glFramebufferRenderbuffer;
-import static org.mini.gl.GL.glFramebufferTexture2D;
-import static org.mini.gl.GL.glGenFramebuffers;
-import static org.mini.gl.GL.glGenRenderbuffers;
-import static org.mini.gl.GL.glGenTextures;
-import static org.mini.gl.GL.glRenderbufferStorage;
-import static org.mini.gl.GL.glTexImage2D;
-import static org.mini.gl.GL.glTexParameteri;
-import static org.mini.gl.GL.glViewport;
+import org.mini.glwrap.GLUtil;
+import org.mini.gui.GCmd;
+import org.mini.gui.GForm;
+
+import static org.mini.gl.GL.*;
 
 public class WaterFrameBuffers {
 
-    protected static final int REFLECTION_WIDTH = 320;
-    private static final int REFLECTION_HEIGHT = 180;
+    protected static final int REFLECTION_WIDTH = 640;
+    private static final int REFLECTION_HEIGHT = 360;
 
-    protected static final int REFRACTION_WIDTH = 1280;
-    private static final int REFRACTION_HEIGHT = 720;
+    protected static final int REFRACTION_WIDTH = 640;
+    private static final int REFRACTION_HEIGHT = 360;
 
-    private int reflectionFrameBuffer;
-    private int reflectionTexture;
-    private int reflectionDepthBuffer;
+    private int[] reflectionFrameBuffer = {-1};
+    private int[] reflectionTexture = {-1};
+    private int[] reflectionDepthBuffer = {-1};
 
-    private int refractionFrameBuffer;
-    private int refractionTexture;
-    private int refractionDepthTexture;
+    private int[] refractionFrameBuffer = {-1};
+    private int[] refractionTexture = {-1};
+    private int[] refractionDepthTexture = {-1};
 
     public WaterFrameBuffers() {//call when loading the game
         initialiseReflectionFrameBuffer();
@@ -53,57 +30,65 @@ public class WaterFrameBuffers {
     }
 
     public void cleanUp() {//call when closing the game
-        glDeleteFramebuffers(1, new int[]{reflectionFrameBuffer}, 0);
-        glDeleteTextures(1, new int[]{reflectionTexture}, 0);
-        glDeleteRenderbuffers(1, new int[]{reflectionDepthBuffer}, 0);
-        glDeleteFramebuffers(1, new int[]{refractionFrameBuffer}, 0);
-        glDeleteTextures(1, new int[]{refractionTexture}, 0);
-        glDeleteTextures(1, new int[]{refractionDepthTexture}, 0);
+        glDeleteFramebuffers(1, reflectionFrameBuffer, 0);
+        glDeleteTextures(1, reflectionTexture, 0);
+        glDeleteRenderbuffers(1, reflectionDepthBuffer, 0);
+        glDeleteFramebuffers(1, refractionFrameBuffer, 0);
+        glDeleteTextures(1, refractionTexture, 0);
+        glDeleteTextures(1, refractionDepthTexture, 0);
+    }
+
+    protected void finalize() {
+        GForm.addCmd(new GCmd(() -> {
+            cleanUp();
+            System.out.println("[G3D][INFO]WaterFrameBuffers clean success");
+        }));
     }
 
     public void bindReflectionFrameBuffer() {//call before rendering to this FBO
-        bindFrameBuffer(reflectionFrameBuffer, REFLECTION_WIDTH, REFLECTION_HEIGHT);
+        bindFrameBuffer(reflectionFrameBuffer[0], REFLECTION_WIDTH, REFLECTION_HEIGHT);
     }
 
     public void bindRefractionFrameBuffer() {//call before rendering to this FBO
-        bindFrameBuffer(refractionFrameBuffer, REFRACTION_WIDTH, REFRACTION_HEIGHT);
+        bindFrameBuffer(refractionFrameBuffer[0], REFRACTION_WIDTH, REFRACTION_HEIGHT);
     }
 
-    public void unbindCurrentFrameBuffer() {//call to switch to default frame buffer
+    public void unbindCurrentFrameBuffer() {//call after rendering to texture
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, EngineManager.getWidth(), EngineManager.getHeight());
+        glViewport(0, 0, DisplayManager.getWidth(), DisplayManager.getHeight());
+        //glFinish();
     }
 
     public int getReflectionTexture() {//get the resulting texture
-        return reflectionTexture;
+        return reflectionTexture[0];
     }
 
     public int getRefractionTexture() {//get the resulting texture
-        return refractionTexture;
+        return refractionTexture[0];
     }
 
     public int getRefractionDepthTexture() {//get the resulting depth texture
-        return refractionDepthTexture;
+        return refractionDepthTexture[0];
     }
 
     private void initialiseReflectionFrameBuffer() {
-        reflectionFrameBuffer = createFrameBuffer();
-        reflectionTexture = createTextureAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);
-        reflectionDepthBuffer = createDepthBufferAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);
+        reflectionFrameBuffer[0] = createFrameBuffer();
+        reflectionTexture[0] = createTextureAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);
+        reflectionDepthBuffer[0] = createDepthBufferAttachment(REFLECTION_WIDTH, REFLECTION_HEIGHT);
         unbindCurrentFrameBuffer();
     }
 
     private void initialiseRefractionFrameBuffer() {
-        refractionFrameBuffer = createFrameBuffer();
-        refractionTexture = createTextureAttachment(REFRACTION_WIDTH, REFRACTION_HEIGHT);
-        refractionDepthTexture = createDepthTextureAttachment(REFRACTION_WIDTH, REFRACTION_HEIGHT);
+        refractionFrameBuffer[0] = createFrameBuffer();
+        refractionTexture[0] = createTextureAttachment(REFRACTION_WIDTH, REFRACTION_HEIGHT);
+        refractionDepthTexture[0] = createDepthTextureAttachment(REFRACTION_WIDTH, REFRACTION_HEIGHT);
         unbindCurrentFrameBuffer();
     }
 
     private void bindFrameBuffer(int frameBuffer, int width, int height) {
-        glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        glViewport(0, 0, width, height);
+        GL.glBindTexture(GL.GL_TEXTURE_2D, 0);
+        GL.glBindFramebuffer(GL.GL_FRAMEBUFFER, frameBuffer);
+        GL.glViewport(0, 0, width, height);
     }
 
     int[] tmp = {0};
@@ -115,6 +100,8 @@ public class WaterFrameBuffers {
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         //create the framebuffer
         glDrawBuffers(1, new int[]{GL_COLOR_ATTACHMENT0}, 0);//gust
+        //GLUtil.checkGlError("createFrameBuffer 1");//orange
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
         //indicate that we will always render to color attachment 0
         return frameBuffer;
     }
@@ -134,7 +121,8 @@ public class WaterFrameBuffers {
         glGenTextures(1, tmp, 0);
         int texture = tmp[0];
         glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, null, 0);//gust
+        //todo GL_DEPTH_COMPONENT32 ? GL_DEPTH_COMPONENT
+        glTexImage2D(GL_TEXTURE_2D, 0,/*ios*/ GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, /*ios*/GL_UNSIGNED_SHORT, null, 0);//gust
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
@@ -145,7 +133,7 @@ public class WaterFrameBuffers {
         glGenRenderbuffers(1, tmp, 0);
         int depthBuffer = tmp[0];
         glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width,
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width,
                 height);
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                 GL_RENDERBUFFER, depthBuffer);

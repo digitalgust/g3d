@@ -1,13 +1,10 @@
 package org.mini.g3d.entity;
 
-import org.mini.g3d.core.MasterPass;
-import org.mini.g3d.core.MasterRenderer;
-import org.mini.g3d.core.MasterShader;
-import org.mini.g3d.core.WorldCamera;
+import org.mini.g3d.core.*;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
-import org.mini.g3d.core.textures.ModelTexture;
-import org.mini.g3d.core.toolbox.G3dMath;
+import org.mini.g3d.core.textures.Texture;
+import org.mini.g3d.core.util.G3dUtil;
 import org.mini.g3d.core.vector.Matrix4f;
 
 import java.util.List;
@@ -15,48 +12,44 @@ import java.util.Map;
 
 import static org.mini.gl.GL.*;
 
-public class EntityRenderer {
+public class EntityRenderer extends AbstractRenderer {
 
-    private MasterShader shader;
+    private EntityShader shader = new EntityShader();
+    Matrix4f cachedTransform = new Matrix4f();
 
-    public EntityRenderer(MasterShader shader, WorldCamera camera) {
-        camera.getProjectionDispatcher().register(new Runnable() {
-            @Override
-            public void run() {
-                // Loads the shader, only has to be done once
-                shader.start();
-                Matrix4f projectionMatrix = camera.getProjectionMatrix();
-                shader.loadProjectionMatrix(projectionMatrix);
-                shader.start();
-            }
-        });
-        this.shader = shader;
+    public EntityRenderer() {
+
     }
 
-    public void render(Map<TexturedModel, List<Entity>> entities) {
+    public void render(Scene scene) {
+        Map<TexturedModel, List<Entity>> entities = scene.getEntitieMap();
+        shader.start();
+        shader.loadSkyColour(scene.getFogColor());
+        shader.loadLights(scene.getLights());
+        shader.loadViewMatrix(scene.getCamera());
+        Matrix4f projectionMatrix = scene.getCamera().getProjectionMatrix();
+        shader.loadProjectionMatrix(projectionMatrix);
+
         for (TexturedModel model : entities.keySet()) {
             prepareTexturedModel(model);
             List<Entity> batch = entities.get(model);
             for (Entity entity : batch) {
                 prepareInstance(entity);
                 glDrawElements(GL_TRIANGLES, model.getRawModel().getVertexCount(), GL_UNSIGNED_INT, null, 0);//gust
-                MasterPass.triangles += model.getRawModel().getVertexCount();
+                MainFrameBuffer.triangles += model.getRawModel().getVertexCount();
             }
             unbindTexturedModel();
         }
-    }
-
-    public void reloadProjectionMatrix(Matrix4f projectionMatrix) {
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
         shader.stop();
     }
 
     private void prepareTexturedModel(TexturedModel model) {
         RawModel rawModel = model.getRawModel();
-        ModelTexture texture = model.getTexture();
+        Texture texture = model.getTexture();
         if (texture.isHasTransparency()) {
             MasterRenderer.disableCulling();
+        } else {
+            MasterRenderer.enableCulling();
         }
 
         glBindVertexArray(rawModel.getVaoID());
@@ -71,7 +64,7 @@ public class EntityRenderer {
     }
 
     private void unbindTexturedModel() {
-        MasterRenderer.enableCulling();
+        enableCulling();
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
@@ -79,7 +72,7 @@ public class EntityRenderer {
     }
 
     private void prepareInstance(Entity entity) {
-        Matrix4f transformationMatrix = G3dMath.createTransformationMatrix(entity.getPosition(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale());
+        Matrix4f transformationMatrix = G3dUtil.createTransformationMatrix(entity.getPosition(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale(), cachedTransform);
         shader.loadTransformationMatrix(transformationMatrix);
         shader.loadOffset(entity.getTextureXOffset(), entity.getTextureYOffset());
     }

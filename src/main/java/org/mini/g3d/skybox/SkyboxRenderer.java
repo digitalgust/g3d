@@ -1,70 +1,72 @@
 package org.mini.g3d.skybox;
 
-import org.mini.g3d.core.Camera;
-import org.mini.g3d.core.EngineManager;
-import org.mini.g3d.core.WorldCamera;
+import org.mini.g3d.core.*;
 import org.mini.g3d.core.vector.Matrix4f;
 
 import static org.mini.gl.GL.*;
 
-public class SkyboxRenderer {
+public class SkyboxRenderer extends AbstractRenderer {
 
     private SkyboxShader shader;
     private float time = 0;
 
-    public SkyboxRenderer(WorldCamera camera) {
-        camera.getProjectionDispatcher().register(new Runnable() {
-            @Override
-            public void run() {
-                shader.start();
-                Matrix4f projectionMatrix = camera.getSkyBoxProjectionMatrix();
-                shader.loadProjectionMatrix(projectionMatrix);
-                shader.stop();
-            }
-        });
+    public SkyboxRenderer() {
         shader = new SkyboxShader();
         shader.start();
         shader.connectTextureUnits();
         shader.stop();
     }
 
-    public void render(Camera camera, Skybox box, float r, float g, float b) {
+    public void render(Scene scene) {
+        Skybox box = scene.getSkybox();
+        if (box == null) return;
         shader.start();
-        shader.loadViewMatrix(camera);
-        shader.loadFogColour(r, g, b);
+        shader.loadViewMatrix(scene.getCamera());
+        Matrix4f projectionMatrix = scene.getCamera().getSkyBoxProjectionMatrix();
+        shader.loadProjectionMatrix(projectionMatrix);
+        shader.loadFogColour(scene.getFogColor());
         glBindVertexArray(box.getVaoID());
         glEnableVertexAttribArray(0);
         glActiveTexture(GL_TEXTURE0);
-        bindTextures(box);
+        bindTextures(scene);
         glDrawArrays(GL_TRIANGLES, 0, box.getVertexCount());
         glDisableVertexAttribArray(0);
         glBindVertexArray(0);
         shader.stop();
     }
 
-    private void bindTextures(Skybox box) {
-        float sec = EngineManager.getFrameTimeSeconds();
+    private void bindTextures(Scene scene) {
+        Skybox box = scene.getSkybox();
+        float sec = DisplayManager.getFrameTimeSeconds();
         time += sec * 1000;
         time %= 24000;
-        int texture1;
-        int texture2;
+        int texture1 = -1;
+        int texture2 = -1;
         float blendFactor;
-        if (time >= 0 && time < 5000) {
-            texture1 = box.getNightTexture();
-            texture2 = box.getNightTexture();
-            blendFactor = (time - 0) / (5000 - 0);
-        } else if (time >= 5000 && time < 8000) {
-            texture1 = box.getNightTexture();
-            texture2 = box.getTexture();
-            blendFactor = (time - 5000) / (8000 - 5000);
-        } else if (time >= 8000 && time < 21000) {
-            texture1 = box.getTexture();
-            texture2 = box.getTexture();
-            blendFactor = (time - 8000) / (21000 - 8000);
-        } else {
-            texture1 = box.getTexture();
-            texture2 = box.getNightTexture();
-            blendFactor = (time - 21000) / (24000 - 21000);
+
+        int segOfDay = scene.getDayAndNight().getSegment();
+        blendFactor = scene.getDayAndNight().getPercentInSeg();
+        switch (segOfDay) {
+            case DayAndNight.NIGHT: {
+                texture1 = box.getNightTexture();
+                texture2 = box.getNightTexture();
+                break;
+            }
+            case DayAndNight.NIGHT_TO_DAY: {
+                texture1 = box.getNightTexture();
+                texture2 = box.getTexture();
+                break;
+            }
+            case DayAndNight.DAY: {
+                texture1 = box.getTexture();
+                texture2 = box.getTexture();
+                break;
+            }
+            case DayAndNight.DAY_TO_NIGHT: {
+                texture1 = box.getTexture();
+                texture2 = box.getNightTexture();
+                break;
+            }
         }
 
         glActiveTexture(GL_TEXTURE0);
@@ -74,9 +76,4 @@ public class SkyboxRenderer {
         shader.loadBlendFactor(blendFactor);
     }
 
-    public void reloadProjectionMatrix(Matrix4f projectionMatrix) {
-        shader.start();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.stop();
-    }
 }

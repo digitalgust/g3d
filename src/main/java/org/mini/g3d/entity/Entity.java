@@ -6,10 +6,11 @@ import org.mini.g3d.core.models.TexturedModel;
 
 public class Entity {
 
+    protected Object attachment;
     protected TexturedModel model;
-    protected Vector3f position;
-    protected float rotX,rotY,rotZ;
-    protected float scale;
+    protected Vector3f position = new Vector3f();
+    protected float rotX, rotY, rotZ;
+    protected float scale = 1.0f;
 
     protected int textureIndex = 0;
 
@@ -35,17 +36,28 @@ public class Entity {
         this.scale = scale;
     }
 
+    public int getTextureIndex() {
+        return textureIndex;
+    }
+
+    public void setTextureIndex(int textureIndex) {
+        this.textureIndex = textureIndex;
+    }
+
     public float getTextureXOffset() {
         int column = textureIndex % model.getTexture().getNumberOfRows();
         return (float) column / (float) model.getTexture().getNumberOfRows();
     }
 
     public float getTextureYOffset() {
-        int row = textureIndex % model.getTexture().getNumberOfRows();
+        int row = textureIndex / model.getTexture().getNumberOfRows();
         return (float) row / (float) model.getTexture().getNumberOfRows();
     }
 
     public void increasePosition(float dx, float dy, float dz) {
+        if (Float.isNaN(dx) || Float.isNaN(dy) || Float.isNaN(dz)) {
+            int debug = 1;
+        }
         this.position.x += dx;
         this.position.y += dy;
         this.position.z += dz;
@@ -108,6 +120,14 @@ public class Entity {
 
     public String toString() {
         return position.toString();
+    }
+
+    public Object getAttachment() {
+        return attachment;
+    }
+
+    public void setAttachment(Object attachment) {
+        this.attachment = attachment;
     }
 
 

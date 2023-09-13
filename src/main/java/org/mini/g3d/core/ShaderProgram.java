@@ -1,19 +1,20 @@
 package org.mini.g3d.core;
 
-import org.mini.g3d.core.vector.*;
+import org.mini.g3d.core.vector.Matrix4f;
+import org.mini.g3d.core.vector.Vector2f;
+import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.core.vector.Vector4f;
 import org.mini.gl.GL;
+import org.mini.glwrap.GLUtil;
 import org.mini.gui.GCmd;
 import org.mini.gui.GForm;
 import org.mini.gui.GToolkit;
 
 import static org.mini.gl.GL.*;
-import static org.mini.nanovg.Gutil.toUtf8;
 
 public abstract class ShaderProgram {
 
     private int programID;
-    private int vertexShaderID;
-    private int fragmentShaderID;
 
     static byte[] gl_version = {'v', 'e', 'r', 's', 'i', 'o', 'n', ' ', '3', '3', '0'};
     static byte[] gles_version = {'v', 'e', 'r', 's', 'i', 'o', 'n', ' ', '3', '0', '0'};
@@ -21,38 +22,58 @@ public abstract class ShaderProgram {
     float[] mbuf = new float[16];
 
     public ShaderProgram(String vertexFile, String fragmentFile) {
-        vertexShaderID = loadShader(vertexFile, GL_VERTEX_SHADER);
-        fragmentShaderID = loadShader(fragmentFile, GL_FRAGMENT_SHADER);
-        init(vertexShaderID, fragmentShaderID);
+        int vertexShaderID = loadShader(vertexFile, GL_VERTEX_SHADER);
+        int fragmentShaderID = loadShader(fragmentFile, GL_FRAGMENT_SHADER);
+        linkShader(vertexShaderID, fragmentShaderID);
+
+        //release vert and frag
+        glDetachShader(programID, vertexShaderID);
+        glDetachShader(programID, fragmentShaderID);
         glDeleteShader(vertexShaderID);
         glDeleteShader(fragmentShaderID);
     }
 
     public ShaderProgram(int vertexShaderID, int fragmentShaderID) {
-        init(vertexShaderID, fragmentShaderID);
+        linkShader(vertexShaderID, fragmentShaderID);
     }
 
-    public void init(int vertexShaderID, int fragmentShaderID) {
+    public ShaderProgram(int programID) {
+        this.programID = programID;
+    }
+
+    /**
+     * link shader and MUST NOT release vertex and fragment
+     *
+     * @param vertexShaderID
+     * @param fragmentShaderID
+     */
+    public void linkShader(int vertexShaderID, int fragmentShaderID) {
 
         programID = glCreateProgram();
+//        GLUtil.checkGlError("init 0");
         glAttachShader(programID, vertexShaderID);
+//        GLUtil.checkGlError("init 1");
         glAttachShader(programID, fragmentShaderID);
+//        GLUtil.checkGlError("init 2");
+
         bindAttributes();
+
+//        GLUtil.checkGlError("init 3");
         glLinkProgram(programID);
 
-        glDetachShader(programID, vertexShaderID);
-        glDetachShader(programID, fragmentShaderID);
-
+//        GLUtil.checkGlError("init 4");
 
         glValidateProgram(programID);
+//        GLUtil.checkGlError("init 5");
         getAllUniformLocations();
-        //System.out.println("init shader "+vertexFile+" , "+fragmentFile+" :"+programID);
+        System.out.println("[G3D][INFO]init shader link " + vertexShaderID + " + " + fragmentShaderID + " = " + programID);
+//        GLUtil.checkGlError("init 8");
     }
 
     protected abstract void getAllUniformLocations();
 
     protected int getUniformLocation(String uniformName) {
-        return glGetUniformLocation(programID, toUtf8(uniformName));
+        return glGetUniformLocation(programID, GLUtil.toCstyleBytes(uniformName));
     }
 
     public void start() {
@@ -71,40 +92,30 @@ public abstract class ShaderProgram {
     public int getProgramId() {
         return programID;
     }
-    /**
-     * must be static,because finalize would be destroy ext class in minijvm
-     */
-    static class Cleaner implements Runnable {
-        int programID;
 
-
-        @Override
-        public void run() {
-            glUseProgram(0);
-            glDeleteProgram(programID);
-            System.out.println("g3d shader program clean success");
-        }
-    }
-
-    public void finalize() {
-        //Don't reference to this instance
-        ShaderProgram.Cleaner cleaner = new ShaderProgram.Cleaner();
-        cleaner.programID = programID;
-        GForm.addCmd(new GCmd(GCmd.GCMD_RUN_CODE, cleaner));
+    protected void finalize() {
+        GForm.addCmd(new GCmd(() -> {
+            cleanUp();
+            System.out.println("[G3D][INFO]" + this.getClass() + "shader program clean success");
+        }));
     }
 
     protected abstract void bindAttributes();
 
     protected void bindAttribute(int attribute, String variableName) {
-        glBindAttribLocation(programID, attribute, toUtf8(variableName));
+        glBindAttribLocation(programID, attribute, GLUtil.toCstyleBytes(variableName));
     }
 
     public void loadFloatArr(int location, float[] value) {
-        glUniform1fv(location, 1, value, 0);
+        glUniform1fv(location, value.length, value, 0);
     }
 
     protected void loadFloat(int location, float value) {
         glUniform1f(location, value);
+    }
+
+    public void loadIntArr(int location, int[] value) {
+        glUniform1iv(location, value.length, value, 0);
     }
 
     protected void loadInt(int location, int value) {
@@ -162,7 +173,7 @@ public abstract class ShaderProgram {
             loadMatrix(location, (Matrix4f) value);
             return;
         }
-        System.out.println("Unhandled type in setUniform: " + value.getClass());
+        System.out.println("[G3D][INFO]Unhandled type in setUniform: " + value.getClass());
         assert false;
     }
 
@@ -170,7 +181,7 @@ public abstract class ShaderProgram {
     private static int loadShader(String file, int type) {
 
         byte[] sb = GToolkit.readFileFromJar(file);
-        if (EngineManager.getGlVersion().toLowerCase().contains("opengl es")) {
+        if (DisplayManager.getGlVersion().toLowerCase().contains("opengl es")) {
             String s = new String(sb);
             s = s.replace("#version 330", "#version 300 es\r\nprecision highp float;\r\nprecision highp sampler2DShadow;\r\n");
             sb = s.getBytes();
@@ -184,7 +195,7 @@ public abstract class ShaderProgram {
             GL.glGetShaderiv(shaderID, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetShaderInfoLog(shaderID, szLog.length, return_val, 0, szLog);
-            System.out.println("Compile Shader fail error :" + new String(szLog, 0, return_val[0]) + ":" + file);
+            System.out.println("[G3D][ERROR]Compile Shader fail.file:" + file + ", error :" + new String(szLog, 0, return_val[0]) + ":" + file);
             //System.exit(-1);
         }
         return shaderID;
