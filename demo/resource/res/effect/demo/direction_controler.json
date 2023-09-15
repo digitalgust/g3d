@@ -1,0 +1,44 @@
+{
+  "emitters": [
+    {
+      "startAt": 0.0,
+      "emitterLife": 5.00,
+      "name": "Fire",
+      "imagePath": "/res/textures/particle_fire.png",
+      "imageGrids": 8,
+      "location": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "direction": {
+        "x": 0,
+        "y": 0.02,
+        "z": 0
+      },
+      "directionDeviation": 0.1,
+      "pps": 10,
+      "min": 1,
+      "max": 100,
+      "speed": 0.1,
+      "speedError": 0.1,
+      "gravity": -0.03,
+      "particleLife": 2,
+      "particleLifeError": 0.1,
+      "scale": 2,
+      "scaleError": 0.5,
+      "randomRotation": true
+    }
+  ],
+  "controlers": [
+    {
+      "controlerType": "Direction",
+      "emitterName": "*",
+      "direction": {
+        "x": 0,
+        "y": -1,
+        "z": 0
+      }
+    }
+  ]
+}

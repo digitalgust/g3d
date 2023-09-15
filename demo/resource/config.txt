@@ -1,0 +1,6 @@
+name=G3D
+app=g3dtest.G3d
+icon=/res/logo.png
+desc=  G3d test.\n  you can upgrade it.
+version=1.0.0
+upgradeurl=http://192.168.0.10/g3d.jar

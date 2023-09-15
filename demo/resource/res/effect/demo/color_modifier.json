@@ -1,0 +1,65 @@
+{
+  "emitters": [
+    {
+      "startAt": 0.0,
+      "emitterLife": 0.001,
+      "name": "Star",
+      "imagePath": "/res/textures/particle_redball.png",
+      "imageGrids": 1,
+      "location": {
+        "x": 0,
+        "y": 3,
+        "z": 0
+      },
+      "direction": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "directionDeviation": 0,
+      "pps": 1,
+      "min": 1,
+      "speed": 0,
+      "gravity": 0,
+      "particleLife": 3.0,
+      "scale": 5,
+      "alpha": 0,
+      "modifiers": [
+        {
+          "modifierType": "Color",
+          "startAt": 0,
+          "endAt": 1.0,
+          "startColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 0.5,
+            "z": 0.5,
+            "w": 1.0
+          }
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 2.000,
+          "endAt": 3.000,
+          "startColor": {
+            "x": 1.0,
+            "y": 0.5,
+            "z": 0.5,
+            "w": 1.0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.minijvm</groupId>
+        <artifactId>g3proj</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <groupId>org.minijvm</groupId>
+    <artifactId>g3d</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+    </properties>
+    
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.digitalgust</groupId>
+            <artifactId>xgui</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+    </dependencies>
+    
+    <build>
+
+        <sourceDirectory>main/java</sourceDirectory>
+
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <plugin>   
+                <artifactId>maven-antrun-plugin</artifactId>    
+                <executions>       
+                    <execution>         
+                        <phase>package</phase>        
+                        <goals>            
+                            <goal>run</goal>        
+                        </goals>             
+                        <configuration>       
+                            <tasks>
+                                <!--  copy to a game lib dir -->
+<!--                                <mkdir dir="${basedir}/../../shl/src/main/resource/lib/"/>-->
+<!--                                <copy todir="${basedir}/../../shl/src/main/resource/lib/" overwrite="true">-->
+<!--                                    <fileset dir="${project.build.directory}" erroronmissingdir="false">-->
+<!--                                        <include name="${project.artifactId}.jar"/>-->
+<!--                                    </fileset>-->
+<!--                                </copy>-->
+
+                                <!--  copy to demo lib dir -->
+                                <copy todir="${basedir}/../demo/resource/lib/" overwrite="true">
+                                    <fileset dir="${project.build.directory}" erroronmissingdir="false">
+                                        <include name="${project.artifactId}.jar"/>
+                                    </fileset>
+                                </copy>
+                            </tasks>
+                        </configuration>        
+                    </execution>    
+                </executions>  
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+        </plugins>
+        
+            
+        <resources>
+            <resource>
+                <directory>main/java</directory>
+                <includes>
+                    <include>**/*.png</include>
+                    <include>**/*.glsl</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>main/resource</directory>
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+
+
+        
+        
+    </build>
+</project>

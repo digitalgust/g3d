@@ -1,0 +1,25 @@
+{
+  "emitters": [
+    {
+      "startAt": 0.5,
+      "emitterLife": 0.001,
+      "name": "FromTo",
+      "imagePath": "/res/textures/particle_redball.png",
+      "imageGrids": 1,
+      "location": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "directionDeviation": 0.01,
+      "pps": 1,
+      "min": 3,
+      "max": 3,
+      "speed": 10,
+      "gravity": 0,
+      "particleLife": 0.3,
+      "scale": 0.5,
+      "scaleError": 0.0
+    }
+  ]
+}

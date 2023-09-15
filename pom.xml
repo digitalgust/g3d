@@ -2,113 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.minijvm</groupId>
-    <artifactId>g3d</artifactId>
-    <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <artifactId>g3proj</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    
-
-    <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>org.minijvm</groupId>-->
-<!--            <artifactId>minijvm_rt</artifactId>-->
-<!--            <version>1.0</version>-->
-<!--            <scope>system</scope>-->
-        <!--            <systemPath>${basedir}/../miniJVM/mobile/assets/resfiles/minijvm_rt.jar</systemPath>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.minijvm</groupId>-->
-        <!--            <artifactId>glfm_gui</artifactId>-->
-        <!--            <version>1.0</version>-->
-        <!--            <scope>system</scope>-->
-        <!--            <systemPath>${basedir}/../miniJVM/mobile/assets/resfiles/glfm_gui.jar</systemPath>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.minijvm</groupId>-->
-        <!--            <artifactId>minijvm_rt</artifactId>-->
-        <!--            <version>1.0</version>-->
-        <!--            <scope>system</scope>-->
-        <!--            <systemPath>${basedir}/../miniJVM/binary/lib/minijvm_rt.jar</systemPath>-->
-        <!--        </dependency>-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.minijvm</groupId>-->
-        <!--            <artifactId>glfw_gui</artifactId>-->
-        <!--            <version>1.0</version>-->
-        <!--            <scope>system</scope>-->
-        <!--            <systemPath>${basedir}/../miniJVM/binary/libex/glfw_gui.jar</systemPath>-->
-        <!--        </dependency>-->
-        <dependency>
-            <groupId>io.github.digitalgust</groupId>
-            <artifactId>minijvm_rt</artifactId>
-            <version>1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.github.digitalgust</groupId>
-            <artifactId>glfw_gui</artifactId>
-            <version>1.0.1</version>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <plugins>
-            <plugin>   
-                <artifactId>maven-antrun-plugin</artifactId>    
-                <executions>       
-                    <execution>         
-                        <phase>package</phase>        
-                        <goals>            
-                            <goal>run</goal>        
-                        </goals>             
-                        <configuration>       
-                            <tasks>
-                                <!--  copy to binary lib dir -->
-                                <mkdir dir="${basedir}/../shl/src/main/resource/lib/"/>
-                                <copy todir="${basedir}/../shl/src/main/resource/lib/" overwrite="true">
-                                    <fileset dir="${project.build.directory}" erroronmissingdir="false">
-                                        <include name="${project.artifactId}.jar"/>
-                                    </fileset>
-                                </copy>
-                            </tasks>
-                        </configuration>        
-                    </execution>    
-                </executions>  
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
-            </plugin>
-        </plugins>
-        
-            
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.png</include>
-                    <include>**/*.glsl</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>src/main/resource</directory>
-                <includes>
-                    <include>**/*.*</include>
-                </includes>
-                <filtering>false</filtering>
-            </resource>
-        </resources>
 
 
-        
-        
-    </build>
+    <modules>
+        <module>g3d</module>
+        <module>demo</module>
+    </modules>
 </project>

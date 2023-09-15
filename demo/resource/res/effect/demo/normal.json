@@ -1,0 +1,51 @@
+{
+  "emitters": [
+    {
+      "startAt": 0.0,
+      "emitterLife": 0.0050,
+      "name": "Bomb",
+      "imagePath": "/res/textures/particle_redball.png",
+      "imageGrids": 1,
+      "location": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "direction": {
+        "x": 0,
+        "y": 0.02,
+        "z": 0
+      },
+      "directionDeviation": 0.5,
+      "min": 15,
+      "max": 20,
+      "speed": 10,
+      "speedError": 0.1,
+      "gravity": 0.05,
+      "particleLife": 0.1,
+      "particleLifeError": 0.1,
+      "scale": 0.3,
+      "scaleError": 0.5,
+      "randomRotation": true,
+      "modifiers": [
+        {
+          "modifierType": "Color",
+          "startAt": 0,
+          "endAt": 1.0,
+          "startColor": {
+            "x": 1.0,
+            "y": 0.1,
+            "z": 0.1,
+            "w": 1.0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 0.1,
+            "z": 0.1,
+            "w": 1.0
+          }
+        }
+      ]
+    }
+  ]
+}

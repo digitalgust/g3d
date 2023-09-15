@@ -1,0 +1,65 @@
+{
+  "emitters": [
+    {
+      "startAt": 0.0,
+      "emitterLife": 0.0010,
+      "name": "GreenCircle",
+      "imagePath": "/res/textures/particle_39.png",
+      "imageGrids": 3,
+      "location": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "direction": {
+        "x": 0,
+        "y": 0.02,
+        "z": 0
+      },
+      "min": 1,
+      "max": 1,
+      "speed": 0,
+      "gravity": 0,
+      "particleLife": 1.5,
+      "particleLifeError": 0,
+      "scale": 1,
+      "scaleError": 0,
+      "alpha": 0.3,
+      "randomRotation": false,
+      "modifiers": [
+        {
+          "modifierType": "Frame",
+          "startAt": 0,
+          "endAt": 1500.0,
+          "frameInfo": [
+            0,
+            50,
+            1,
+            50,
+            2,
+            100,
+            3,
+            50,
+            4,
+            50,
+            5,
+            100,
+            6,
+            100,
+            7,
+            100,
+            8,
+            900
+          ]
+        },
+        {
+          "modifierType": "Fade",
+          "startAt": 0.8,
+          "endAt": 1.5,
+          "startAlpha": 0.3,
+          "endAlpha": 0
+        }
+      ]
+    }
+  ]
+}

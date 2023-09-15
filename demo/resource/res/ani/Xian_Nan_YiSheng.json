@@ -1,0 +1,64 @@
+{
+  "aniClips": [
+    {
+      "clipName": "IDLE",
+      "begin": 1,
+      "end": 60
+    },
+    {
+      "clipName": "RUN",
+      "begin": 70,
+      "end": 94
+    },
+    {
+      "clipName": "ATTACK01",
+      "begin": 180,
+      "end": 228
+    },
+    {
+      "clipName": "ATTACK02",
+      "begin": 240,
+      "end": 285
+    },
+    {
+      "clipName": "ATTACK03",
+      "begin": 300,
+      "end": 360
+    },
+    {
+      "clipName": "SKILL01",
+      "begin": 370,
+      "end": 430
+    },
+    {
+      "clipName": "STANDHIT",
+      "begin": 1,
+      "end": 10
+    },
+    {
+      "clipName": "DIE",
+      "begin": 100,
+      "end": 170
+    },
+    {
+      "clipName": "DEAD",
+      "begin": 169,
+      "end": 170
+    },
+    {
+      "clipName": "SING01",
+      "begin": 440,
+      "end": 455
+    },
+    {
+      "clipName": "SING02",
+      "begin": 456,
+      "end": 475
+    },
+    {
+      "clipName": "SING03",
+      "begin": 476,
+      "end": 490
+    }
+  ]
+}

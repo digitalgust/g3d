@@ -1,0 +1,66 @@
+{
+  "emitters": [
+    {
+      "startAt": 0.0,
+      "emitterLife": 0.0050,
+      "name": "Magic",
+      "imagePath": "/res/textures/particle_redball.png",
+      "imageGrids": 1,
+      "location": {
+        "x": 0,
+        "y": 0.1,
+        "z": 0
+      },
+      "direction": {
+        "x": 0,
+        "y": 0.0,
+        "z": 0
+      },
+      "directionDeviation": 0.0,
+      "min": 1,
+      "max": 1,
+      "speed": 0,
+      "speedError": 0.0,
+      "gravity": 0.000,
+      "particleLife": 5,
+      "particleLifeError": 0.0,
+      "scale": 3,
+      "scaleError": 0.0,
+      "randomRotation": false,
+      "modifiers": [
+        {
+          "modifierType": "Color",
+          "startAt": 0,
+          "endAt": 1.0,
+          "startColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 1.0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 1.0
+          }
+        },
+        {
+          "modifierType": "Rotation",
+          "startAt": 0,
+          "endAt": 5.0,
+          "startPitchYawRoll": {
+            "x": 270,
+            "y": 0,
+            "z": 720
+          },
+          "endPitchYawRoll": {
+            "x": 270,
+            "y": 0,
+            "z": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "emitters": [
+    {
+      "startAt": 0.0,
+      "emitterLife": 0.0050,
+      "name": "FrameModify",
+      "imagePath": "/res/textures/particle_01.png",
+      "imageGrids": 2,
+      "location": {
+        "x": 0,
+        "y": 2,
+        "z": 0
+      },
+      "direction": {
+        "x": 0,
+        "y": 0.02,
+        "z": 0
+      },
+      "min": 1,
+      "max": 1,
+      "speed": 0,
+      "gravity": 0,
+      "particleLife": 12.0,
+      "particleLifeError": 0,
+      "scale": 4,
+      "scaleError": 0,
+      "alpha": 1,
+      "randomRotation": false,
+      "modifiers": [
+        {
+          "modifierType": "Frame",
+          "startAt": 0,
+          "endAt": 100.0,
+          "frameInfo": [
+            0,
+            1500,
+            1,
+            1500,
+            2,
+            1500,
+            3,
+            1500
+          ]
+        }
+      ]
+    }
+  ]
+}
