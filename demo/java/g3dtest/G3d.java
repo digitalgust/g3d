@@ -31,7 +31,7 @@ public class G3d extends GApplication {
 
         eventHandle = new GameUIEventHandle(this);
 
-        XmlExtAssist xmlExtAssist=new XmlExtAssist(form);
+        XmlExtAssist xmlExtAssist=new XmlExtAssist(null);
         xmlExtAssist.registerGUI("g3dtest.simple.XSimplePanel");
         xmlExtAssist.registerGUI("g3dtest.game.XGamePanel");
         String xmlStr = GToolkit.readFileFromJarAsString("/res/ui/G3dForm.xml", "utf-8");

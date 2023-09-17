@@ -1,5 +1,6 @@
 name=G3D
 app=g3dtest.G3d
+app1=org.mini.g3d.animation.gltf2.ExportJointsKeyFrameMatrics
 icon=/res/logo.png
 desc=  G3d test.\n  you can upgrade it.
 version=1.0.0

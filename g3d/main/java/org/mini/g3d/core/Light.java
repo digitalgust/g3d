@@ -26,6 +26,12 @@ public class Light {
         this.attenuation.set(attenuation);
     }
 
+    public Light(float x, float y, float z, float r, float g, float b, float at100, float at10, float at) {
+        this.position.set(x, y, z);
+        this.colour.set(r, g, b);
+        this.attenuation.set(at100, at10, at);
+    }
+
     public Vector3f getAttentuation() {
         return attenuation;
     }

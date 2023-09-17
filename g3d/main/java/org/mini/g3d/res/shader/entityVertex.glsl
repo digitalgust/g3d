@@ -1,6 +1,10 @@
 #version 330 
 
-const int MAX_LIGHT = 2;// Max amount light
+//${MAX_LIGHT_DEFINE_IN_PROGRAM}
+#ifndef MAX_LIGHT
+#define MAX_LIGHT  4
+#endif
+
 
 in vec3 position;
 in vec2 textureCoordinates;

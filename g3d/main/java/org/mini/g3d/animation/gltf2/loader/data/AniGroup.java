@@ -44,6 +44,10 @@ public class AniGroup {
         return aniClips;
     }
 
+    public int getSize(){
+        return aniClips.size();
+    }
+
 
     Map<GLTFAccessor, AniClip[]> indexMap = new HashMap();
 

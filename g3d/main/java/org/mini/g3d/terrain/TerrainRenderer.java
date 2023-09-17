@@ -47,7 +47,7 @@ public class TerrainRenderer extends AbstractRenderer {
 
         shader.start();
         shader.loadSkyColour(scene.getFogColor());
-        shader.loadLights(scene.getLights());
+        shader.loadLights(scene.getLightIterator());
         shader.loadViewMatrix(scene.getCamera());
         Matrix4f projectionMatrix = scene.getCamera().getProjectionMatrix();
         shader.loadProjectionMatrix(projectionMatrix);

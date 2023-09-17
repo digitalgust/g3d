@@ -3,6 +3,7 @@ package org.mini.g3d.core;
 import org.mini.g3d.animation.AnimatedModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.entity.EntityShader;
 import org.mini.g3d.particles.EffectMaster;
 import org.mini.g3d.entity.Entity;
 import org.mini.g3d.gui.GuiTexture;
@@ -51,7 +52,7 @@ public class Scene {
     public Scene() {
         //太阳暂时不能设置Z值,会导致阴影贴图旋转
         sun = new Light(new Vector3f(-200, 500, 0), new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(0.7f, 0, 0));
-        lights.add(sun);
+        addLight(sun);
         dayAndNight = new DayAndNight();
     }
 
@@ -91,10 +92,20 @@ public class Scene {
         return camera;
     }
 
-    public List<Light> getLights() {
-        return lights;
+    public Iterator<Light> getLightIterator() {
+        return lights.iterator();
     }
 
+    public int getLightSize(){
+        return lights.size();
+    }
+
+    public void addLight(Light light) {
+        lights.add(light);
+        if (lights.size() > EntityShader.MAX_LIGHTS) {
+            System.out.println("[G3D]max light num is " + EntityShader.MAX_LIGHTS + ", exceeded " + lights.size());
+        }
+    }
 
     public List<WaterTile> getWaters() {
         return waters;
@@ -160,14 +171,15 @@ public class Scene {
      */
     public void clear() {
         lights.clear();
-        lights.add(sun);
-
         entitieMap.clear();
         waters.clear();
         setTerrain(null);
         setSkybox(null);
         clearGuis();
         clearAnimatedModels();
+
+        //reset
+        addLight(sun);
     }
 
     public void addEntity(Entity entity) {

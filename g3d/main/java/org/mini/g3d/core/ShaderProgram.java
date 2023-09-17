@@ -177,15 +177,22 @@ public abstract class ShaderProgram {
         assert false;
     }
 
+    protected String preProcessShader(String shader, int type) {
+        return shader;
+    }
 
-    private static int loadShader(String file, int type) {
+    private int loadShader(String file, int type) {
 
-        byte[] sb = GToolkit.readFileFromJar(file);
-        if (DisplayManager.getGlVersion().toLowerCase().contains("opengl es")) {
-            String s = new String(sb);
-            s = s.replace("#version 330", "#version 300 es\r\nprecision highp float;\r\nprecision highp sampler2DShadow;\r\n");
-            sb = s.getBytes();
+        String sstr = GToolkit.readFileFromJarAsString(file, "utf-8");
+        sstr = preProcessShader(sstr, type);
+        sstr = adapteOpenGLorES(sstr);
+        byte[] sb = null;
+        try {
+            sb = sstr.getBytes("utf-8");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         int shaderID = glCreateShader(type);
         glShaderSource(shaderID, 1, new byte[][]{sb}, new int[]{sb.length}, 0);
         glCompileShader(shaderID);
@@ -199,6 +206,14 @@ public abstract class ShaderProgram {
             //System.exit(-1);
         }
         return shaderID;
+    }
+
+    public static String adapteOpenGLorES(String shaderBytes) {
+        if (DisplayManager.getGlVersion().toLowerCase().contains("opengl es")) {
+            shaderBytes = shaderBytes.replace("#version 330", "#version 300 es\r\nprecision highp float;\r\nprecision highp sampler2DShadow;\r\n");
+
+        }
+        return shaderBytes;
     }
 
 }

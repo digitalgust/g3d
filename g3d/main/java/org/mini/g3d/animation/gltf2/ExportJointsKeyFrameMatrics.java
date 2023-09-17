@@ -28,61 +28,10 @@ import java.util.Random;
  */
 
 public class ExportJointsKeyFrameMatrics extends GApplication {
-    GForm form;
-    List<AnimatedModel> models = new ArrayList<>();
-    Random random = new Random();
     static GImage jointImg;
     static final String EXT_MODEL_MAT = ".modelmat";
     static final String EXT_JOINT_MAT = ".jointmat";
 
-    @Override
-    public GForm getForm() {
-        if (form != null) {
-            return form;
-        }
-        GToolkit.setStyle(new GStyleDark());
-
-        form = new GForm(null);
-        MonitorGLPanel glp = new MonitorGLPanel(form);
-        glp.setName("MONITOR");
-        glp.setBack(true);
-        form.add(glp);
-
-        glp.setSize(GCallBack.getInstance().getDeviceWidth(), GCallBack.getInstance().getDeviceHeight());
-        GButton bt_load = new GButton(form, "LOAD", 0, 0, 50, 20);
-        bt_load.setActionListener(gObject -> {
-            String s = "/res/ani/xyv/Xian_Nv_DaoShi";
-            GLTF gltf = export(s + ".gltf", s + ".json");
-            for (int i = 0; i < 200; i++) {
-                AnimatedModel am = new AnimatedModel(gltf);
-                am.setPosition(new Vector3f(random.nextFloat() * 100 % 40f, 0f, random.nextFloat() * 100 % 40f));
-                am.setAniClipIndex(Math.abs(random.nextInt() % gltf.getAniGroup().getFullAniIndex()));
-                //am.setAniClipIndex(0);
-                //am.setAnimationStartTime(Math.abs(System.currentTimeMillis() - (int) (random.nextInt() % 10000)));
-                models.add(am);
-            }
-//            GLTF gltf1 = export("/res/ani/mashroom.gltf", null);
-//            AnimatedModel am = new AnimatedModel(gltf1);
-//            am.setPosition(new Vector3f(random.nextFloat() * 100 % 5f, 0f, random.nextFloat() * 100 % 5f));
-//            models.add(am);
-
-            MonitorGLPanel mgp = form.findByName("MONITOR");
-            if (mgp != null) {
-                mgp.getScene().addAnimatedModels(models);
-                mgp.getScene().getCamera().setLookatTarget(models.get(0));
-                mgp.getScene().getCamera().setOffsetToTarget(0f, 1f, 0f);
-
-            }
-        });
-        form.add(bt_load);
-
-        GButton bt_exit = new GButton(form, "EXIT", 0, 25, 50, 20);
-        bt_exit.setActionListener(gObject -> {
-            closeApp();
-        });
-        form.add(bt_exit);
-        return form;
-    }
 
     static class Token {
         int curKeyFrame;
@@ -473,6 +422,67 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
         }
     }
 
+    /**
+     * ==================================================================
+     * Test Instanced App
+     * change miniJVM plugin app  config.txt:
+     * app=org.mini.g3d.animation.gltf2.ExportJointsKeyFrameMatrics
+     * <p>
+     * ==================================================================
+     */
+
+    GForm form;
+    List<AnimatedModel> models = new ArrayList<>();
+    Random random = new Random();
+
+    @Override
+    public GForm getForm() {
+        if (form != null) {
+            return form;
+        }
+        GToolkit.setStyle(new GStyleDark());
+
+        form = new GForm(null);
+        MonitorGLPanel glp = new MonitorGLPanel(form);
+        glp.setName("MONITOR");
+        glp.setBack(true);
+        form.add(glp);
+
+        glp.setSize(GCallBack.getInstance().getDeviceWidth(), GCallBack.getInstance().getDeviceHeight());
+        GButton bt_load = new GButton(form, "LOAD", 0, 0, 50, 20);
+        bt_load.setActionListener(gObject -> {
+            String s = "/res/ani/Xian_Nv_DaoShi";
+            GLTF gltf = export(s + ".gltf", s + ".json");
+            for (int i = 0; i < 200; i++) {
+                AnimatedModel am = new AnimatedModel(gltf);
+                am.setPosition(new Vector3f((i % 20) * 2, 0f, (i / 20) * 2));
+                am.setAniClipIndex(random.nextInt(am.getGltf().getAniGroup().getSize()));
+                //am.setAnimationStartTime(Math.abs(System.currentTimeMillis() - (int) (random.nextInt() % 10000)));
+                am.setRotY(random.nextInt(360));
+                models.add(am);
+            }
+//            GLTF gltf1 = export("/res/ani/mashroom.gltf", null);
+//            AnimatedModel am = new AnimatedModel(gltf1);
+//            am.setPosition(new Vector3f(random.nextFloat() * 100 % 5f, 0f, random.nextFloat() * 100 % 5f));
+//            models.add(am);
+
+            MonitorGLPanel mgp = form.findByName("MONITOR");
+            if (mgp != null) {
+                mgp.getScene().addAnimatedModels(models);
+                mgp.getScene().getCamera().setLookatTarget(models.get(0));
+                mgp.getScene().getCamera().setOffsetToTarget(0f, 1f, 0f);
+
+            }
+        });
+        form.add(bt_load);
+
+        GButton bt_exit = new GButton(form, "EXIT", 0, 25, 50, 20);
+        bt_exit.setActionListener(gObject -> {
+            closeApp();
+        });
+        form.add(bt_exit);
+        return form;
+    }
 
     class MonitorGLPanel extends GOpenGLPanel {
         Scene scene;

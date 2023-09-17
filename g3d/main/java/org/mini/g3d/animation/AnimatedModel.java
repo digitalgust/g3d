@@ -26,6 +26,7 @@ import java.util.List;
  */
 public class AnimatedModel extends Entity implements Cloneable {
 
+    GLTF gltf;
     protected Entity shadowNode;
     protected Matrix4f transform = new Matrix4f();
     AniGroup aniGroup;
@@ -198,8 +199,12 @@ public class AnimatedModel extends Entity implements Cloneable {
     }
 
 
-    void loadGLTF(GLTF gltf) {
+    public GLTF getGltf() {
+        return gltf;
+    }
 
+    void loadGLTF(GLTF gltf) {
+        this.gltf = gltf;
 
         rootRenderNode = genRenderNode(gltf);
 

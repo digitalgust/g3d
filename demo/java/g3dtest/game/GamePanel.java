@@ -47,14 +47,8 @@ public class GamePanel extends GOpenGLPanel {
 
     MousePicker picker;
 
-    Light svetielko;
-    Entity lampa;
-    Entity ball;
     Player player;
     Map<String, GLTF> gltfData = new HashMap<>();
-
-
-    Skybox skybox;
 
     WidgetContainer widgets;
     ViewMover viewMover;
@@ -62,6 +56,8 @@ public class GamePanel extends GOpenGLPanel {
     WButton jumpBtn;
     Scene scene;
     RenderEngine renderEngine;
+
+    Light lightOnHead;
 
     public GamePanel(GForm gf) {
         super(gf, 0f, 0f, 1f, 1f);
@@ -152,7 +148,7 @@ public class GamePanel extends GOpenGLPanel {
             tx = Math.abs(random.nextFloat()) * terrain.getCols() * mapSize;
             tz = Math.abs(random.nextFloat()) * terrain.getRows() * mapSize;
             ty = terrain.getHeightOfTerrain(tx, tz);
-            modelWithLight(lamp, 1, terrain, tx, ty, tz, "Green", 0);
+            modelWithLight(lamp, 1, terrain, tx, ty, tz, "Green", 1);
         }
 
         //Gutil.checkGlError("Game glinit 5");
@@ -172,6 +168,9 @@ public class GamePanel extends GOpenGLPanel {
         scene.addAnimatedModel(player);
         camera.setLookatTarget(player);
         camera.setHeightOfLand(2f);
+        Vector3f ppos = player.getPosition();
+        lightOnHead = new Light(ppos.x, ppos.y + 3f, ppos.z, 1f, 0f, 1f, 0, 0.5f, 0f);
+        scene.addLight(lightOnHead);
 
         GLTF gltf1 = GLTFImporter.loadFile("/res/ani/Xian_Nv_DaoShi.gltf");
         gltfData.put(gltf1.getSource(), gltf1);
@@ -186,12 +185,13 @@ public class GamePanel extends GOpenGLPanel {
             py = terrain.getHeightOfTerrain(px, pz);
             Player p = new Player(gltf1, new Vector3f(px, py, pz), 0, 90, 0, 1f, shodowModel);
             p.setAniClipIndex(random.nextInt(aniGroup1.getFullAniIndex()));
+            p.setRotY(random.nextInt(360));
             scene.addAnimatedModel(p);
         }
 
         px = 0f;
         pz = 0f;
-        py = terrain.getHeightOfTerrain(px, pz) + 1f;
+        py = terrain.getHeightOfTerrain(px, pz) + 2f;
         scene.getWaters().add(new WaterTile(px, pz, py, terrain.getCols() * terrain.getMapScale()));
 
         //Gutil.checkGlError("Game glinit 9");
@@ -298,6 +298,7 @@ public class GamePanel extends GOpenGLPanel {
         } else {
             player.moveStop();
         }
+        lightOnHead.setPosition(player.getPosition());
 
 
         Vector3f cpos = camera.getPosition();
@@ -344,22 +345,22 @@ public class GamePanel extends GOpenGLPanel {
         int rgb_GREEN = 0;
         int rgb_BLUE = 0;
         if (colour == "Red") {
-            rgb_RED = 2;
+            rgb_RED = 1;
             rgb_RED += colourStrength;
         } else if (colour == "Green") {
-            rgb_GREEN = 2;
+            rgb_GREEN = 1;
             rgb_GREEN += colourStrength;
         } else if (colour == "Blue") {
-            rgb_BLUE = 2;
+            rgb_BLUE = 1;
             rgb_BLUE += colourStrength;
         }
 
-        Light light = new Light(new Vector3f(xLocation, yLocation, zLocation), new Vector3f(rgb_RED, rgb_GREEN, rgb_BLUE), new Vector3f(1.0f, 1.01f, 1.002f));
+        Light light = new Light(new Vector3f(xLocation, yLocation, zLocation), new Vector3f(rgb_RED, rgb_GREEN, rgb_BLUE), new Vector3f(.0f, 0.01f, 1.002f));
 
         Entity e = new Entity(model, new Vector3f(xLocation, currentTerrain.getHeightOfTerrain(xLocation, zLocation), zLocation), 0f, 0f, 0f, modelSize);
 
         scene.addEntity(e);
-        scene.getLights().add(light);
+        //scene.addLight(light);
     }
 
     private static void collisionMultipleTerrainsAnimatedModel(Player player, Terrain terrain) {

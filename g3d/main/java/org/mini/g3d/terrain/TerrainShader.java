@@ -5,7 +5,10 @@ import org.mini.g3d.core.Light;
 import org.mini.g3d.core.ShaderProgram;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.entity.Entity;
+import org.mini.g3d.entity.EntityShader;
 
+import java.util.Iterator;
 import java.util.List;
 
 import static org.mini.g3d.entity.EntityShader.MAX_LIGHTS;
@@ -43,6 +46,10 @@ public class TerrainShader extends ShaderProgram {
 
     public TerrainShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
+    }
+
+    protected String preProcessShader(String shader, int type) {
+        return EntityShader.defineMaxLights(shader);
     }
 
     protected void bindAttributes() {
@@ -100,12 +107,13 @@ public class TerrainShader extends ShaderProgram {
         super.loadFloat(location_shineDamper, shineDamper);
     }
 
-    public void loadLights(List<Light> lights) {
+    public void loadLights(Iterator<Light> it) {
         for (int i = 0; i < MAX_LIGHTS; i++) {
-            if (i < lights.size()) {
-                super.loadVector(location_lightPosition[i], lights.get(i).getPosition());
-                super.loadVector(location_lightColour[i], lights.get(i).getColour());
-                super.loadVector(location_attenuation[i], lights.get(i).getAttentuation());
+            if (it.hasNext()) {
+                Light light = it.next();
+                super.loadVector(location_lightPosition[i], light.getPosition());
+                super.loadVector(location_lightColour[i], light.getColour());
+                super.loadVector(location_attenuation[i], light.getAttentuation());
             } else {
                 super.loadVector(location_lightPosition[i], defLightPos);
                 super.loadVector(location_lightColour[i], defLightColor);

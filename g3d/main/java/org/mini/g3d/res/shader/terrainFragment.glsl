@@ -1,6 +1,9 @@
 #version 330 
 
-const int MAX_LIGHT = 2;// Max amount light, 1(sun) , 2(player in night)
+//${MAX_LIGHT_DEFINE_IN_PROGRAM}
+#ifndef MAX_LIGHT
+#define MAX_LIGHT  4
+#endif
 
 
 in vec2 pass_textureCoordinates;
