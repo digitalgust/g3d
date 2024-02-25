@@ -18,6 +18,7 @@ out vec3 toCameraVector;
 out float visibility;
 out vec4 shadowMapCoord;
 out vec3 pass_pos;
+out float distanceToCam;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
@@ -47,4 +48,6 @@ void main(void){
     float distance = length(positionRelativeToCam.xyz);
     visibility = exp(-pow((distance*density), gradient));
     visibility = clamp(visibility, 0.5, 1.0);
+
+    distanceToCam = length(positionRelativeToCam.xyz);
 }

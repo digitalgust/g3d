@@ -12,6 +12,7 @@ in vec3 toLightVector[MAX_LIGHT];
 in vec3 toCameraVector;
 in float visibility;
 in vec4 shadowMapCoord;
+in float distanceToCam;
 
 out vec4 out_Color;
 
@@ -178,4 +179,10 @@ void main(void){
     //    vec4 cloud = getCloud(noisetex, worldPos, cameraPos, lightPos);// 云颜色
     //    out_Color.rgb = out_Color.rgb*(1.0 - cloud.a) + cloud.rgb;// 混色
 
+    if (distanceToCam < 7.0){
+        float mx = mod(gl_FragCoord.x, 2.0);
+        if (mod(floor(gl_FragCoord.y + mx), 2.0)!=0.0){
+            discard;
+        }
+    }
 }
