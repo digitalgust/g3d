@@ -3,10 +3,10 @@ package org.mini.g3d.core;
 import org.mini.g3d.animation.AnimatedModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.vector.Vector3f;
-import org.mini.g3d.entity.EntityShader;
-import org.mini.g3d.particles.EffectMaster;
 import org.mini.g3d.entity.Entity;
+import org.mini.g3d.entity.EntityShader;
 import org.mini.g3d.gui.GuiTexture;
+import org.mini.g3d.particles.EffectMaster;
 import org.mini.g3d.particles.ParticleMaster;
 import org.mini.g3d.skybox.DayAndNight;
 import org.mini.g3d.skybox.Skybox;
@@ -14,6 +14,8 @@ import org.mini.g3d.terrain.Terrain;
 import org.mini.g3d.water.WaterTile;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 所有实体数据,需要渲染的对象,放入各个容器中
@@ -27,12 +29,46 @@ public class Scene {
     public static final Vector3f FOG_COLOR_NIGHT = new Vector3f(0.25f, 0.25f, 0.4f);
     public static final Vector3f FOG_COLOR_DAY = new Vector3f(0.7f, 0.7f, 0.9f);
 
-    List<Light> lights = Collections.synchronizedList(new ArrayList<>());
-    Map<TexturedModel, List<Entity>> entitieMap = Collections.synchronizedMap(new HashMap<TexturedModel, List<Entity>>());
-    List<WaterTile> waters = Collections.synchronizedList(new ArrayList<>());
-    List<GuiTexture> guis = Collections.synchronizedList(new ArrayList<>());
-    List<AnimatedModel> animatedModels = Collections.synchronizedList(new ArrayList<>());
-    List<Entity> subsitutes = Collections.synchronizedList(new ArrayList<>());//sprite 替身模型, 用于产生影子
+    List<Light> lights = new CopyOnWriteArrayList<>();
+    Map<TexturedModel, List<Entity>> entitieMap = new ConcurrentHashMap<>();
+
+    //            Collections.synchronizedMap(new HashMap<TexturedModel, List<Entity>>() {
+//                @Override
+//                public Set<TexturedModel> keySet() {
+//                    throw new UnsupportedOperationException("not supoort, see forEach()");
+//                }
+//
+//                @Override
+//                public Collection<List<Entity>> values() {
+//                    throw new UnsupportedOperationException("not supoort, see forEach()");
+//                }
+//
+//                @Override
+//                public Set<Map.Entry<TexturedModel, List<Entity>>> entrySet() {
+//                    throw new UnsupportedOperationException("not supoort, see forEach()");
+//                }
+//            });
+    List<WaterTile> waters = new CopyOnWriteArrayList<>();
+    List<GuiTexture> guis = new CopyOnWriteArrayList<>();
+    List<AnimatedModel> animatedModels = new CopyOnWriteArrayList<>();
+
+    //            Collections.synchronizedList(new ArrayList<AnimatedModel>() {
+//                @Override
+//                public ListIterator<AnimatedModel> iterator() {
+//                    throw new UnsupportedOperationException("not supoort, see forEach()");
+//                }
+//
+//                @Override
+//                public ListIterator<AnimatedModel> listIterator() {
+//                    throw new UnsupportedOperationException("not supoort, see forEach()");
+//                }
+//
+//                @Override
+//                public ListIterator<AnimatedModel> listIterator(int index) {
+//                    throw new UnsupportedOperationException("not supoort, see forEach()");
+//                }
+//            });
+    List<Entity> subsitutes = new ArrayList<>();//sprite 替身模型, 用于产生影子
 
 
     Skybox skybox;
@@ -96,7 +132,11 @@ public class Scene {
         return lights.iterator();
     }
 
-    public int getLightSize(){
+    public List<Light> getLights() {
+        return lights;
+    }
+
+    public int getLightSize() {
         return lights.size();
     }
 
@@ -185,16 +225,18 @@ public class Scene {
     public void addEntity(Entity entity) {
         TexturedModel entityModel = entity.getModel();
         if (entityModel == null) {
-            new Throwable().printStackTrace();
+            new Throwable("Entity :null TexturedModel").printStackTrace();
         }
-        List<Entity> batch = entitieMap.get(entityModel);
+        synchronized (entitieMap) {
+            List<Entity> batch = entitieMap.get(entityModel);
 
-        if (batch != null) {
-            batch.add(entity);
-        } else {
-            List<Entity> newBatch = new ArrayList<Entity>();
-            newBatch.add(entity);
-            entitieMap.put(entityModel, newBatch);
+            if (batch != null) {
+                batch.add(entity);
+            } else {
+                List<Entity> newBatch = new ArrayList<Entity>();
+                newBatch.add(entity);
+                entitieMap.put(entityModel, newBatch);
+            }
         }
     }
 
@@ -202,12 +244,14 @@ public class Scene {
     public void removeEntity(Entity entity) {
         TexturedModel entityModel = entity.getModel();
         if (entityModel == null) {
-            new Throwable().printStackTrace();
+            new Throwable("Entity :null TexturedModel").printStackTrace();
         }
-        List<Entity> batch = entitieMap.get(entityModel);
+        synchronized (entitieMap) {
+            List<Entity> batch = entitieMap.get(entityModel);
 
-        if (batch != null) {
-            batch.remove(entity);
+            if (batch != null) {
+                batch.remove(entity);
+            }
         }
     }
 

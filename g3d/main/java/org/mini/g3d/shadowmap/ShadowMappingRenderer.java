@@ -115,7 +115,11 @@ public class ShadowMappingRenderer extends AbstractRenderer {
 //        }
 
         Map<TexturedModel, List<Entity>> entities = scene.getEntitieMap();
-        for (TexturedModel texturedModel : entities.keySet()) {
+        entities.forEach((texturedModel, batch) -> {
+            //multithread , if scene.clear() may batch is null
+            if (texturedModel == null || batch == null) {
+                return;
+            }
             RawModel rawModel = texturedModel.getRawModel();
             Texture texture = texturedModel.getTexture();
             if (texture.isHasTransparency()) {
@@ -129,7 +133,6 @@ public class ShadowMappingRenderer extends AbstractRenderer {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture.getID());
 
-            List<Entity> batch = entities.get(texturedModel);
             for (int i = 0, imax = batch.size(); i < imax; i++) {
                 Entity entity = batch.get(i);
 
@@ -144,7 +147,7 @@ public class ShadowMappingRenderer extends AbstractRenderer {
             glDisableVertexAttribArray(1);
             glDisableVertexAttribArray(2);
             glBindVertexArray(0);
-        }
+        });
         shadowMappingShader.stop();
     }
 

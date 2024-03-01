@@ -22,7 +22,6 @@ public class EntityRenderer extends AbstractRenderer {
     }
 
     public void render(Scene scene) {
-        Map<TexturedModel, List<Entity>> entities = scene.getEntitieMap();
         shader.start();
         shader.loadSkyColour(scene.getFogColor());
         shader.loadLights(scene.getLightIterator());
@@ -30,16 +29,22 @@ public class EntityRenderer extends AbstractRenderer {
         Matrix4f projectionMatrix = scene.getCamera().getProjectionMatrix();
         shader.loadProjectionMatrix(projectionMatrix);
 
-        for (TexturedModel model : entities.keySet()) {
-            prepareTexturedModel(model);
-            List<Entity> batch = entities.get(model);
-            for (Entity entity : batch) {
-                prepareInstance(entity);
-                glDrawElements(GL_TRIANGLES, model.getRawModel().getVertexCount(), GL_UNSIGNED_INT, null, 0);//gust
-                MainFrameBuffer.triangles += model.getRawModel().getVertexCount();
+        Map<TexturedModel, List<Entity>> entities = scene.getEntitieMap();
+        entities.forEach((texturedModel, batch) -> {
+            //multithread , if scene.clear() may batch is null
+            if (texturedModel == null || batch == null) {
+                return;
             }
-            unbindTexturedModel();
-        }
+            if (texturedModel.getTexture() != null) {
+                prepareTexturedModel(texturedModel);
+                for (Entity entity : batch) {
+                    prepareInstance(entity);
+                    glDrawElements(GL_TRIANGLES, texturedModel.getRawModel().getVertexCount(), GL_UNSIGNED_INT, null, 0);//gust
+                    MainFrameBuffer.triangles += texturedModel.getRawModel().getVertexCount();
+                }
+                unbindTexturedModel();
+            }
+        });
         shader.stop();
     }
 

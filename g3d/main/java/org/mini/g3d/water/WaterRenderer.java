@@ -51,12 +51,14 @@ public class WaterRenderer extends AbstractRenderer {
 
     public void render(List<WaterTile> tiles, ICamera camera, Vector3f lightDir) {
         prepareRender(camera, lightDir);
-        for (WaterTile water : tiles) {
-            Matrix4f modelMatrix = createModelMatrix(water.getX(), water.getHeight(), water.getZ(), water.getTileSize());
-            shader.loadModelMatrix(modelMatrix);
-            shader.loadWaterColor(water.getWaterColor());
-            GL.glDrawElements(GL.GL_TRIANGLES, quad.getVertexCount(), GL.GL_UNSIGNED_INT, null, 0);
-            GLUtil.checkGlError("render " + water);
+        synchronized (tiles) {
+            for (WaterTile water : tiles) {
+                Matrix4f modelMatrix = createModelMatrix(water.getX(), water.getHeight(), water.getZ(), water.getTileSize());
+                shader.loadModelMatrix(modelMatrix);
+                shader.loadWaterColor(water.getWaterColor());
+                GL.glDrawElements(GL.GL_TRIANGLES, quad.getVertexCount(), GL.GL_UNSIGNED_INT, null, 0);
+                GLUtil.checkGlError("render " + water);
+            }
         }
         finish();
     }

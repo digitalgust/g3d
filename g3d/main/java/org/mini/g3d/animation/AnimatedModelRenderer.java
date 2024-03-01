@@ -63,12 +63,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
     public void render(ICamera camera, Iterator<? extends AnimatedModel> animatedPlayersIterator) {
         for (; animatedPlayersIterator.hasNext(); ) {
             AnimatedModel p = animatedPlayersIterator.next();
-//        animatedModelShader.start();
-//        animatedModelShader.loadSkyColor(FOG_RED, FOG_GREEN, FOG_BLUE);
-//        animatedModelShader.loadLights(lights);
-//        animatedModelShader.loadViewMatrix(camera);
             renderer.draw(camera, p.getRootRenderNode(), -1);
-//        animatedModelShader.stop();
         }
 
         List<RenderMeshPrimitive> batch = new ArrayList<>();

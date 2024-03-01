@@ -32,14 +32,16 @@ public class GuiRenderer extends AbstractRenderer {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDisable(GL_DEPTH_TEST);
-        for (GuiTexture gui : guis) {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, gui.getTexture());
-            G3dUtil.createTransformationMatrix(gui.getPosition(), gui.getScale(), matrix);
-            shader.loadTransformation(matrix);
-            shader.loadNumberOfRows(gui.getNumberOfRows());
-            shader.loadTexOffsets(gui.getTextureOffset());
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.getVertexCount());
+        synchronized (guis) {
+            for (GuiTexture gui : guis) {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, gui.getTexture());
+                G3dUtil.createTransformationMatrix(gui.getPosition(), gui.getScale(), matrix);
+                shader.loadTransformation(matrix);
+                shader.loadNumberOfRows(gui.getNumberOfRows());
+                shader.loadTexOffsets(gui.getTextureOffset());
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, quad.getVertexCount());
+            }
         }
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
