@@ -19,7 +19,9 @@ public class RenderEngine {
 
     public void renderScene(Scene scene) {
 
-        masterRenderer.render(scene);
+        synchronized (scene.getLock()) {
+            masterRenderer.render(scene);
+        }
         DisplayManager.updateDisplay();
     }
 

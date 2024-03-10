@@ -102,26 +102,44 @@ public class Joystick extends Widget {
     @Override
     public void keyEvent(int key, int scanCode, int action, int mods) {
         //System.out.println("key:" + key + " doAction:" + doAction);
+        boolean isDirectionKey = false;
         float dx = 0, dy = 0;
-        if (key == GLFW_KEY_W && (action == GLFW_PRESS || action == Glfw.GLFW_REPEAT)) {
-            dirDegree = 90f;
-            dy = -50;
-            touchedId = GLFW_MOUSE_BUTTON_4;
-        } else if (key == GLFW_KEY_S && (action == GLFW_PRESS || action == Glfw.GLFW_REPEAT)) {
-            dirDegree = 270f;
-            dy = 50;
-            touchedId = GLFW_MOUSE_BUTTON_4;
-        } else if (key == GLFW_KEY_D && (action == GLFW_PRESS || action == Glfw.GLFW_REPEAT)) {
-            dirDegree = 0f;
-            dx = 50;
-            touchedId = GLFW_MOUSE_BUTTON_4;
-        } else if (key == GLFW_KEY_A && (action == GLFW_PRESS || action == Glfw.GLFW_REPEAT)) {
-            dirDegree = 180f;
-            dx = -50;
-            touchedId = GLFW_MOUSE_BUTTON_4;
-        } else {
-            dirDegree = 0f;
-            touchedId = NO_TOUCHEDID;
+        if ((key == GLFW_KEY_W || key == GLFW_KEY_UP)) {
+            if (action == GLFW_PRESS || action == Glfw.GLFW_REPEAT) {
+                dirDegree = 90f;
+                dy = -50;
+                touchedId = GLFW_MOUSE_BUTTON_4;
+            } else {
+                touchedId = NO_TOUCHEDID;
+            }
+            isDirectionKey = true;
+        } else if ((key == GLFW_KEY_S || key == GLFW_KEY_DOWN)) {
+            if (action == GLFW_PRESS || action == Glfw.GLFW_REPEAT) {
+                dirDegree = 270f;
+                dy = 50;
+                touchedId = GLFW_MOUSE_BUTTON_4;
+            } else {
+                touchedId = NO_TOUCHEDID;
+            }
+            isDirectionKey = true;
+        } else if ((key == GLFW_KEY_D || key == GLFW_KEY_RIGHT)) {
+            if (action == GLFW_PRESS || action == Glfw.GLFW_REPEAT) {
+                dirDegree = 0f;
+                dx = 50;
+                touchedId = GLFW_MOUSE_BUTTON_4;
+            } else {
+                touchedId = NO_TOUCHEDID;
+            }
+            isDirectionKey = true;
+        } else if ((key == GLFW_KEY_A || key == GLFW_KEY_LEFT)) {
+            if (action == GLFW_PRESS || action == Glfw.GLFW_REPEAT) {
+                dirDegree = 180f;
+                dx = -50;
+                touchedId = GLFW_MOUSE_BUTTON_4;
+            } else {
+                touchedId = NO_TOUCHEDID;
+            }
+            isDirectionKey = true;
         }
         if (touchedId == GLFW_MOUSE_BUTTON_4) {
             float bigX = getX() + w * .5f;
@@ -129,12 +147,14 @@ public class Joystick extends Widget {
             curX = (bigX + dx);
             curY = (bigY + dy);
         }
-        if (action == GLFW_PRESS) {
-            callListener(JoystickListener.OPERATION_PRESS, curX, curY, dirDegree);
-        } else if (action == Glfw.GLFW_REPEAT) {
-            callListener(JoystickListener.OPERATION_MOVE, curX, curY, dirDegree);
-        } else {
-            callListener(JoystickListener.OPERATION_RELEASE, curX, curY, dirDegree);
+        if (isDirectionKey) {
+            if (action == GLFW_PRESS) {
+                callListener(JoystickListener.OPERATION_PRESS, curX, curY, dirDegree);
+            } else if (action == Glfw.GLFW_REPEAT) {
+                callListener(JoystickListener.OPERATION_MOVE, curX, curY, dirDegree);
+            } else {
+                callListener(JoystickListener.OPERATION_RELEASE, curX, curY, dirDegree);
+            }
         }
     }
 

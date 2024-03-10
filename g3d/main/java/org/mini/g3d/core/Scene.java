@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Scene {
 
+    Object lock = new Object();
     public static final Vector3f SUN_COLOR_NIGHT = new Vector3f(0.4f, 0.4f, 0.6f);
     public static final Vector3f SUN_COLOR_DAY = new Vector3f(1.0f, 1.0f, 0.8f);
 
@@ -101,19 +102,27 @@ public class Scene {
     }
 
     public void setSkybox(Skybox skybox) {
-        this.skybox = skybox;
+        synchronized (lock) {
+            this.skybox = skybox;
+        }
     }
 
     public void setSun(Light sun) {
-        this.sun = sun;
+        synchronized (lock) {
+            this.sun = sun;
+        }
     }
 
     public void setTerrain(Terrain terrain) {
-        this.terrain = terrain;
+        synchronized (lock) {
+            this.terrain = terrain;
+        }
     }
 
     public void setCamera(Camera camera) {
-        this.camera = camera;
+        synchronized (lock) {
+            this.camera = camera;
+        }
     }
 
     public Skybox getSkybox() {
@@ -168,31 +177,42 @@ public class Scene {
 
     public void addAnimatedModel(AnimatedModel model) {
         if (model == null) return;
-        animatedModels.add(model);
-        if (model.getShadowNode() != null) {
-            subsitutes.add(model.getShadowNode());
+
+        synchronized (lock) {
+            animatedModels.add(model);
+            if (model.getShadowNode() != null) {
+                subsitutes.add(model.getShadowNode());
+            }
         }
     }
 
     public void addAnimatedModels(List<? extends AnimatedModel> models) {
         if (models == null) return;
-        for (AnimatedModel am : models) {
-            addAnimatedModel(am);
+        synchronized (lock) {
+            for (AnimatedModel am : models) {
+                addAnimatedModel(am);
+            }
         }
     }
 
     public void removeAnimatedMode(AnimatedModel model) {
         if (model == null) return;
-        animatedModels.remove(model);
-        if (model.getShadowNode() != null) {
-            subsitutes.remove(model.getShadowNode());
+
+        synchronized (lock) {
+            animatedModels.remove(model);
+            if (model.getShadowNode() != null) {
+                subsitutes.remove(model.getShadowNode());
+            }
         }
     }
 
     public void removeAnimatedModels(List<? extends AnimatedModel> models) {
         if (models == null) return;
-        for (AnimatedModel am : models) {
-            removeAnimatedMode(am);
+
+        synchronized (lock) {
+            for (AnimatedModel am : models) {
+                removeAnimatedMode(am);
+            }
         }
     }
 
@@ -202,55 +222,64 @@ public class Scene {
 
 
     public void clearAnimatedModels() {
-        animatedModels.clear();
-        subsitutes.clear();
+        synchronized (lock) {
+            animatedModels.clear();
+            subsitutes.clear();
+        }
     }
 
     /**
      * =====================================================
      */
     public void clear() {
-        lights.clear();
-        entitieMap.clear();
-        waters.clear();
-        setTerrain(null);
-        setSkybox(null);
-        clearGuis();
-        clearAnimatedModels();
+        synchronized (lock) {
+            lights.clear();
+            entitieMap.clear();
+            waters.clear();
+            setTerrain(null);
+            setSkybox(null);
+            clearGuis();
+            clearAnimatedModels();
 
-        //reset
-        addLight(sun);
+            //reset
+            addLight(sun);
+        }
     }
 
     public void addEntity(Entity entity) {
-        TexturedModel entityModel = entity.getModel();
-        if (entityModel == null) {
-            new Throwable("Entity :null TexturedModel").printStackTrace();
-        }
-        synchronized (entitieMap) {
-            List<Entity> batch = entitieMap.get(entityModel);
+        synchronized (lock) {
+            TexturedModel entityModel = entity.getModel();
+            if (entityModel == null) {
+                new Throwable("Entity :null TexturedModel").printStackTrace();
+            }
+            synchronized (entitieMap) {
+                List<Entity> batch = entitieMap.get(entityModel);
 
-            if (batch != null) {
-                batch.add(entity);
-            } else {
-                List<Entity> newBatch = new ArrayList<Entity>();
-                newBatch.add(entity);
-                entitieMap.put(entityModel, newBatch);
+                if (batch != null) {
+                    batch.add(entity);
+                } else {
+                    List<Entity> newBatch = new ArrayList<Entity>();
+                    newBatch.add(entity);
+                    entitieMap.put(entityModel, newBatch);
+                }
             }
         }
     }
 
 
     public void removeEntity(Entity entity) {
-        TexturedModel entityModel = entity.getModel();
-        if (entityModel == null) {
-            new Throwable("Entity :null TexturedModel").printStackTrace();
-        }
-        synchronized (entitieMap) {
-            List<Entity> batch = entitieMap.get(entityModel);
 
-            if (batch != null) {
-                batch.remove(entity);
+        synchronized (lock) {
+            TexturedModel entityModel = entity.getModel();
+            if (entityModel == null) {
+                new Throwable("Entity :null TexturedModel").printStackTrace();
+            }
+            synchronized (entitieMap) {
+                List<Entity> batch = entitieMap.get(entityModel);
+
+                if (batch != null) {
+                    batch.remove(entity);
+                }
             }
         }
     }
@@ -269,15 +298,21 @@ public class Scene {
     }
 
     public void addGuiTex(GuiTexture tex) {
-        guis.add(tex);
+        synchronized (lock) {
+            guis.add(tex);
+        }
     }
 
     public void removeGuiTex(GuiTexture tex) {
-        guis.remove(tex);
+        synchronized (lock) {
+            guis.remove(tex);
+        }
     }
 
     public void clearGuis() {
-        guis.clear();
+        synchronized (lock) {
+            guis.clear();
+        }
     }
 
     public List<GuiTexture> getGuis() {
@@ -289,21 +324,27 @@ public class Scene {
     }
 
     public void setShadowRender(boolean shadowNow) {
-        shadowRender = shadowNow;
-        if (!subsitutes.isEmpty()) {
-            TexturedModel tm = subsitutes.get(0).getModel();
-            if (shadowNow) {
-                if (entitieMap.get(tm) != null) {
-                    //throw new RuntimeException("Subsitue of AnimatedModel TextureModel can't used by other");
+        synchronized (lock) {
+            shadowRender = shadowNow;
+            if (!subsitutes.isEmpty()) {
+                TexturedModel tm = subsitutes.get(0).getModel();
+                if (shadowNow) {
+                    if (entitieMap.get(tm) != null) {
+                        //throw new RuntimeException("Subsitue of AnimatedModel TextureModel can't used by other");
+                    }
+                    entitieMap.put(tm, subsitutes);
+                } else {
+                    entitieMap.remove(tm);
                 }
-                entitieMap.put(tm, subsitutes);
-            } else {
-                entitieMap.remove(tm);
             }
         }
     }
 
     public boolean isShadowRender() {
         return shadowRender;
+    }
+
+    public Object getLock() {
+        return lock;
     }
 }
