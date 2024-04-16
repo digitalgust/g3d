@@ -118,6 +118,13 @@ public class Emitter {
     }
 
 
+    /**
+     * 每秒调用一次
+     */
+    public void onSecondOver() {
+        generatedCount = 0;
+    }
+
     public void onEmitterTerminate(Vector3f systemCenter) {
         for (int i = generatedCount; i < getMin(); i++) {
             emitParticle(systemCenter);
@@ -128,7 +135,7 @@ public class Emitter {
         float delta = DisplayManager.getFrameTimeSeconds();
         float particlesToCreate = pps * delta;
         int count = (int) Math.floor(particlesToCreate);
-        //不足1的部分按概率发身
+        //不足1的部分按概率发射
         float partialParticle = particlesToCreate % 1;
         if (random.nextFloat() < partialParticle) {
             count++;

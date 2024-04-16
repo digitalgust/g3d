@@ -23,6 +23,7 @@ public class Effect {
     //runtime
     public Map<String, Emitter> map;
     private float firstRun;
+    private float secondRun;
     boolean exit = false;
 
 
@@ -37,7 +38,14 @@ public class Effect {
         float now = DisplayManager.getTime();
         if (firstRun == 0) {
             firstRun = now;
+            secondRun = now;
         }
+        boolean onSeconds = false;
+        if (now - secondRun > 1.f) {
+            secondRun = now;
+            onSeconds = true;
+        }
+
         boolean over = true;
         for (Emitter emi : emitters) {
             if (now - firstRun >= emi.startAt) {
@@ -53,7 +61,12 @@ public class Effect {
                     c.onUpdate(emi);
                 }
             }
+            //
             emi.update();
+            // 每秒调用一次
+            if(onSeconds){
+                emi.onSecondOver();
+            }
             if (emi.emitterLife > 0.f && now - firstRun - emi.startAt > emi.emitterLife) {
                 for (EmitterControler c : controlers) {
                     if (c.canApply(emi)) {
