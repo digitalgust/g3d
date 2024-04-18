@@ -61,12 +61,12 @@ public class WButton extends Widget {
         if (pressed) {
             if (isInArea(x, y) && touchedId == NO_TOUCHEDID) {
                 touchedId = button;
-                doAction();
                 return true;
             }
         } else {
             if (touchedId == button) {
                 touchedId = NO_TOUCHEDID;
+                doAction();
                 return true;
             }
         }
