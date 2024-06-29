@@ -59,8 +59,9 @@ void main(void){
     out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
 
     if (distanceToCam < 6.0){
-        float mx = mod(gl_FragCoord.x, 2.0);
-        if (mod(floor(gl_FragCoord.y + mx), 2.0)!=0.0){
+        int mx = int(mod(gl_FragCoord.x, 2.0));
+        int my = int(mod(gl_FragCoord.y, 2.0));
+        if (mx+my!=1){//网格状透明
             discard;
         }
     }

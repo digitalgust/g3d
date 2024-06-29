@@ -80,6 +80,7 @@ public class EntityRenderer extends AbstractRenderer {
         Matrix4f transformationMatrix = G3dUtil.createTransformationMatrix(entity.getPosition(), entity.getRotX(), entity.getRotY(), entity.getRotZ(), entity.getScale(), cachedTransform);
         shader.loadTransformationMatrix(transformationMatrix);
         shader.loadOffset(entity.getTextureXOffset(), entity.getTextureYOffset());
+        shader.loadTransparency(entity.getTransparency());
     }
 
 }

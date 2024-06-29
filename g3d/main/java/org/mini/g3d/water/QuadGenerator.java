@@ -12,6 +12,7 @@ public class QuadGenerator {
     private static final int[] INDICES = {0, 3, 1, 1, 3, 2};
 
     public static RawModel generateQuad(Loader loader) {
+        GLUtil.checkGlError("generateQuad 0");
         int[] lengths = getAttributeLengths(VERTEX_COUNT, VERTICES);
         float[] interleavedData = interleaveFloatData(VERTEX_COUNT, VERTICES);
 

@@ -39,12 +39,19 @@ public class MasterRenderer extends AbstractRenderer {
 
         shadowMappingRenderer = new ShadowMappingRenderer(shadowMappingFbo);
         enitiyRenderer = new EntityRenderer();
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "init EntityRenderer");
         terrainRenderer = new TerrainRenderer(shadowMappingFbo);
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "init TerrainRenderer");
         animatedModelRenderer = new AnimatedModelRenderer();
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "init AnimatedModelRenderer");
         skyboxRenderer = new SkyboxRenderer();
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "init SkyboxRenderer");
         waterRenderer = new WaterRenderer(waterFbos);
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "init WaterRenderer");
         guiRenderer = new GuiRenderer();
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "init GuiRenderer");
         particleRenderer = new ParticleRenderer();
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "init ParticleRenderer");
     }
 
 

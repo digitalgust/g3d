@@ -11,6 +11,7 @@ public class Entity {
     protected Vector3f position = new Vector3f();
     protected float rotX, rotY, rotZ;
     protected float scale = 1.0f;
+    protected float transparency = 1.0f; //采用网络透，性能高，目前仅支付半透明，1不透明，0透明，0.5半透明
 
     protected int textureIndex = 0;
 
@@ -111,6 +112,14 @@ public class Entity {
 
     public float getScale() {
         return scale;
+    }
+
+    public void setTransparency(float transparency) {
+        this.transparency = transparency;
+    }
+
+    public float getTransparency() {
+        return transparency;
     }
 
     public void setScale(float scale) {
