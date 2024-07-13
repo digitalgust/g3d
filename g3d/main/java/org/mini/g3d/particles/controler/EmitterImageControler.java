@@ -16,12 +16,14 @@ public class EmitterImageControler extends EmitterControler {
     int rows;
     int frameIndex;
     boolean additive;
+    boolean depthTest;
 
-    public EmitterImageControler(GImage texture, boolean additive, int rows, int frameIndex, String pnodeName) {
+    public EmitterImageControler(GImage texture, boolean additive, boolean depthTest, int rows, int frameIndex, String pnodeName) {
         this.texture = texture;
         this.rows = rows;
         this.frameIndex = frameIndex;
         this.additive = additive;
+        this.depthTest = depthTest;
         emitterName = pnodeName;
     }
 
@@ -33,7 +35,7 @@ public class EmitterImageControler extends EmitterControler {
         if (texture == null) return;
         if (emi != null) {
             emi.setImageGrids(rows);
-            emi.setImg(texture, additive);
+            emi.setImg(texture, additive, depthTest);
             emi.setFrameIndex(frameIndex);
         }
     }

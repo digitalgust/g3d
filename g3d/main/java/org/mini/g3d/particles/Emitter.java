@@ -30,6 +30,7 @@ public class Emitter {
     public int imageGrids;
     public String audioPath;
     public boolean additive = true;
+    private boolean depthTest = true;
     public Vector3f location;
     public Vector3f locationError = new Vector3f(0, 0, 0);
     public Vector3f direction = new Vector3f(0, 0, 0);
@@ -73,7 +74,7 @@ public class Emitter {
             startuped = true;
             GImage img = GToolkit.getCachedImageFromJar(imagePath);
             if (img != null) {
-                setImg(img, additive);
+                setImg(img, additive, depthTest);
             }
             if (audioPath != null && !"".equals(audioPath)) {
                 Sound.getInstance().play(audioPath, getEmitLocation());
@@ -395,10 +396,10 @@ public class Emitter {
         this.locationError = locationError;
     }
 
-    public void setImg(GImage img, boolean additive) {
+    public void setImg(GImage img, boolean additivePara, boolean depthTestPara) {
         this.img = img;
         if (img != null) {
-            texture = new ParticleTexture(img.getGLTextureId(), imageGrids, additive);
+            texture = new ParticleTexture(img.getGLTextureId(), imageGrids, additivePara, depthTestPara);
         } else {
             System.out.println("[G3D][ERROR]load image error " + imagePath);
         }
@@ -433,4 +434,11 @@ public class Emitter {
     }
 
 
+    public boolean isDepthTest() {
+        return depthTest;
+    }
+
+    public void setDepthTest(boolean depthTest) {
+        this.depthTest = depthTest;
+    }
 }

@@ -55,8 +55,14 @@ public class ParticleRenderer extends AbstractRenderer {
         Matrix4f viewMatrix = scene.getCamera().getViewMatrix();
         Matrix4f projectionMatrix = scene.getCamera().getProjectionMatrix();
         shader.loadProjectionMatrix(projectionMatrix);
+        int depthTestState = glIsEnabled(GL_DEPTH_TEST);
 
         for (ParticleTexture texture : particles.keySet()) {
+            if (texture.isDepthTest()) {
+                glEnable(GL_DEPTH_TEST);
+            } else {
+                glDisable(GL_DEPTH_TEST);
+            }
             bindTexture(texture);
             List<Particle> particleList = particles.get(texture);
             pointer = 0;
@@ -67,6 +73,11 @@ public class ParticleRenderer extends AbstractRenderer {
             }
             loader.updateVbo(vbo, vboData);
             glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, quad.getVertexCount(), particleList.size());
+        }
+        if (depthTestState == GL_TRUE) {
+            glEnable(GL_DEPTH_TEST);
+        } else {
+            glDisable(GL_DEPTH_TEST);
         }
         finish();
     }

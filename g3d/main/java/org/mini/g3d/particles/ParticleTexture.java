@@ -5,11 +5,13 @@ public class ParticleTexture {
     private int textureID;
     private int numberOfRows;
     private boolean additive;
+    private boolean depthTest;
 
-    public ParticleTexture(int textureID, int numberOfRows, boolean additive) {
+    public ParticleTexture(int textureID, int numberOfRows, boolean additive, boolean depthTest) {
         this.textureID = textureID;
         this.numberOfRows = numberOfRows;
         this.additive = additive;
+        this.depthTest = depthTest;
     }
 
     protected boolean usesAdditiveBlending() {
@@ -22,5 +24,9 @@ public class ParticleTexture {
 
     public int getNumberOfRows() {
         return numberOfRows;
+    }
+
+    public boolean isDepthTest() {
+        return depthTest;
     }
 }
