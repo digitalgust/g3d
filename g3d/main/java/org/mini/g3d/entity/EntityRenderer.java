@@ -51,10 +51,10 @@ public class EntityRenderer extends AbstractRenderer {
     private void prepareTexturedModel(TexturedModel model) {
         RawModel rawModel = model.getRawModel();
         Texture texture = model.getTexture();
-        if (texture.isHasTransparency()) {
-            MasterRenderer.disableCulling();
-        } else {
+        if (rawModel.isCullingBack()) {
             MasterRenderer.enableCulling();
+        } else {
+            MasterRenderer.disableCulling();
         }
 
         glBindVertexArray(rawModel.getVaoID());

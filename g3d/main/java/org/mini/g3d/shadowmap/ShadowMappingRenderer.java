@@ -122,7 +122,9 @@ public class ShadowMappingRenderer extends AbstractRenderer {
             }
             RawModel rawModel = texturedModel.getRawModel();
             Texture texture = texturedModel.getTexture();
-            if (texture.isHasTransparency()) {
+            if (rawModel.isCullingBack()) {
+                MasterRenderer.enableCulling();
+            } else {
                 MasterRenderer.disableCulling();
             }
 
