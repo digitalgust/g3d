@@ -1,7 +1,7 @@
 package org.mini.g3d.particles;
 
 import org.mini.g3d.particles.controler.EmitterDirectionControler;
-import org.mini.g3d.particles.controler.EmitterLocOffsetControler;
+import org.mini.g3d.particles.controler.EmitterLocationControler;
 import org.mini.json.JsonParser;
 
 /**
@@ -41,9 +41,9 @@ public abstract class EmitterControler implements JsonParser.Polymorphic {
     public Class getType() {
         switch (controlerType) {
             case "LocOffset":
-                return EmitterLocOffsetControler.class;
+                return EmitterLocationControler.class;
             case "LocRation":
-                return EmitterLocOffsetControler.class;
+                return EmitterLocationControler.class;
             case "Direction":
                 return EmitterDirectionControler.class;
             default://try to parse as class name

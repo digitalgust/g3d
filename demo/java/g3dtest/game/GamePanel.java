@@ -20,7 +20,7 @@ import org.mini.g3d.gui.GuiTexture;
 import org.mini.g3d.particles.Effect;
 import org.mini.g3d.particles.EffectMaster;
 import org.mini.g3d.particles.controler.EmitterDirectionControler;
-import org.mini.g3d.particles.controler.EmitterLocOffsetControler;
+import org.mini.g3d.particles.controler.EmitterLocationControler;
 import org.mini.g3d.shadowmap.ShadowMappingRenderer;
 import org.mini.g3d.skybox.Skybox;
 import org.mini.g3d.terrain.Terrain;
@@ -414,7 +414,7 @@ public class GamePanel extends GOpenGLPanel {
     public static void showFalldown(Vector3f pos) {
         String STR_PE_1 = GToolkit.readFileFromJarAsString("/res/effect/demo/multi_emitter.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_1);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(pos, null);
+        EmitterLocationControler etc = new EmitterLocationControler(pos, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }
@@ -422,7 +422,7 @@ public class GamePanel extends GOpenGLPanel {
     public static void showFadeInFadeOut(Vector3f loc) {
         String STR_PE_2 = GToolkit.readFileFromJarAsString("/res/effect/demo/fadein_fadeout.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_2);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(loc, null);
+        EmitterLocationControler etc = new EmitterLocationControler(loc, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }
@@ -432,7 +432,7 @@ public class GamePanel extends GOpenGLPanel {
         Effect pe1 = EffectMaster.parseEffect(STR_PE_3);
         Vector3f v = new Vector3f();
         Vector3f.sub(to, from, v);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(from, null);
+        EmitterLocationControler etc = new EmitterLocationControler(from, null);
         pe1.addControler(etc);
         EmitterDirectionControler edc = new EmitterDirectionControler(v, null);
         pe1.addControler(edc);
@@ -444,7 +444,7 @@ public class GamePanel extends GOpenGLPanel {
     public static void showFire(Vector3f loc) {
         String STR_PE_4 = GToolkit.readFileFromJarAsString("/res/effect/demo/direction_controler.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_4);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(loc, null);
+        EmitterLocationControler etc = new EmitterLocationControler(loc, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }
@@ -453,7 +453,7 @@ public class GamePanel extends GOpenGLPanel {
     public static void showCircle(Vector3f loc) {
         String STR_PE_5 = GToolkit.readFileFromJarAsString("/res/effect/demo/circle_modifier.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_5);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(loc, null);
+        EmitterLocationControler etc = new EmitterLocationControler(loc, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }
@@ -461,7 +461,7 @@ public class GamePanel extends GOpenGLPanel {
     public static void showColorChange(Vector3f loc) {
         String STR_PE_6 = GToolkit.readFileFromJarAsString("/res/effect/demo/color_modifier.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_6);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(loc, null);
+        EmitterLocationControler etc = new EmitterLocationControler(loc, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }
@@ -469,7 +469,7 @@ public class GamePanel extends GOpenGLPanel {
     public static void showBomb(Vector3f loc) {
         String STR_PE_7 = GToolkit.readFileFromJarAsString("/res/effect/demo/normal.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_7);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(loc, null);
+        EmitterLocationControler etc = new EmitterLocationControler(loc, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }
@@ -478,7 +478,7 @@ public class GamePanel extends GOpenGLPanel {
     public static void showNumber(Vector3f loc, int val) {
         String STR_PE_7 = GToolkit.readFileFromJarAsString("/res/effect/demo/normal.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_7);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(loc, null);
+        EmitterLocationControler etc = new EmitterLocationControler(loc, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }
@@ -487,7 +487,7 @@ public class GamePanel extends GOpenGLPanel {
     public static void showTest(Vector3f loc) {
         String STR_PE_7 = GToolkit.readFileFromJarAsString("/res/effect/demo/test.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_7);
-        EmitterLocOffsetControler etc = new EmitterLocOffsetControler(loc, null);
+        EmitterLocationControler etc = new EmitterLocationControler(loc, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }

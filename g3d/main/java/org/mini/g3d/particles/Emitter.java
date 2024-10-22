@@ -54,7 +54,7 @@ public class Emitter {
     // runtime
     private boolean startuped = false, terminated = false;
     GImage img;
-    public Vector3f offsetLocation;
+    public Vector3f offsetLocation = new Vector3f();
     public Vector3f rotation = new Vector3f();
     public Vector3f runtimeLocation = new Vector3f();
     public ParticleTexture texture;

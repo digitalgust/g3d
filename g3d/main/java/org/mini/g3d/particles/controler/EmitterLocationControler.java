@@ -7,11 +7,11 @@ import org.mini.g3d.particles.EmitterControler;
 /**
  * 粒子发射器位置控制,叠加在json配置上的位置
  */
-public class EmitterLocOffsetControler extends EmitterControler {
+public class EmitterLocationControler extends EmitterControler {
     Vector3f location = new Vector3f();
     String emitterName;
 
-    public EmitterLocOffsetControler(Vector3f location, String pnodeName) {
+    public EmitterLocationControler(Vector3f location, String pnodeName) {
         this.location.set(location);
         this.emitterName = pnodeName;
     }
@@ -25,7 +25,7 @@ public class EmitterLocOffsetControler extends EmitterControler {
         if (location == null) return;
         //
         if (emi != null) {
-            emi.offsetLocation = (location);
+            emi.offsetLocation.set(location);
         }
     }
 
