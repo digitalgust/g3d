@@ -19,8 +19,9 @@ public class EventDispatcher {
     }
 
     public void dispatch() {
-        for (Runnable listener : listeners) {
+        for (int i = 0; i < listeners.size(); i++) {
             try {
+                Runnable listener = listeners.get(i);
                 listener.run();
             } catch (Exception e) {
                 e.printStackTrace();

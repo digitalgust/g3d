@@ -34,8 +34,7 @@ public class EmitterImageControler extends EmitterControler {
     public void onStart(Emitter emi) {
         if (texture == null) return;
         if (emi != null) {
-            emi.setImageGrids(rows);
-            emi.setImg(texture, additive, depthTest);
+            emi.setImg(texture, rows, additive, depthTest);
             emi.setFrameIndex(frameIndex);
         }
     }

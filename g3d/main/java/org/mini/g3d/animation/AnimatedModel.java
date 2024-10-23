@@ -211,7 +211,8 @@ public class AnimatedModel extends Entity implements Cloneable {
         aniGroup = gltf.getAniGroup();
         //Generate Animations
         if (gltf.getAnimations() != null) {
-            for (GLTFAnimation animation : gltf.getAnimations()) {
+            for (int i = 0; i < gltf.getAnimations().size(); i++) {
+                GLTFAnimation animation = gltf.getAnimations().get(i);
                 animations.add(new RenderAnimation(animation, rootRenderNode, gltf.getAniGroup()));
             }
         }
@@ -242,7 +243,8 @@ public class AnimatedModel extends Entity implements Cloneable {
         if (mesh != null) {
             GLTFMesh gltfMesh = mesh;
             renderNode = new RenderMesh(node, parent);
-            for (GLTFMeshPrimitive primitive : gltfMesh.getPrimitives()) {
+            for (int i = 0; i < gltfMesh.getPrimitives().size(); i++) {
+                GLTFMeshPrimitive primitive = gltfMesh.getPrimitives().get(i);
                 //System.out.println("Processing GLTFMesh. Name: " + gltfMesh.getName());
                 //Each primitive gets its own render object.
                 new RenderMeshPrimitive(primitive, null, (RenderMesh) renderNode);

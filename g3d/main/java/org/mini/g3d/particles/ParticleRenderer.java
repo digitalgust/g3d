@@ -67,7 +67,8 @@ public class ParticleRenderer extends AbstractRenderer {
             List<Particle> particleList = particles.get(texture);
             pointer = 0;
             float[] vboData = new float[particleList.size() * INSTANCE_DATA_LENGTH];
-            for (Particle particle : particleList) {
+            for (int i = 0; i < particleList.size(); i++) {
+                Particle particle = particleList.get(i);
                 updateModelViewMatrix(particle, viewMatrix, vboData);
                 updateTexCoordInfo(particle, vboData);
             }

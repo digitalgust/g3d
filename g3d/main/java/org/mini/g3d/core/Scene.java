@@ -189,7 +189,8 @@ public class Scene {
     public void addAnimatedModels(List<? extends AnimatedModel> models) {
         if (models == null) return;
         synchronized (lock) {
-            for (AnimatedModel am : models) {
+            for (int i = 0, imax = models.size(); i < imax; i++) {
+                AnimatedModel am = models.get(i);
                 addAnimatedModel(am);
             }
         }
@@ -210,7 +211,8 @@ public class Scene {
         if (models == null) return;
 
         synchronized (lock) {
-            for (AnimatedModel am : models) {
+            for (int i = 0, imax = models.size(); i < imax; i++) {
+                AnimatedModel am = models.get(i);
                 removeAnimatedMode(am);
             }
         }

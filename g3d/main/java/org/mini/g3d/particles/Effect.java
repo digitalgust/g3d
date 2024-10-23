@@ -20,8 +20,6 @@ public class Effect {
     //config
     public List<Emitter> emitters;
 
-    //runtime
-    public Map<String, Emitter> map;
     private float firstRun;
     private float secondRun;
     boolean exit = false;
@@ -47,16 +45,19 @@ public class Effect {
         }
 
         boolean over = true;
-        for (Emitter emi : emitters) {
+        for (int i = 0; i < emitters.size(); i++) {
+            Emitter emi = emitters.get(i);
             if (now - firstRun >= emi.startAt) {
                 emi.startup();
-                for (EmitterControler c : controlers) {
+                for (int j = 0; j < controlers.size(); j++) {
+                    EmitterControler c = controlers.get(j);
                     if (c.canApply(emi)) {
                         c.onStart(emi);
                     }
                 }
             }
-            for (EmitterControler c : controlers) {
+            for (int j = 0; j < controlers.size(); j++) {
+                EmitterControler c = controlers.get(j);
                 if (c.canApply(emi)) {
                     c.onUpdate(emi);
                 }
@@ -64,11 +65,12 @@ public class Effect {
             //
             emi.update();
             // 每秒调用一次
-            if(onSeconds){
+            if (onSeconds) {
                 emi.onSecondOver();
             }
             if (emi.emitterLife > 0.f && now - firstRun - emi.startAt > emi.emitterLife) {
-                for (EmitterControler c : controlers) {
+                for (int j = 0; j < controlers.size(); j++) {
+                    EmitterControler c = controlers.get(j);
                     if (c.canApply(emi)) {
                         c.onTeminate(emi);
                     }
@@ -93,7 +95,12 @@ public class Effect {
 
     public Emitter get(String pnodeName) {
         if (emitters != null) {
-            return map.get(pnodeName);
+            for (int i = 0; i < emitters.size(); i++) {
+                Emitter emi = emitters.get(i);
+                if (emi.name.equals(pnodeName)) {
+                    return emi;
+                }
+            }
         }
         return null;
     }
@@ -107,14 +114,6 @@ public class Effect {
 
     public void setEmitters(List<Emitter> emitters) {
         this.emitters = emitters;
-
-        //fill map with name
-        map = new HashMap<>();
-        for (Emitter pn : emitters) {
-            if (pn.name != null) {
-                map.put(pn.name, pn);
-            }
-        }
     }
 
 

@@ -1,7 +1,9 @@
 package org.mini.g3d.particles;
 
 import org.mini.g3d.particles.controler.EmitterDirectionControler;
+import org.mini.g3d.particles.controler.EmitterImageControler;
 import org.mini.g3d.particles.controler.EmitterLocationControler;
+import org.mini.g3d.particles.controler.EmitterRotationControler;
 import org.mini.json.JsonParser;
 
 /**
@@ -14,24 +16,28 @@ public abstract class EmitterControler implements JsonParser.Polymorphic {
 
     /**
      * 当emitter创建时执行一次
+     *
      * @param emi
      */
     public abstract void onStart(Emitter emi);
 
     /**
      * 当结束时执行一次
+     *
      * @param emi
      */
     public abstract void onTeminate(Emitter emi);
 
     /**
      * 每次更新
+     *
      * @param emi
      */
     public abstract void onUpdate(Emitter emi);
 
     /**
      * 是否对emitter进行作用
+     *
      * @param emitter
      * @return
      */
@@ -40,12 +46,14 @@ public abstract class EmitterControler implements JsonParser.Polymorphic {
     @Override
     public Class getType() {
         switch (controlerType) {
-            case "LocOffset":
+            case "Location":
                 return EmitterLocationControler.class;
-            case "LocRation":
-                return EmitterLocationControler.class;
+            case "Ration":
+                return EmitterRotationControler.class;
             case "Direction":
                 return EmitterDirectionControler.class;
+            case "Image":
+                return EmitterImageControler.class;
             default://try to parse as class name
                 try {
                     return Class.forName(controlerType);

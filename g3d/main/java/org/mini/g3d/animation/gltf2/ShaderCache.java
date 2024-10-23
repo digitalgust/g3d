@@ -95,7 +95,8 @@ public class ShaderCache {
 
         //calc hash, 采用更快的方法计算相同配置的 shader
         Collections.sort(permutationDefines);
-        for (String def : permutationDefines) {
+        for (int i = 0; i < permutationDefines.size(); i++) {
+            String def = permutationDefines.get(i);
             hash *= def.hashCode();
         }
 
@@ -105,7 +106,8 @@ public class ShaderCache {
         } else {
             sb.append("#version 330\n"); //Put this in so it doesn't give a warning
         }
-        for (String define : permutationDefines) {
+        for (int i = 0; i < permutationDefines.size(); i++) {
+            String define = permutationDefines.get(i);
             sb.append("#define ").append(define).append('\n');
         }
         //hash *= sb.toString().hashCode();

@@ -52,7 +52,8 @@ public class WaterRenderer extends AbstractRenderer {
     public void render(List<WaterTile> tiles, ICamera camera, Vector3f lightDir) {
         prepareRender(camera, lightDir);
         synchronized (tiles) {
-            for (WaterTile water : tiles) {
+            for (int i = 0; i < tiles.size(); i++) {
+                WaterTile water = tiles.get(i);
                 Matrix4f modelMatrix = createModelMatrix(water.getX(), water.getHeight(), water.getZ(), water.getTileSize());
                 shader.loadModelMatrix(modelMatrix);
                 shader.loadWaterColor(water.getWaterColor());

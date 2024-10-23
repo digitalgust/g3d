@@ -74,7 +74,7 @@ public class Emitter {
             startuped = true;
             GImage img = GToolkit.getCachedImageFromJar(imagePath);
             if (img != null) {
-                setImg(img, additive, depthTest);
+                setImg(img, imageGrids, additive, depthTest);
             }
             if (audioPath != null && !"".equals(audioPath)) {
                 Sound.getInstance().play(audioPath, getEmitLocation());
@@ -396,8 +396,9 @@ public class Emitter {
         this.locationError = locationError;
     }
 
-    public void setImg(GImage img, boolean additivePara, boolean depthTestPara) {
+    public void setImg(GImage img, int rows, boolean additivePara, boolean depthTestPara) {
         this.img = img;
+        imageGrids = rows;
         if (img != null) {
             texture = new ParticleTexture(img.getGLTextureId(), imageGrids, additivePara, depthTestPara);
         } else {

@@ -10,6 +10,7 @@ import org.mini.gl.GL;
 import org.mini.glwrap.GLUtil;
 import org.mini.gui.GCmd;
 import org.mini.gui.GForm;
+import org.mini.util.IntList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,9 +28,9 @@ import static org.mini.gl.GL.*;
 public class Loader {
     public static final int FLOAT_SIZE = 4, INT_SIZE = 4;
 
-    private final List<Integer> vaos = new ArrayList<>();
-    private final List<Integer> vbos = new ArrayList<>();
-    private final List<Integer> textures = new ArrayList<>();
+    private final IntList vaos = new IntList();
+    private final IntList vbos = new IntList();
+    private final IntList textures = new IntList();
     private final Map<String, Integer> path2texid = new HashMap();
     private final Map<String, Texture> path2tex = new HashMap();
     private final Map<String, RawModel> path2model = new HashMap();
@@ -341,15 +342,18 @@ public class Loader {
 
     public void cleanUp() {
         int[] tmp = {0};
-        for (int vaoID : vaos) {
+        for (int i = 0; i < vaos.size(); i++) {
+            int vaoID = vaos.get(i);
             tmp[0] = vaoID;
             glDeleteVertexArrays(1, tmp, 0);
         }
-        for (int vboID : vbos) {
+        for (int i = 0; i < vbos.size(); i++) {
+            int vboID = vbos.get(i);
             tmp[0] = vboID;
             glDeleteBuffers(1, tmp, 0);
         }
-        for (int textureID : textures) {
+        for (int i = 0; i < textures.size(); i++) {
+            int textureID = textures.get(i);
             tmp[0] = textureID;
             glDeleteTextures(1, tmp, 0);
         }

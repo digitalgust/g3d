@@ -229,9 +229,11 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
 
     public void load_u_Lights(List<RenderLight> list) {
         Field[] fields = UniformLight.class.getDeclaredFields();
-        int i = 0;
-        for (RenderLight rlight : list) {
-            for (Field field : fields) {
+
+        for (int i = 0; i < list.size(); ) {
+            RenderLight rlight = list.get(i);
+            for (int j = 0; j < fields.length; j++) {
+                Field field = fields[j];
                 String uniformName = "u_Lights[" + i + "]." + field.getName();
                 try {
                     //setUniform(uniformName, field.get(rlight.getUniformLight()));
