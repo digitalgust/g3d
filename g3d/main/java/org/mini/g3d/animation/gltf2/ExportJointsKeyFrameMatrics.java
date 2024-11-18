@@ -93,7 +93,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
 
             for (int i = aniBegin; i < aniEnd; i++) {
                 try {
-                    float elapsedTime = i * AniGroup.FPT * animationTimeScale;
+                    float elapsedTime = i * aniGroup.getFpt() * animationTimeScale;
                     model.animateNode(elapsedTime);
 
                     RenderNode rootRenderNode = model.getRootRenderNode();
@@ -181,7 +181,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
         if (!skins.isEmpty()) {
             GLTFSkin skin = skins.get(0);
             List<Matrix4f>[] keyFramesMats = skin.getJointKeyFrameMatrics();
-            boolean usingHalfFloat = true;
+            boolean usingHalfFloat = false;
             if (keyFramesMats != null) {
                 int len = keyFramesMats.length;//关键帧数量
                 if (len > 0) {

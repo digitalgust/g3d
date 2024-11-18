@@ -181,16 +181,19 @@ public class AnimatedModelRenderer extends AbstractRenderer {
             rmp = rmps.get(i);
             if (rmp.getModelMatrics() != null) {
                 int curFK = rmp.getAnimatedModel().getCurKeyFrame();
-
-                //用世界变换矩阵 * 模型矩阵当前帧的矩阵，得到最终结果
-                Matrix4f modelMat = rmp.getModelMatrics()[curFK];
-                Matrix4f worldMat = rmp.getAnimatedModel().getTransform();
-                GLMath.mat4x4_mul(modelMatrics[i].mat, worldMat.mat, modelMat.mat);
+                if (curFK >= 0 && curFK < rmp.getModelMatrics().length) {//有效性检查
+                    //用世界变换矩阵 * 模型矩阵当前帧的矩阵，得到最终结果
+                    Matrix4f modelMat = rmp.getModelMatrics()[curFK];
+                    Matrix4f worldMat = rmp.getAnimatedModel().getTransform();
+                    GLMath.mat4x4_mul(modelMatrics[i].mat, worldMat.mat, modelMat.mat);
 //
 //                Matrix4f normMat = rmp.getModelNormMatrics()[curFK];
 //                GLMath.mat4x4_mul(tmp.mat, worldMat.mat, normMat.mat);
 //                shader.load_u_NormalMatrix(tmp);
-
+                } else {
+                    System.out.println("[G3D]keyframe index out of range:" + curFK + " / " + rmp.getModelMatrics().length);
+                    GLMath.mat4x4_dup(modelMatrics[i].mat, rmp.getWorldTransform().mat);
+                }
             } else {
                 GLMath.mat4x4_dup(modelMatrics[i].mat, rmp.getWorldTransform().mat);
 //                shader.load_u_ModelMatrix(modelMatrics);

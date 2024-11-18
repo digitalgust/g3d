@@ -123,7 +123,7 @@ public class AnimatedModel extends Entity implements Cloneable {
         if (aniGroup != null) {
             AniClip clip = aniGroup.getAniClips().get(clipIndex);
             elapsedTime = (elapsedTime % (clip.endAt - clip.beginAt));
-            int curKF = clip.begin + (int) (elapsedTime / AniGroup.FPT);
+            int curKF = clip.begin + (int) (elapsedTime / aniGroup.getFpt());
             if (curKF < clip.begin) {
                 curKF = clip.begin;
             }

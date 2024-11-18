@@ -5,24 +5,36 @@ import java.util.List;
 import java.util.Map;
 
 public class AniGroup {
-    //    static final float FPT = .041666666666667f;//24fps
-    public static final float FPT = .033333333333333f;//30fps
+    static final float DEFAUT_FPT = .033333333333333f;//30fps
 
     //don't change the name , it's json map name
     List<AniClip> aniClips;
-    int keyFrameMin = Integer.MAX_VALUE;
-    int keyFrameMax = Integer.MIN_VALUE;
-    int fullAniIndex;
+    int fps;
+    //runtime vars
+    int keyFrameMin;
+    int keyFrameMax;
+    int fullAniIndex = -1;
 
+    public AniGroup() {
+        fps = Math.round(1.f / DEFAUT_FPT);
+    }
 
-    public void setAniClips(List<AniClip> aniClips) {
-        this.aniClips = aniClips;
+    private void init() {
+        if (aniClips == null) return;
+        keyFrameMin = Integer.MAX_VALUE;
+        keyFrameMax = Integer.MIN_VALUE;
+
+        float fpt = 1f / fps;
+        //System.out.println("setAniClips fps:" + fps);
+        if (fullAniIndex >= 0) {
+            aniClips.remove(fullAniIndex);
+        }
 
         for (int i = 0; i < aniClips.size(); i++) {
             AniClip c = aniClips.get(i);
             //pre calc
-            c.beginAt = c.begin * FPT;
-            c.endAt = c.end * FPT;
+            c.beginAt = c.begin * fpt;
+            c.endAt = c.end * fpt;
             if (keyFrameMin > c.begin) {
                 keyFrameMin = c.begin;
             }
@@ -34,17 +46,22 @@ public class AniGroup {
         ac.setClipName("_FULL_ANI");
         ac.begin = 0;//from zero
         ac.end = keyFrameMax;
-        ac.beginAt = ac.begin * FPT;
-        ac.endAt = ac.end * FPT;
+        ac.beginAt = ac.begin * fpt;
+        ac.endAt = ac.end * fpt;
         aniClips.add(ac);
         fullAniIndex = aniClips.indexOf(ac);
+    }
+
+    public void setAniClips(List<AniClip> aniClips) {
+        this.aniClips = aniClips;
+        init();
     }
 
     public List<AniClip> getAniClips() {
         return aniClips;
     }
 
-    public int getSize(){
+    public int getSize() {
         return aniClips.size();
     }
 
@@ -110,5 +127,18 @@ public class AniGroup {
 
     public int getFullAniIndex() {
         return fullAniIndex;
+    }
+
+    public void setFps(int fps) {
+        this.fps = fps;
+        init();
+    }
+
+    public int getFps() {
+        return fps;
+    }
+
+    public float getFpt() {
+        return 1f / fps;
     }
 }
