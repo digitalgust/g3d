@@ -5,6 +5,7 @@
 #define MAX_LIGHT  4
 #endif
 
+#define PI 3.1415926535897932384626433832795
 
 in vec2 pass_textureCoordinates;
 in vec3 surfaceNormal;
@@ -13,6 +14,7 @@ in vec3 toCameraVector;
 in float visibility;
 in vec4 shadowMapCoord;
 in float distanceToCam;
+in float angleToXZ;
 
 out vec4 out_Color;
 
@@ -125,7 +127,7 @@ uniform vec3 skyColour;
 
 
 
-void main(void){
+void main(void) {
 
     vec4 blendMapColour = texture(blendMap, pass_textureCoordinates);
 
@@ -151,7 +153,7 @@ void main(void){
     vec3 totalDiffuse = vec3(0.0);
     vec3 totalSpecular = vec3(0.0);
 
-    for (int i=0;i<MAX_LIGHT;i++){
+    for (int i = 0;i < MAX_LIGHT; i++) {
         float distance = length(toLightVector[i]);
         float attFactor = attenuation[i].x + (attenuation[i].y * distance) + (attenuation[i].z * distance * distance);
 
@@ -172,17 +174,21 @@ void main(void){
     totalDiffuse = max(totalDiffuse, 0.3);
     //totalColour = shadow_visibility * totalColour;
 
-    out_Color =  vec4(totalDiffuse, 1.0) * totalColour + vec4(totalSpecular, 1.0);
+    out_Color = vec4(totalDiffuse, 1.0) * totalColour + vec4(totalSpecular, 1.0);
     out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
 
     //    vec3 worldPos = pass_pos;// 想办法弄到当前片元的世界坐标，可以是深度重建或者读坐标纹理
     //    vec4 cloud = getCloud(noisetex, worldPos, cameraPos, lightPos);// 云颜色
     //    out_Color.rgb = out_Color.rgb*(1.0 - cloud.a) + cloud.rgb;// 混色
 
-    if (distanceToCam < 7.0){
-        float mx = mod(gl_FragCoord.x, 2.0);
-        if (mod(floor(gl_FragCoord.y + mx), 2.0)!=0.0){
-            discard;
+    //如果这个面在xz平面45度以上，并且距离相机小于7，则使用网格显示
+    //如果没有与地面的夹角判断，地板也会用网格显示，地面会难看
+    if (angleToXZ > PI / 6.0) {
+        if (distanceToCam < 10.0) {
+            float mx = mod(gl_FragCoord.x, 2.0);
+            if (mod(floor(gl_FragCoord.y + mx), 2.0) != 0.0) {
+                discard;
+            }
         }
     }
 }

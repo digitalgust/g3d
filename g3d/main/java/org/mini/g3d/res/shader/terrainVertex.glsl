@@ -19,6 +19,7 @@ out float visibility;
 out vec4 shadowMapCoord;
 out vec3 pass_pos;
 out float distanceToCam;
+out float angleToXZ;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
@@ -29,7 +30,12 @@ uniform vec3 lightPosition[MAX_LIGHT];
 const float density = 0.015;
 const float gradient = 2.0;
 
-void main(void){
+float radiansToDegrees(float radians) {
+    return radians * 180.0 / 3.14159265358979323846;
+}
+
+
+void main(void) {
 
     vec4 worldPosition = transformationMatrix * vec4(position, 1.0);
     pass_pos = worldPosition.xyz;
@@ -40,14 +46,21 @@ void main(void){
     shadowMapCoord = depthBiasMVPMatrix * vec4(position, 1.0);
 
     surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
-    for (int i=0;i<MAX_LIGHT;i++){
+    for (int i = 0;i < MAX_LIGHT; i++) {
         toLightVector[i] = lightPosition[i] - worldPosition.xyz;
     }
     toCameraVector = (inverse(viewMatrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz - worldPosition.xyz;
 
     float distance = length(positionRelativeToCam.xyz);
-    visibility = exp(-pow((distance*density), gradient));
+    visibility = exp(-pow((distance * density), gradient));
     visibility = clamp(visibility, 0.5, 1.0);
 
-    distanceToCam = length(positionRelativeToCam.xyz);
+    distanceToCam = distance;
+
+    //计算当前面与xz平面的夹角，单位为弧度
+    vec3 yAxis = vec3(0.0, 1.0, 0.0);
+    float dotProduct = dot(surfaceNormal, yAxis);
+    float cosTheta = dotProduct;
+    angleToXZ = acos(cosTheta);
+
 }
