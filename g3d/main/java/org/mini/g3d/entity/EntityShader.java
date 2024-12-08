@@ -30,6 +30,7 @@ public class EntityShader extends ShaderProgram {
     private int location_numberOfRows;
     private int location_offset;
     int location_transparency;
+    private int location_transparencyDistance;
 
 
     Vector3f defaultLightPosition = new Vector3f(0, 0, 0);
@@ -70,6 +71,7 @@ public class EntityShader extends ShaderProgram {
         location_numberOfRows = super.getUniformLocation("numberOfRows");
         location_offset = super.getUniformLocation("offset");
         location_transparency = super.getUniformLocation("transparency");
+        location_transparencyDistance = getUniformLocation("transparencyDistance");
 
         location_lightPosition = new int[MAX_LIGHTS];
         location_lightColour = new int[MAX_LIGHTS];
@@ -137,5 +139,9 @@ public class EntityShader extends ShaderProgram {
 
     public void loadTransparency(float transparency) {
         super.loadFloat(location_transparency, transparency);
+    }
+
+    public void loadTransparencyDistance(float transparencyDistance) {
+        super.loadFloat(location_transparencyDistance, transparencyDistance);
     }
 }

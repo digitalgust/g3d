@@ -28,6 +28,7 @@ public class EntityRenderer extends AbstractRenderer {
         shader.loadViewMatrix(scene.getCamera());
         Matrix4f projectionMatrix = scene.getCamera().getProjectionMatrix();
         shader.loadProjectionMatrix(projectionMatrix);
+        shader.loadTransparencyDistance(scene.getCamera().getDistanceFromTarget() - 1f);
 
         Map<TexturedModel, List<Entity>> entities = scene.getEntitieMap();
         entities.forEach((texturedModel, batch) -> {

@@ -54,6 +54,7 @@ public class TerrainRenderer extends AbstractRenderer {
         shader.loadCameraPosition(scene.getCamera().getPosition());
         shader.loadLightPos(scene.getSun().getPosition());
         shader.loadTime(DisplayManager.getTime());
+        shader.loadTransparencyDistance(scene.getCamera().getDistanceFromTarget() - 1f);
 
         Terrain terrain = scene.getTerrain();
         //for(){

@@ -21,6 +21,7 @@ uniform vec3 attenuation[MAX_LIGHT];
 uniform float shineDamper;
 uniform float reflectivity;
 uniform vec3 skyColour;
+uniform float transparencyDistance;//离摄像机多远的物体进行透明处理
 
 void main(void){
 
@@ -58,7 +59,7 @@ void main(void){
     out_Color =  vec4(totalDiffuse, 1.0) * textureColour + vec4(totalSpecular, 1.0);
     out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
 
-    if (distanceToCam < 10.0){
+    if (distanceToCam < transparencyDistance){
         int mx = int(mod(gl_FragCoord.x, 2.0));
         int my = int(mod(gl_FragCoord.y, 2.0));
         if (mx+my!=1){//网格状透明

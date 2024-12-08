@@ -38,6 +38,7 @@ public class TerrainShader extends ShaderProgram {
     private int location_lightPos;
     private int location_noiseTexture;
     private int location_itime;
+    private int location_transparencyDistance;
 
     //
     Vector3f defLightPos = new Vector3f();
@@ -76,6 +77,7 @@ public class TerrainShader extends ShaderProgram {
         location_lightPos = getUniformLocation("lightPos");
         location_noiseTexture = getUniformLocation("noisetex");
         location_itime = getUniformLocation("itime");
+        location_transparencyDistance = getUniformLocation("transparencyDistance");
 
         location_lightPosition = new int[MAX_LIGHTS];
         location_lightColour = new int[MAX_LIGHTS];
@@ -100,6 +102,10 @@ public class TerrainShader extends ShaderProgram {
 
     public void loadSkyColour(Vector3f fogColor) {
         super.loadVector(location_skyColour, fogColor);
+    }
+
+    public void loadTransparencyDistance(float transparencyDistance) {
+        super.loadFloat(location_transparencyDistance, transparencyDistance);
     }
 
     public void loadShineVariables(float shineDamper, float reflectivity) {

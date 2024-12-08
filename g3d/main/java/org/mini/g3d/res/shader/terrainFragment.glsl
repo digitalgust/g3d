@@ -30,6 +30,7 @@ uniform vec3 attenuation[MAX_LIGHT];
 uniform float shineDamper;
 uniform float reflectivity;
 uniform vec3 skyColour;
+uniform float transparencyDistance;//离摄像机多远的物体进行透明处理
 
 ////https://blog.csdn.net/weixin_44176696/article/details/113090350
 //in vec3 pass_pos;
@@ -184,7 +185,7 @@ void main(void) {
     //如果这个面在xz平面45度以上，并且距离相机小于7，则使用网格显示
     //如果没有与地面的夹角判断，地板也会用网格显示，地面会难看
     if (angleToXZ > PI / 6.0) {
-        if (distanceToCam < 10.0) {
+        if (distanceToCam < transparencyDistance) {
             float mx = mod(gl_FragCoord.x, 2.0);
             if (mod(floor(gl_FragCoord.y + mx), 2.0) != 0.0) {
                 discard;

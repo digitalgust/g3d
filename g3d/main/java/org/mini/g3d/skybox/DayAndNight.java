@@ -3,6 +3,8 @@ package org.mini.g3d.skybox;
 
 import org.mini.g3d.core.DisplayManager;
 
+import java.util.Calendar;
+
 /**
  * 日夜更替系统
  */
@@ -24,6 +26,8 @@ public class DayAndNight {
 
     public DayAndNight() {
         setSecondsPerDay(SECONDS_PER_DAY_DEFAULT);
+        Calendar calendar = Calendar.getInstance();
+        time = calendar.get(Calendar.HOUR_OF_DAY) * secondsPerHour + calendar.get(Calendar.MINUTE) * 60 + calendar.get(Calendar.SECOND);
     }
 
     public void setSecondsPerDay(int seconds) {
@@ -69,5 +73,9 @@ public class DayAndNight {
 
     public float getTime() {
         return time;
+    }
+
+    public void setTime(float time) {
+        this.time = time;
     }
 }
