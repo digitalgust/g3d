@@ -20,33 +20,33 @@
     
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>io.github.digitalgust</groupId>-->
-<!--            <artifactId>xgui</artifactId>-->
-<!--            <version>1.1.10</version>-->
-<!--        </dependency>-->
-
         <dependency>
-            <groupId>org.minijvm</groupId>
-            <artifactId>minijvm_rt</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../../miniJVM/binary/lib/minijvm_rt.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.minijvm</groupId>
-            <artifactId>glfw_gui</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../../miniJVM/binary/libex/glfw_gui.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.minijvm</groupId>
+            <groupId>io.github.digitalgust</groupId>
             <artifactId>xgui</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/../../miniJVM/binary/libex/xgui.jar</systemPath>
+            <version>1.1.16</version>
         </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.minijvm</groupId>-->
+<!--            <artifactId>minijvm_rt</artifactId>-->
+<!--            <version>1.0</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${basedir}/../../miniJVM/binary/lib/minijvm_rt.jar</systemPath>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.minijvm</groupId>-->
+<!--            <artifactId>glfw_gui</artifactId>-->
+<!--            <version>1.0</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${basedir}/../../miniJVM/binary/libex/glfw_gui.jar</systemPath>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.minijvm</groupId>-->
+<!--            <artifactId>xgui</artifactId>-->
+<!--            <version>1.0</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${basedir}/../../miniJVM/binary/libex/xgui.jar</systemPath>-->
+<!--        </dependency>-->
     </dependencies>
     
     <build>
