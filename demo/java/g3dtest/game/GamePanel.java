@@ -378,6 +378,16 @@ public class GamePanel extends GOpenGLPanel {
         return widgets.dragEvent(button, dx, dy, x, y);
     }
 
+    @Override
+    public boolean scrollEvent(float scrollX, float scrollY, float x, float y) {
+        Camera cam = scene.getCamera();
+        float dis2tgt = cam.getDistanceFromTarget() - (scrollY * .2f);
+        //System.out.println("dis3tgt = " + dis2tgt + "  /  " + cam.getDistanceFromTarget());
+        if (dis2tgt <= 30 && dis2tgt > 5) {
+            cam.setDistanceFromTarget(dis2tgt);
+        }
+        return super.scrollEvent(scrollX, scrollY, x, y);
+    }
 
     @Override
     public void keyEventGlfw(int key, int scanCode, int action, int mods) {
