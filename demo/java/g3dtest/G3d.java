@@ -31,15 +31,15 @@ public class G3d extends GApplication {
 
         eventHandle = new GameUIEventHandle(this);
 
-        XmlExtAssist xmlExtAssist=new XmlExtAssist(null);
+        XmlExtAssist xmlExtAssist = new XmlExtAssist(null);
         xmlExtAssist.registerGUI("g3dtest.simple.XSimplePanel");
         xmlExtAssist.registerGUI("g3dtest.game.XGamePanel");
         String xmlStr = GToolkit.readFileFromJarAsString("/res/ui/G3dForm.xml", "utf-8");
         UITemplate uit = new UITemplate(xmlStr);
         for (String key : uit.getVariable()) {
-            uit.setVar(key, GLanguage.getString(key));
+            uit.setVar(key, getString(key));
         }
-        XForm xform = (XForm) XContainer.parseXml(uit.parse(),xmlExtAssist);
+        XForm xform = (XForm) XContainer.parseXml(uit.parse(), xmlExtAssist);
         xform.build(GCallBack.getInstance().getDeviceWidth(), GCallBack.getInstance().getDeviceHeight(), eventHandle);
         form = (GForm) xform.getGui();
         eventHandle.setForm(form);

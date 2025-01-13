@@ -167,6 +167,7 @@ public class GamePanel extends GOpenGLPanel {
         player = new Player(gltf, new Vector3f(px, py, pz), 0, 90, 0, 1f, shodowModel);
         scene.addAnimatedModel(player);
         camera.setLookatTarget(player);
+        camera.setDistanceFromTarget(30f);
         camera.setHeightOfLand(2f);
         Vector3f ppos = player.getPosition();
         lightOnHead = new Light(ppos.x, ppos.y + 3f, ppos.z, 1f, 0f, 1f, 0, 0.5f, 0f);
@@ -282,8 +283,6 @@ public class GamePanel extends GOpenGLPanel {
         glPolygonOffset(1.f, 1.f);
         // MainLoop
 
-        renderEngine.renderScene(scene);
-
         //Gutil.checkGlError(this.getClass().getName() + " gl_paint 0");
         scene.update();
 
@@ -301,14 +300,10 @@ public class GamePanel extends GOpenGLPanel {
         lightOnHead.setPosition(player.getPosition());
 
 
-        Vector3f cpos = camera.getPosition();
-        float hight = terrain.getHeightOfTerrain(cpos.x, cpos.z);
-        if (hight > cpos.y) {
-            camera.getPosition().setY(hight + 1);
-            camera.calculatePitch(hight - camera.getPosition().y);
-        }
 
         updateAnimatedModel();
+
+        renderEngine.renderScene(scene);
 
         cost = System.currentTimeMillis() - start;
 
