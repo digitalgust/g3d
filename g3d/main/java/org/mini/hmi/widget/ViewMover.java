@@ -49,7 +49,7 @@ public class ViewMover extends Widget {
         if (pressed) {
             if (isInArea(x, y) && touchedId1 == NO_TOUCHEDID) {
                 touchedId1 = button;
-                return true;
+                return false; //可以穿透这个板到达其他层
             }
         } else {
             if (this.touchedId1 == button) {
