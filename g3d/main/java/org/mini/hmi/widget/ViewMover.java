@@ -5,13 +5,24 @@ import org.mini.glfm.Glfm;
 import org.mini.gui.GImage;
 import org.mini.gui.GToolkit;
 
+/**
+ * 拖动相机
+ * 一个手指拖动，旋转相机
+ * 两个手指拖动，缩放相机
+ */
 public class ViewMover extends Widget {
 
     GImage icon;
 
 
-    int touchedId;
+    int touchedId1 = NO_TOUCHEDID, touchedId2 = NO_TOUCHEDID;
+    float touchedX1, touchedX2;
+    float touchedY1, touchedY2;
+    int zoomDirection = 0;
     Camera camera;
+
+    float cameraDistanceFar = 30;
+    float cameraDistanceNear = 5;
 
 
     public ViewMover(String iconPath, float left, float top, float w, float h) {
@@ -36,13 +47,13 @@ public class ViewMover extends Widget {
     @Override
     public boolean mouseButtonEvent(int button, boolean pressed, int x, int y) {
         if (pressed) {
-            if (isInArea(x, y) && touchedId == NO_TOUCHEDID) {
-                touchedId = button;
-                return false;
+            if (isInArea(x, y) && touchedId1 == NO_TOUCHEDID) {
+                touchedId1 = button;
+                return true;
             }
         } else {
-            if (this.touchedId == button) {
-                touchedId = NO_TOUCHEDID;
+            if (this.touchedId1 == button) {
+                touchedId1 = NO_TOUCHEDID;
                 return false;
             }
         }
@@ -50,15 +61,40 @@ public class ViewMover extends Widget {
     }
 
     @Override
+    public boolean scrollEvent(float scrollX, float scrollY, float x, float y) {
+        Camera cam = camera;
+        if (cam == null) return false;
+
+        float dis2tgt = cam.getDistanceFromTarget() - (scrollY * .2f);
+        //System.out.println("dis3tgt = " + dis2tgt + "  /  " + cam.getDistanceFromTarget());
+        setCameraDistance(dis2tgt);
+        return super.scrollEvent(scrollX, scrollY, x, y);
+    }
+
+    @Override
     public boolean touchEvent(int touchid, int phase, int x, int y) {
         //System.out.println("mousemover touch " + phase + "," + x + "," + y);
         if (phase == Glfm.GLFMTouchPhaseBegan) {
-            if (isInArea(x, y) && touchedId == NO_TOUCHEDID) {
-                this.touchedId = touchid;
-                return false;
+            if (isInArea(x, y)) {
+                if (touchedId1 == NO_TOUCHEDID) {
+                    this.touchedId1 = touchid;
+                    touchedX1 = x;
+                    touchedY1 = y;
+                    return false;
+                } else if (touchedId2 == NO_TOUCHEDID) {
+                    this.touchedId2 = touchid;
+                    touchedX2 = x;
+                    touchedY2 = y;
+                    return false;
+                }
             }
-        } else if (phase == Glfm.GLFMTouchPhaseEnded && this.touchedId == touchid) {
-            touchedId = NO_TOUCHEDID;
+        } else if (phase == Glfm.GLFMTouchPhaseEnded) {
+            if (this.touchedId1 == touchid) {
+                touchedId1 = NO_TOUCHEDID;
+            }
+            if (this.touchedId2 == touchid) {
+                touchedId2 = NO_TOUCHEDID;
+            }
             return false;
         }
         return false;
@@ -68,20 +104,81 @@ public class ViewMover extends Widget {
     @Override
     public boolean dragEvent(int button, float dx, float dy, float x, float y) {
 
-        if (camera != null && touchedId == button) {
-            //System.out.println("mousemover drag      " + dx + " , " + dy + "          ," + x + "," + y);
-            float a = camera.getAngleAroundTarget();
-            float adjx = dx * 0.5f;
-            camera.setAngleAroundTarget(a - adjx);
-            float pitch = camera.getPitch();
-            float adjy = dy * 0.3f;
-            float newpitch = pitch + adjy;
-            if (newpitch > 2f && newpitch < 70f) {
-                camera.setPitch(newpitch);
+        if (camera != null) {
+            if (touchedId1 != NO_TOUCHEDID && touchedId2 != NO_TOUCHEDID) {
+                //zoom
+                //判断这个触点离另一个触点是在变远还是变近
+                float distanceOld = (float) Math.sqrt((touchedX1 - touchedX2) * (touchedX1 - touchedX2) + (touchedY1 - touchedY2) * (touchedY1 - touchedY2));
+                if (button == touchedId1) {
+                    touchedX1 = x;
+                    touchedY1 = y;
+                } else if (button == touchedId2) {
+                    touchedX2 = x;
+                    touchedY2 = y;
+                }
+                float distanceNew = (float) Math.sqrt((touchedX1 - touchedX2) * (touchedX1 - touchedX2) + (touchedY1 - touchedY2) * (touchedY1 - touchedY2));
+                //在双指缩放时，避免抖动
+                if (distanceNew > distanceOld) {
+                    zoomDirection++;
+                    if (zoomDirection > 2) {
+                        zoomDirection = 2;
+                    }
+                }
+                if (distanceNew < distanceOld) {
+                    zoomDirection--;
+                    if (zoomDirection < -2) {
+                        zoomDirection = -2;
+                    }
+                }
+
+                if (zoomDirection > 0) {//变近
+                    setCameraDistance(camera.getDistanceFromTarget() * 0.98f);
+                }
+                if (zoomDirection < 0) {//变远
+                    setCameraDistance(camera.getDistanceFromTarget() * 1.02f);
+                }
+            } else {
+                //rotate
+                if (touchedId1 == button && touchedId2 == NO_TOUCHEDID) {
+                    //System.out.println("mousemover drag      " + dx + " , " + dy + "          ," + x + "," + y);
+                    float a = camera.getAngleAroundTarget();
+                    float adjx = dx * 0.5f;
+                    camera.setAngleAroundTarget(a - adjx);
+                    float pitch = camera.getPitch();
+                    float adjy = dy * 0.3f;
+                    float newpitch = pitch + adjy;
+                    if (newpitch > 2f && newpitch < 70f) {
+                        camera.setPitch(newpitch);
+                    }
+                    return true;
+                }
             }
-            return false;
         }
         return false;
     }
 
+    public void setCameraNearFar(float cameraDistanceNear, float cameraDistanceFar) {
+        this.cameraDistanceFar = cameraDistanceFar;
+        this.cameraDistanceNear = cameraDistanceNear;
+    }
+
+    private void setCameraDistance(float distance) {
+        if (camera != null) {
+            if (distance > cameraDistanceFar) {
+                distance = cameraDistanceFar;
+            }
+            if (distance < cameraDistanceNear) {
+                distance = cameraDistanceNear;
+            }
+            camera.setDistanceFromTarget(distance);
+        }
+    }
+
+    public float getCameraDistanceNear() {
+        return cameraDistanceNear;
+    }
+
+    public float getCameraDistanceFar() {
+        return cameraDistanceFar;
+    }
 }

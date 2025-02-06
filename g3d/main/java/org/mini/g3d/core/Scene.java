@@ -23,7 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Scene {
 
-    Object lock = new Object();
+    final Object lock = new Object();
     public static final Vector3f SUN_COLOR_NIGHT = new Vector3f(0.4f, 0.4f, 0.6f);
     public static final Vector3f SUN_COLOR_DAY = new Vector3f(1.0f, 1.0f, 0.8f);
 

@@ -24,20 +24,19 @@ public class MousePicker {
         this.scene = scene;
     }
 
-    public Vector3f getCurrentTerrainPoint() {
+    public Vector3f getCurrentTerrainPoint(int mouseX, int mouseY) {
+        Vector3f currentRay = calculateMouseRay(mouseX, mouseY);
+        ;
+        if (intersectionInRange(0, RAY_RANGE, currentRay)) {
+            currentTerrainPoint = binarySearch(0, 0, RAY_RANGE, currentRay);
+            if (currentTerrainPoint != null) {
+                currentTerrainPoint.scale(1.f / scene.getTerrain().getMapScale());
+            }
+        } else {
+            currentTerrainPoint = null;
+        }
         return currentTerrainPoint;
     }
-
-
-//    public void update() {
-//
-//        ;
-//        if (intersectionInRange(0, RAY_RANGE, currentRay)) {
-//            currentTerrainPoint = binarySearch(0, 0, RAY_RANGE, currentRay);
-//        } else {
-//            currentTerrainPoint = null;
-//        }
-//    }
 
     public Vector3f calculateMouseRay(int mouseX, int mouseY) {
         projectionMatrix = scene.getCamera().getProjectionMatrix();
@@ -67,7 +66,7 @@ public class MousePicker {
 
     private Vector2f getNormalisedDeviceCoordinates(float mouseX, float mouseY) {
         float x = (2.0f * mouseX) / DisplayManager.getWidth() - 1f;
-        float y = (2.0f * mouseY) / DisplayManager.getHeight() - 1f;
+        float y = 1.0f - (2.0f * mouseY) / DisplayManager.getHeight();
         return new Vector2f(x, y);
     }
 

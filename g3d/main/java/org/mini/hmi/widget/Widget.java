@@ -52,6 +52,10 @@ abstract public class Widget {
         return false;
     }
 
+    public boolean scrollEvent(float scrollX, float scrollY, float x, float y) {
+        return false;
+    }
+
     public boolean dragEvent(int button, float dx, float dy, float x, float y) {
         return false;
     }

@@ -82,6 +82,18 @@ public class WidgetContainer extends Widget {
         return false;
     }
 
+    public boolean scrollEvent(float scrollX, float scrollY, float x, float y) {
+        if (!isEnable()) return false;
+
+        for (Widget w : widgets) {
+            if (!w.isEnable()) continue;
+            if (w.scrollEvent(scrollX, scrollY, x, y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public boolean dragEvent(int button, float dx, float dy, float x, float y) {
         if (!isEnable()) return false;
 
