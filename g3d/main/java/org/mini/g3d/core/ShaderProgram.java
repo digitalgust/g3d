@@ -6,9 +6,9 @@ import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.core.vector.Vector4f;
 import org.mini.gl.GL;
 import org.mini.glwrap.GLUtil;
-import org.mini.gui.GCmd;
 import org.mini.gui.GForm;
 import org.mini.gui.GToolkit;
+import org.mini.gui.callback.GCmd;
 
 import static org.mini.gl.GL.*;
 

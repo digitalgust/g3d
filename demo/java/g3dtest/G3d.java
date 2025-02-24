@@ -4,6 +4,7 @@ import g3dtest.game.GamePanel;
 import g3dtest.simple.SimplePanel;
 import org.mini.apploader.GApplication;
 import org.mini.gui.*;
+import org.mini.gui.callback.GCallBack;
 import org.mini.gui.event.GSizeChangeListener;
 import org.mini.layout.UITemplate;
 import org.mini.layout.XContainer;

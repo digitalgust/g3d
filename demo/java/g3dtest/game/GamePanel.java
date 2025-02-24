@@ -28,6 +28,7 @@ import org.mini.g3d.terrain.TerrainTexture;
 import org.mini.g3d.terrain.TerrainTexturePack;
 import org.mini.g3d.water.WaterTile;
 import org.mini.gui.*;
+import org.mini.gui.callback.GCallBack;
 import org.mini.hmi.widget.*;
 
 import java.util.*;

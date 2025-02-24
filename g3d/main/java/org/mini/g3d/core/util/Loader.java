@@ -8,13 +8,11 @@ import org.mini.g3d.core.textures.Texture;
 import org.mini.g3d.core.textures.TextureData;
 import org.mini.gl.GL;
 import org.mini.glwrap.GLUtil;
-import org.mini.gui.GCmd;
 import org.mini.gui.GForm;
+import org.mini.gui.callback.GCmd;
 import org.mini.util.IntList;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.mini.g3d.core.util.G3dUtil.loadFileFromJar;

@@ -16,6 +16,8 @@ import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.glfw.Glfw;
 import org.mini.gui.*;
+import org.mini.gui.callback.GCallBack;
+import org.mini.gui.style.GStyleDark;
 
 import java.io.*;
 import java.nio.ByteBuffer;
