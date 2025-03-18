@@ -6,16 +6,17 @@ import org.mini.apploader.GApplication;
 import org.mini.gui.*;
 import org.mini.gui.callback.GCallBack;
 import org.mini.gui.event.GSizeChangeListener;
-import org.mini.layout.UITemplate;
+import org.mini.layout.loader.UITemplate;
 import org.mini.layout.XContainer;
 import org.mini.layout.XForm;
-import org.mini.layout.XmlExtAssist;
+import org.mini.layout.loader.XmlExtAssist;
+import org.mini.layout.loader.XuiAppHolder;
 
 
 /**
  * @author gust
  */
-public class G3d extends GApplication {
+public class G3d extends GApplication  implements XuiAppHolder {
 
     GForm form;
     GMenu menu;
@@ -24,15 +25,13 @@ public class G3d extends GApplication {
     GameUIEventHandle eventHandle;
 
     @Override
-    public GForm getForm() {
-        if (form != null) {
-            return form;
-        }
+    public void onInit() {
+
         GLanguage.setCurLang(GLanguage.ID_CHN);
 
         eventHandle = new GameUIEventHandle(this);
 
-        XmlExtAssist xmlExtAssist = new XmlExtAssist(null);
+        XmlExtAssist xmlExtAssist = new XmlExtAssist(this);
         xmlExtAssist.registerGUI("g3dtest.simple.XSimplePanel");
         xmlExtAssist.registerGUI("g3dtest.game.XGamePanel");
         String xmlStr = GToolkit.readFileFromJarAsString("/res/ui/G3dForm.xml", "utf-8");
@@ -43,6 +42,7 @@ public class G3d extends GApplication {
         XForm xform = (XForm) XContainer.parseXml(uit.parse(), xmlExtAssist);
         xform.build(GCallBack.getInstance().getDeviceWidth(), GCallBack.getInstance().getDeviceHeight(), eventHandle);
         form = (GForm) xform.getGui();
+        setForm(form);
         eventHandle.setForm(form);
 
         simplePanel = (SimplePanel) form.findByName("GLP_SIMPLE");
@@ -58,7 +58,6 @@ public class G3d extends GApplication {
             }
         });
         showGamePanel();
-        return form;
 
 
     }
@@ -83,5 +82,15 @@ public class G3d extends GApplication {
         if (gamePanel != null) {
             gamePanel.exit();
         }
+    }
+
+    @Override
+    public GApplication getApp() {
+        return this;
+    }
+
+    @Override
+    public GContainer getWebView() {
+        return null;
     }
 }

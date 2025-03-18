@@ -438,13 +438,12 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
     Random random = new Random();
 
     @Override
-    public GForm getForm() {
-        if (form != null) {
-            return form;
-        }
+    public void onInit() {
+
         GToolkit.setStyle(new GStyleDark());
 
-        form = new GForm(null);
+        form = new GForm(this);
+        setForm(form);
         MonitorGLPanel glp = new MonitorGLPanel(form);
         glp.setName("MONITOR");
         glp.setBack(true);
@@ -483,7 +482,6 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
             closeApp();
         });
         form.add(bt_exit);
-        return form;
     }
 
     class MonitorGLPanel extends GOpenGLPanel {
