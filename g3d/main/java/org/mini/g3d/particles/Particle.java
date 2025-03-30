@@ -69,7 +69,7 @@ public class Particle {
         this.scale = scale;
         this.texture = texture;
         ParticleMaster.addParticle(this);
-        // System.out.println("Particle setActive");
+        // SysLog.info("G3D|Particle setActive");
     }
 
 

@@ -14,6 +14,7 @@ import org.mini.g3d.animation.gltf2.render.GLTFRenderer;
 import org.mini.g3d.animation.gltf2.render.RenderTexture;
 import org.mini.gl.GL;
 import org.mini.glwrap.GLUtil;
+import org.mini.util.SysLog;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -36,8 +37,8 @@ public class GLDriver {
     }
 
     public static int compileShader(String shaderIdentifier, boolean isVert, String shaderSource) {
-        System.out.println("[G3D][INFO]gltf shader compile begin: " + shaderIdentifier);
-//    System.out.println(shaderSource);
+        SysLog.info("G3D|gltf shader compile begin: " + shaderIdentifier);
+//    SysLog.info("G3D|" + shaderSource);
         int shader = glCreateShader(isVert ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
 //    glShaderSource(shader, shaderSource);
         glShaderSource(shader, 1, new byte[][]{GLUtil.toCstyleBytes(shaderSource)}, null, 0);
@@ -50,15 +51,15 @@ public class GLDriver {
             GL.glGetShaderiv(shader, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetShaderInfoLog(shader, szLog.length, return_val, 0, szLog);
-            System.out.println("[G3D][ERROR]gltf shader compile fail :" + new String(szLog, 0, return_val[0]) + "\n" + shaderSource + "\n");
+            SysLog.error("G3D|gltf shader compile fail :" + new String(szLog, 0, return_val[0]) + "\n" + shaderSource + "\n");
             return 0;
         }
-        System.out.println("[G3D][INFO]gltf shader compile finish " + shader + " : " + shaderIdentifier);
+        SysLog.info("G3D|gltf shader compile finish " + shader + " : " + shaderIdentifier);
         return shader;
     }
 
     public static int linkProgram(int vertex, int fragment) {
-        System.out.println("[G3D][INFO]gltf shader link begin vertex = " + vertex + ", fragment = " + fragment);
+        SysLog.info("G3D|gltf shader link begin vertex = " + vertex + ", fragment = " + fragment);
         int program = glCreateProgram();
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
@@ -70,7 +71,7 @@ public class GLDriver {
             GL.glGetProgramiv(program, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetProgramInfoLog(program, szLog.length, return_val, 0, szLog);
-            System.out.println("[G3D][ERROR]gltf shader link error :" + new String(szLog, 0, return_val[0]) + "\n vertex shader:" + vertex + "\nfragment shader:" + fragment + "\n");
+            SysLog.error("G3D|gltf shader link error :" + new String(szLog, 0, return_val[0]) + "\n vertex shader:" + vertex + "\nfragment shader:" + fragment + "\n");
             return 0;
         }
 
@@ -81,10 +82,10 @@ public class GLDriver {
             GL.glGetProgramiv(program, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetProgramInfoLog(program, szLog.length, return_val, 0, szLog);
-            System.out.println("[G3D][ERROR]gltf shader link fail :" + new String(szLog, 0, return_val[0]) + "\n vertex shader:" + vertex + "\nfragment shader:" + fragment + "\n");
+            SysLog.error("G3D|gltf shader link fail :" + new String(szLog, 0, return_val[0]) + "\n vertex shader:" + vertex + "\nfragment shader:" + fragment + "\n");
             return 0;
         }
-        System.out.println("[G3D][INFO]gltf shader link finish, vertex = " + vertex + ", fragment = " + fragment + ", program = "
+        SysLog.info("G3D|gltf shader link finish, vertex = " + vertex + ", fragment = " + fragment + ", program = "
                 + program);
         return program;
     }
@@ -114,9 +115,9 @@ public class GLDriver {
     }
 
     public static void enableAttribute(int attributeLocation, GLTFAccessor accessor) {
-//    System.out.println("Begin enableAttribute: location = " + attributeLocation);
+//    SysLog.info("G3D|Begin enableAttribute: location = " + attributeLocation);
         if (!accessor2GlBufferMap.containsKey(accessor)) {
-            //System.out.println("Generating buffer: " + accessor.toString());
+            //SysLog.info("G3D|Generating buffer: " + accessor.toString());
             int[] glBuffer = {0};
             glGenBuffers(1, glBuffer, 0);
             glBindBuffer(GL_ARRAY_BUFFER, glBuffer[0]);
@@ -136,7 +137,7 @@ public class GLDriver {
 
         glVertexAttribPointer(attributeLocation, accessor.getType().getPrimitiveCount(),
                 accessor.getGLType(), accessor.isNormalized() ? GL_TRUE : GL_FALSE, accessor.getByteStride(), null, 0);
-//    System.out.println("End enableAttribute: location = " + attributeLocation);
+//    SysLog.info("G3D|End enableAttribute: location = " + attributeLocation);
     }
 
     private static void loadImageToTexture(RenderTexture renderTexture) {
@@ -156,12 +157,12 @@ public class GLDriver {
             glGenTextures(1, tex, 0);
             glBindTexture(renderTexture.getType(), tex[0]);
             texInfo2GlTextureMap.put(info, tex);
-            System.out.println("[G3D][INFO]Begin init texture");
+            SysLog.info("G3D|Begin init texture");
 
             GLTFSampler sampler = renderTexture.getSampler();
 //            if (useSampler) {
 //                if (sampler == null) {
-//                    System.out.println("Sampler is undefined for texture: " + renderTexture.toString());
+//                    SysLog.info("G3D|Sampler is undefined for texture: " + renderTexture.toString());
 //                    return false;
 //                }
 //            }
@@ -177,7 +178,7 @@ public class GLDriver {
                     renderTexture.shouldGenerateMips() && GLTFRenderer.generateMipmaps);
 //            }
 
-            System.out.println("[G3D][INFO]End init texture");
+            SysLog.info("G3D|End init texture");
             return tex[0];
         }
         return tex[0];
@@ -190,7 +191,7 @@ public class GLDriver {
     private static boolean setTexture(int location, RenderTexture renderTexture, int texSlot,
                                       boolean useSampler) {
         if (renderTexture == null) {
-            System.out.println("[G3D][WARN]Texture is undefined: " + renderTexture.toString());
+            SysLog.warn("G3D|Texture is undefined: " + renderTexture.toString());
             return false;
         }
 
@@ -263,6 +264,6 @@ public class GLDriver {
             glDeleteBuffers(1, buf, 0);
             it.remove();
         }
-        System.out.println("[G3D][INFO]" + GLDriver.class + " cleanup");
+        SysLog.info("G3D|" + GLDriver.class + " cleanup");
     }
 }

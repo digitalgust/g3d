@@ -66,14 +66,14 @@ public class ViewMover extends Widget {
         if (cam == null) return false;
 
         float dis2tgt = cam.getDistanceFromTarget() - (scrollY * .2f);
-        //System.out.println("dis3tgt = " + dis2tgt + "  /  " + cam.getDistanceFromTarget());
+        //SysLog.info("G3D|dis3tgt = " + dis2tgt + "  /  " + cam.getDistanceFromTarget());
         setCameraDistance(dis2tgt);
         return super.scrollEvent(scrollX, scrollY, x, y);
     }
 
     @Override
     public boolean touchEvent(int touchid, int phase, int x, int y) {
-        //System.out.println("mousemover touch " + phase + "," + x + "," + y);
+        //SysLog.info("G3D|mousemover touch " + phase + "," + x + "," + y);
         if (phase == Glfm.GLFMTouchPhaseBegan) {
             if (isInArea(x, y)) {
                 if (touchedId1 == NO_TOUCHEDID) {
@@ -140,7 +140,7 @@ public class ViewMover extends Widget {
             } else {
                 //rotate
                 if (touchedId1 == button && touchedId2 == NO_TOUCHEDID) {
-                    //System.out.println("mousemover drag      " + dx + " , " + dy + "          ," + x + "," + y);
+                    //SysLog.info("G3D|mousemover drag      " + dx + " , " + dy + "          ," + x + "," + y);
                     float a = camera.getAngleAroundTarget();
                     float adjx = dx * 0.5f;
                     camera.setAngleAroundTarget(a - adjx);

@@ -206,7 +206,7 @@ public class Camera implements ICamera {
         v = v > 1f ? 0.99f : v;
         float oldpitch = pitch;
         pitch = (float) Math.toDegrees(Math.asin(v));
-        //System.out.println("pitch old: " + oldpitch + "  new: " + verticalDistance + "/" + distanceFromTarget + "=" + pitch);
+        //SysLog.info("G3D|pitch old: " + oldpitch + "  new: " + verticalDistance + "/" + distanceFromTarget + "=" + pitch);
     }
 
 

@@ -3,12 +3,13 @@ package org.mini.g3d.animation.gltf2.render;
 import org.mini.g3d.animation.gltf2.loader.data.GLTFCamera;
 import org.mini.g3d.animation.gltf2.loader.data.GLTFPerspective;
 import org.mini.g3d.core.vector.AABBf;
+import org.mini.util.SysLog;
 
 public class GLTFRenderCamera extends RenderCamera {
 
 
     public void setGLTFCamera(GLTFCamera camera) {
-        System.out.println("[G3D][INFO]Using file defined camera");
+        SysLog.info("G3D|Using file defined camera");
         if (camera.getType() == GLTFCamera.GLTFCameraType.PERSPECTIVE) {
             GLTFPerspective perspective = camera.getPerspective();
 
@@ -20,7 +21,7 @@ public class GLTFRenderCamera extends RenderCamera {
             Z_NEAR = perspective.getZnear();
             Z_FAR = perspective.getZfar();
         } else {
-            System.out.println("[G3D][WARN]Unsupported camera type: " + camera.getType());
+            SysLog.warn("G3D|Unsupported camera type: " + camera.getType());
         }
     }
 

@@ -30,6 +30,7 @@ import org.mini.g3d.water.WaterTile;
 import org.mini.gui.*;
 import org.mini.gui.callback.GCallBack;
 import org.mini.hmi.widget.*;
+import org.mini.util.SysLog;
 
 import java.util.*;
 
@@ -234,7 +235,7 @@ public class GamePanel extends GOpenGLPanel {
                     default:
                         showColorChange(player.getPosition());
                 }
-                System.out.println("player jump");
+                SysLog.info("G3D|player jump");
             }
         });
         widgets.add(jumpBtn);
@@ -292,7 +293,7 @@ public class GamePanel extends GOpenGLPanel {
         collisionMultipleTerrainsAnimatedModel(player, terrain); // Move method for player is inside this method
         if (joystick.isTouched()) {
             float playerRotY = joystick.getDirection() + camera.getAngleAroundTarget() - 90;
-            //System.out.println("old roty:" + player.getRotY() + "   playerRotY:" + playerRotY);
+            //SysLog.info("G3D|old roty:" + player.getRotY() + "   playerRotY:" + playerRotY);
             player.setRotY(playerRotY);
             player.moveForward();
         } else {
@@ -383,7 +384,7 @@ public class GamePanel extends GOpenGLPanel {
     public boolean scrollEvent(float scrollX, float scrollY, float x, float y) {
         Camera cam = scene.getCamera();
         float dis2tgt = cam.getDistanceFromTarget() - (scrollY * .2f);
-        //System.out.println("dis3tgt = " + dis2tgt + "  /  " + cam.getDistanceFromTarget());
+        //SysLog.info("G3D|dis3tgt = " + dis2tgt + "  /  " + cam.getDistanceFromTarget());
         if (dis2tgt <= 30 && dis2tgt > 5) {
             cam.setDistanceFromTarget(dis2tgt);
         }

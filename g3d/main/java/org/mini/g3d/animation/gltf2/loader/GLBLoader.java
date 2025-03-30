@@ -7,6 +7,7 @@
 package org.mini.g3d.animation.gltf2.loader;
 
 import org.mini.g3d.animation.gltf2.loader.data.GLTF;
+import org.mini.util.SysLog;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -60,7 +61,7 @@ public class GLBLoader {
         byte[] magicRead = new byte[magic.length];
         glb.get(magicRead);
         if (!Arrays.equals(magicRead, magic)) {
-            System.out.println("[G3D][ERROR]GLB file is not a valid glb file.");
+            SysLog.error("G3D|GLB file is not a valid glb file.");
             return;
         }
 
@@ -86,7 +87,7 @@ public class GLBLoader {
                 glb.position(glb.position() + chunkLength);
             }
         } catch (Exception e) {
-            System.out.println("[G3D][ERROR]Error loading glb file: " + e.getMessage());
+            SysLog.error("G3D|Error loading glb file: " + e.getMessage());
         }
     }
 

@@ -6,6 +6,8 @@
 
 package org.mini.g3d.animation.gltf2.loader.data;
 
+import org.mini.util.SysLog;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -61,7 +63,7 @@ public class GLTFImage extends GLTFChildOfRootProperty {
             imgBuffer = bufferView.getData(0, bufferView.getByteLength());
         } else {
             imgBuffer = GLTF.getDirectByteBuffer(gltf.getRelativePath() + uri);
-            System.out.println("[G3D][INFO]Image data from URI");
+            SysLog.info("G3D|Image data from URI");
         }
         return imgBuffer;
     }

@@ -54,7 +54,7 @@ public class Player extends AnimatedModel implements Cloneable {
 //        upwardsSpeed += GRAVITY * EngineManager.getFrameTimeSeconds();
 //        super.increasePosition(0, upwardsSpeed * EngineManager.getFrameTimeSeconds(), 0);
 //        float terrainHeight = terrain.getHeightOfTerrain(super.getPosition().x, super.getPosition().z);
-////		System.out.println("Position: " +this.getPosition().left + " " + this.getPosition().top + " " + this.getPosition().z);
+////		SysLog.info("G3D|Position: " +this.getPosition().left + " " + this.getPosition().top + " " + this.getPosition().z);
 //        if (super.getPosition().y < terrainHeight) {
 //            upwardsSpeed = 0;
 //            isInAir = false;

@@ -7,6 +7,7 @@
 package org.mini.g3d.animation.gltf2.render;
 
 import org.mini.g3d.animation.gltf2.loader.data.*;
+import org.mini.util.SysLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +99,7 @@ public class RenderAnimation {
                         RenderMesh mesh = (RenderMesh) node;
                         interpolator.interpolate(sampler, mesh.getWeights());
                     } else {
-                        System.out.println("[G3D][ERROR]Error weights must be applied to RenderMesh");
+                        SysLog.error("G3D|Error weights must be applied to RenderMesh");
                     }
                     break;
 

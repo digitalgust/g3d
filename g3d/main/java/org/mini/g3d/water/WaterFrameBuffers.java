@@ -4,6 +4,7 @@ import org.mini.g3d.core.DisplayManager;
 import org.mini.gl.GL;
 import org.mini.gui.GForm;
 import org.mini.gui.callback.GCmd;
+import org.mini.util.SysLog;
 
 import static org.mini.gl.GL.*;
 
@@ -40,7 +41,7 @@ public class WaterFrameBuffers {
     protected void finalize() {
         GForm.addCmd(new GCmd(() -> {
             cleanUp();
-            System.out.println("[G3D][INFO]WaterFrameBuffers clean success");
+            SysLog.info("G3D|WaterFrameBuffers clean success");
         }));
     }
 

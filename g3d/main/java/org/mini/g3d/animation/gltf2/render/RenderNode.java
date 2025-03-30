@@ -14,6 +14,7 @@ import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Quaternionf;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.gl.GLMath;
+import org.mini.util.SysLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -253,7 +254,7 @@ public class RenderNode {
 
         //确保原装备和替换装备具有相同的模型结构
         if (children.size() != target.children.size()) {
-            System.out.println("[G3D][WARN]Substitute children size not equials");
+            SysLog.warn("G3D|Substitute children size not equials");
             return false;
         }
         for (int i = 0, imax = children.size(); i < imax; i++) {
@@ -267,7 +268,7 @@ public class RenderNode {
                     return false;
                 }
             } else {
-                System.out.println("[G3D][WARN]Sustitute skin dose not exist");
+                SysLog.warn("G3D|Sustitute skin dose not exist");
                 return false;
             }
         }

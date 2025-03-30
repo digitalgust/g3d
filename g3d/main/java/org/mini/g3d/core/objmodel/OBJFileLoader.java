@@ -172,7 +172,7 @@ public class OBJFileLoader {
 //    static public void main(String[] args) {
 //        String s = "v  0.1603 0.0000 0.0926";
 //        String[] a = s.split("[ ]{1,}");
-//        System.out.println(a.length);
+//        SysLog.info("G3D|" + a.length);
 //
 //    }
 }

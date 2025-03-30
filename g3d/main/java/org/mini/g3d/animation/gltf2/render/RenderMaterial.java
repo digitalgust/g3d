@@ -47,7 +47,7 @@ public class RenderMaterial {
             defines.add("HAS_NORMAL_MAP 1");
             properties.put("u_NormalScale", material.getNormalTexture().getScale());
             properties.put("u_NormalUVSet", material.getNormalTexture().getTexCoord());
-            //System.out.println("Material normal map set " + material.toString());
+            //SysLog.info("G3D|Material normal map set " + material.toString());
         }
 
         if (material.getOcclusionTexture() != null) {
@@ -55,7 +55,7 @@ public class RenderMaterial {
             defines.add("HAS_OCCLUSION_MAP 1");
             properties.put("u_OcclusionStrength", material.getOcclusionTexture().getStrength());
             properties.put("u_OcclusionUVSet", material.getOcclusionTexture().getTexCoord());
-            //System.out.println("Material occlusion map set " + material.toString());
+            //SysLog.info("G3D|Material occlusion map set " + material.toString());
         }
 
         if (material.getEmissiveTexture() != null) {
@@ -64,7 +64,7 @@ public class RenderMaterial {
             Vector3f emissive = material.getEmissiveFactor();
             properties.put("u_EmissiveFactor", emissive);
             properties.put("u_EmissiveUVSet", material.getEmissiveTexture().getTexCoord());
-            //System.out.println("Material emissive map set " + material.toString());
+            //SysLog.info("G3D|Material emissive map set " + material.toString());
         }
         if (material.getPbrMetallicRoughness() != null) {
             GLTFPBRMetallicRoughness pbr = material.getPbrMetallicRoughness();
@@ -74,7 +74,7 @@ public class RenderMaterial {
                 texturesMap.put("u_BaseColorSampler", new RenderTexture(pbr.getBaseColorTexture()));
                 defines.add("HAS_BASE_COLOR_MAP 1");
                 properties.put("u_BaseColorUVSet", pbr.getBaseColorTexture().getTexCoord());
-                //System.out.println("Material base color map set " + material.toString());
+                //SysLog.info("G3D|Material base color map set " + material.toString());
             }
 
             //metallicRoughnessTexture
@@ -83,7 +83,7 @@ public class RenderMaterial {
                         new RenderTexture(pbr.getMetallicRoughnessTexture()));
                 defines.add("HAS_METALLIC_ROUGHNESS_MAP 1");
                 properties.put("u_MetallicRoughnessUVSet", pbr.getMetallicRoughnessTexture().getTexCoord());
-                //System.out.println("Material metallic roughness map set " + material.toString());
+                //SysLog.info("G3D|Material metallic roughness map set " + material.toString());
             }
 
             //TODO diffuseTexture - extension
@@ -107,7 +107,7 @@ public class RenderMaterial {
             this.defines.add("ALPHAMODE_OPAQUE 1");
         }
 
-        //System.out.println("End RenderMaterial init: " + material.toString());
+        //SysLog.info("G3D|End RenderMaterial init: " + material.toString());
     }
 
     public String getShaderIdentifier() {

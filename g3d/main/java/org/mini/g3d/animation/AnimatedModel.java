@@ -11,6 +11,7 @@ import org.mini.g3d.core.textures.Texture;
 import org.mini.g3d.core.util.G3dUtil;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.entity.Entity;
+import org.mini.util.SysLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -227,7 +228,7 @@ public class AnimatedModel extends Entity implements Cloneable {
 //    float delta = 1 / (maxValue - minValue);
 //    sceneScale.scale(delta);
 //    rootRenderNode.applyTransform(sceneScale);
-//    System.out.println("Scaling scene by " + delta);
+//    SysLog.info("G3D|Scaling scene by " + delta);
 
         //renderCamera.fitViewToScene(rootRenderNode);
 
@@ -245,7 +246,7 @@ public class AnimatedModel extends Entity implements Cloneable {
             renderNode = new RenderMesh(node, parent);
             for (int i = 0; i < gltfMesh.getPrimitives().size(); i++) {
                 GLTFMeshPrimitive primitive = gltfMesh.getPrimitives().get(i);
-                //System.out.println("Processing GLTFMesh. Name: " + gltfMesh.getName());
+                //SysLog.info("G3D|Processing GLTFMesh. Name: " + gltfMesh.getName());
                 //Each primitive gets its own render object.
                 new RenderMeshPrimitive(primitive, null, (RenderMesh) renderNode);
             }
@@ -300,7 +301,7 @@ public class AnimatedModel extends Entity implements Cloneable {
             RenderNode target = findRenderNode(slotName, renderNode);
             if (!source.validSubstitute(target)) {
                 source.clearSubstitute();
-                System.out.println("[G3D][ERROR]Substitute fail :" + slotName);
+                SysLog.error("G3D|Substitute fail :" + slotName);
             }
         }
     }
@@ -319,7 +320,7 @@ public class AnimatedModel extends Entity implements Cloneable {
             if (gltfNode.getName().matches(slotName)) {
                 return renderNode;
             }
-            //System.out.println("QUERY :" + gltfNode.getName());
+            //SysLog.info("G3D|QUERY :" + gltfNode.getName());
         }
         for (int i = 0, imax = renderNode.getChildren().size(); i < imax; i++) {
             RenderNode son = renderNode.getChildren().get(i);

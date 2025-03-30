@@ -38,7 +38,7 @@ public class EffectMaster {
 //    public static void main(String[] args) {
 //        String s = "" ;
 //        Effect effect = parseEffect(s);
-//        System.out.println(effect);
+//        SysLog.info("G3D|" + effect);
 //        int debug = 1;
 //
 //    }

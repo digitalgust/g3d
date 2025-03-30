@@ -10,6 +10,7 @@ import org.mini.g3d.animation.gltf2.loader.data.GLTFAccessor;
 import org.mini.g3d.animation.gltf2.loader.data.GLTFNode;
 import org.mini.g3d.animation.gltf2.loader.data.GLTFSkin;
 import org.mini.g3d.core.vector.Matrix4f;
+import org.mini.util.SysLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +101,7 @@ public class RenderSkin {
 
     public boolean validSubstitute(RenderSkin target) {
         if (target.getJoints().size() != getJoints().size()) {
-            System.out.println("[G3D][WARN]Substitue joint size not equials");
+            SysLog.warn("G3D|Substitue joint size not equials");
             return false;
         }
         substitute = target;

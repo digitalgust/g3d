@@ -7,6 +7,7 @@ import org.mini.glwrap.GLUtil;
 import org.mini.gui.GForm;
 import org.mini.gui.GOpenGLPanel;
 import org.mini.gui.GToolkit;
+import org.mini.util.SysLog;
 
 import static org.mini.gl.GL.*;
 import static org.mini.gl.GLMath.mat4x4_rotate;
@@ -40,7 +41,7 @@ public class SimplePanel extends GOpenGLPanel {
             GL.glGetShaderiv(vertexShader, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetShaderInfoLog(vertexShader, szLog.length, return_val, 0, szLog);
-            System.out.println("Compile Shader fail error :" + new String(szLog, 0, return_val[0]) + "\n" + vss + "\n");
+            SysLog.error("G3D|Compile Shader fail error :" + new String(szLog, 0, return_val[0]) + "\n" + vss + "\n");
             return 0;
         }
 
@@ -54,7 +55,7 @@ public class SimplePanel extends GOpenGLPanel {
             GL.glGetShaderiv(fragmentShader, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetShaderInfoLog(fragmentShader, szLog.length, return_val, 0, szLog);
-            System.out.println("Compile Shader fail error :" + new String(szLog, 0, return_val[0]) + "\n" + fss + "\n");
+            SysLog.error("G3D|Compile Shader fail error :" + new String(szLog, 0, return_val[0]) + "\n" + fss + "\n");
             return 0;
         }
 
@@ -69,7 +70,7 @@ public class SimplePanel extends GOpenGLPanel {
             GL.glGetProgramiv(shaderProgram, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetProgramInfoLog(shaderProgram, szLog.length, return_val, 0, szLog);
-            System.out.println("Link Shader fail error :" + new String(szLog, 0, return_val[0]) + "\n vertex shader:" + vertexShader + "\nfragment shader:" + fragmentShader + "\n");
+            SysLog.error("G3D|Link Shader fail error :" + new String(szLog, 0, return_val[0]) + "\n vertex shader:" + vertexShader + "\nfragment shader:" + fragmentShader + "\n");
             return 0;
         }
         glDetachShader(shaderProgram, vertexShader);

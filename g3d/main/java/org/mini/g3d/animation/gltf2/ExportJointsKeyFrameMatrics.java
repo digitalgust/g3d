@@ -18,6 +18,7 @@ import org.mini.glfw.Glfw;
 import org.mini.gui.*;
 import org.mini.gui.callback.GCallBack;
 import org.mini.gui.style.GStyleDark;
+import org.mini.util.SysLog;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -59,7 +60,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
      */
     public static GLTF export(GLTF gltf, AniGroup aniGroup) {
         if (aniGroup == null) return gltf;
-        System.out.println("[G3D][INFO]export " + gltf.getSource());
+        SysLog.info("G3D|export " + gltf.getSource());
         gltf.setAniGroup(aniGroup);
 
         String gltffn = gltf.getSource();
@@ -105,7 +106,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                     token.curKeyFrame = i;
                     findMesh(rootRenderNode, token);
                 } catch (Exception e) {
-                    System.out.println("[G3D][WARN]keyframe out of bound :" + i);
+                    SysLog.warn("G3D|keyframe out of bound :" + i);
                     e.printStackTrace();
                     break;
                 }
@@ -138,7 +139,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                 GLTFMesh mesh = meshes.get(i);
                 String mname = mesh.getName();
                 if (mname == null || "".equals(mname)) {
-                    System.out.println("[G3D][WARN]Mesh need a name , matrix can't save :" + gltf.getSource());
+                    SysLog.warn("G3D|Mesh need a name , matrix can't save :" + gltf.getSource());
                     continue;
                 }
                 mname = fixFileName(mname);
@@ -147,7 +148,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                 List<GLTFMeshPrimitive> primitives = mesh.getPrimitives();
                 int primSize = dis.readInt();
                 if (primitives.size() != primSize) {
-                    System.out.println("[G3D][INFO]primtives changed in :" + gltf.getSource() + " mesh: " + mesh.getName());
+                    SysLog.info("G3D|primtives changed in :" + gltf.getSource() + " mesh: " + mesh.getName());
                 }
                 for (int j = 0; j < primitives.size(); j++) {
                     GLTFMeshPrimitive gmp = primitives.get(j);
@@ -168,7 +169,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                 }
                 fis.close();
             }
-            System.out.println("[G3D][INFO]GLTF joints keyframe and model matrics load success :" + gltf.getSource());
+            SysLog.info("G3D|GLTF joints keyframe and model matrics load success :" + gltf.getSource());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -178,7 +179,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
 
         List<GLTFSkin> skins = gltf.getSkins();
         if (skins.size() > 1) {
-            System.out.println("[G3D][WARN] not support multiple skins in one gltf :" + gltf.getSource());
+            SysLog.warn("G3D| not support multiple skins in one gltf :" + gltf.getSource());
         }
         if (!skins.isEmpty()) {
             GLTFSkin skin = skins.get(0);
@@ -226,7 +227,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                     }
                     skin.setJointKeyFrameMatrics(null);//release
                     skin.setJointKeyFrameNormMatrics(null);
-                    System.out.println("[G3D][INFO]Joint keyframe matrics max=" + max + "    min=" + min + " saved bytes = " + imgData.capacity() + " texture width = " + imgW);
+                    SysLog.info("G3D|Joint keyframe matrics max=" + max + "    min=" + min + " saved bytes = " + imgData.capacity() + " texture width = " + imgW);
 
                     try {
                         FileOutputStream fos = new FileOutputStream(appRoot + "/" + fn + EXT_JOINT_MAT);
@@ -243,7 +244,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                             GLTFMesh mesh = meshes.get(i);
                             String mname = mesh.getName();
                             if (mname == null || "".equals(mname)) {
-                                System.out.println("[G3D][WARN]Mesh need a name , matrix can't save :" + gltf.getSource());
+                                SysLog.warn("G3D|Mesh need a name , matrix can't save :" + gltf.getSource());
                                 continue;
                             }
                             mname = fixFileName(mname);
@@ -367,7 +368,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                 modelMatrics[token.curKeyFrame] = m;
                 if (token.curKeyFrame < 3) {
 
-                    //System.out.println(token.curKeyFrame + "====================\n" + m.toString());
+                    //SysLog.info("G3D|" + token.curKeyFrame + "====================\n" + m.toString());
                 }
             }
             {
@@ -419,7 +420,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                     jointNormList.add(mat);
                 }
             } else {
-                //System.out.println(gltfSkin + ", jointNorm " + token.curKeyFrame);
+                //SysLog.info("G3D|" + gltfSkin + ", jointNorm " + token.curKeyFrame);
             }
         }
     }

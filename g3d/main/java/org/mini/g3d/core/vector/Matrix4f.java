@@ -166,9 +166,9 @@ public class Matrix4f extends Matrix implements Serializable {
     }
 
 //    public static void main(String[] s) {
-//        System.out.println(format(555.33f, 3));
-//        System.out.println(format(0.0033f, 3));
-//        System.out.println(format(1.0033f, 3));
+//        SysLog.info("G3D|" + format(555.33f, 3));
+//        SysLog.info("G3D|" + format(0.0033f, 3));
+//        SysLog.info("G3D|" + format(1.0033f, 3));
 //    }
 
     /**

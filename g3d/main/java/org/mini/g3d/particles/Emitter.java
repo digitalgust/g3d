@@ -7,6 +7,7 @@ import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.core.vector.Vector4f;
 import org.mini.gui.GImage;
 import org.mini.gui.GToolkit;
+import org.mini.util.SysLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -402,7 +403,7 @@ public class Emitter {
         if (img != null) {
             texture = new ParticleTexture(img.getGLTextureId(), imageGrids, additivePara, depthTestPara);
         } else {
-            System.out.println("[G3D][ERROR]load image error " + imagePath);
+            SysLog.error("G3D|load image error " + imagePath);
         }
     }
 

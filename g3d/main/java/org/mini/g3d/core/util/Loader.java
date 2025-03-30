@@ -11,6 +11,7 @@ import org.mini.glwrap.GLUtil;
 import org.mini.gui.GForm;
 import org.mini.gui.callback.GCmd;
 import org.mini.util.IntList;
+import org.mini.util.SysLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class Loader {
                 rawModel = loadToVAO(data.getVertices(), data.getTextureCoords(), data.getNormals(), data.getIndices());
                 path2model.put(modelFileName, rawModel);
             } else {
-                System.out.println("[G3D][INFO]found cached model:" + modelFileName);
+                SysLog.info("G3D|found cached model:" + modelFileName);
             }
 
 
@@ -73,13 +74,13 @@ public class Loader {
             tm = new TexturedModel(rawModel, tex);
             path2texmodel.put(key, tm);
         } else {
-            System.out.println("[G3D][INFO]found cached TexturedModel:" + key);
+            SysLog.info("G3D|found cached TexturedModel:" + key);
         }
         return tm;
     }
 
     public RawModel loadToVAO(float[] positions, float[] textureCoords, float[] normals, int[] indices) {
-        //System.out.println("pos,texture,normals,indices: "+positions.length+",\t"+textureCoords.length+",\t"+normals.length+",\t"+indices.length+",\t");
+        //SysLog.info("G3D|pos,texture,normals,indices: "+positions.length+",\t"+textureCoords.length+",\t"+normals.length+",\t"+indices.length+",\t");
         int vaoID = createVAO();
         bindIndicesBuffer(indices);
         storeDataInAttributeList(0, 3, positions);
@@ -90,7 +91,7 @@ public class Loader {
     }
 
     public RawModel loadToVAO(int[] indices, float[] positions, int... lengths) {
-        //System.out.println("pos,texture,normals,indices: "+positions.length+",\t"+textureCoords.length+",\t"+normals.length+",\t"+indices.length+",\t");
+        //SysLog.info("G3D|pos,texture,normals,indices: "+positions.length+",\t"+textureCoords.length+",\t"+normals.length+",\t"+indices.length+",\t");
         int vaoID = createVAO();
         storeInterleavedData(positions, lengths);
         bindIndicesBuffer(indices);
@@ -165,10 +166,10 @@ public class Loader {
         String key = fileName + mipmap + nearest + clamp2edge;
         Integer loadedtex = path2texid.get(key);
         if (loadedtex != null) {
-            System.out.println("[G3D][INFO]found cached tex:" + fileName);
+            SysLog.info("G3D|found cached tex:" + fileName);
             return loadedtex.intValue();
         }
-        System.out.println(fileName);
+        SysLog.info("G3D|" + fileName);
         byte[] filecont = loadFileFromJar(fileName);
         if (filecont == null) {
             throw new RuntimeException("[G3D][WARN]file not found: " + fileName);
@@ -237,7 +238,7 @@ public class Loader {
     private TextureData decodeTextureFile(String fileName) {
         byte[] filecont = G3dUtil.loadFileFromJar(fileName);
         byte[] b = GLUtil.image_parse_from_file_content(filecont, w_h_d);
-        //System.out.println("load " + fileName + " whn:" + w_h_d[0] + "," + w_h_d[1] + "," + w_h_d[2]);
+        //SysLog.info("G3D|load " + fileName + " whn:" + w_h_d[0] + "," + w_h_d[1] + "," + w_h_d[2]);
         return new TextureData(b, w_h_d[0], w_h_d[1], w_h_d[2]);
     }
 
@@ -355,7 +356,7 @@ public class Loader {
             tmp[0] = textureID;
             glDeleteTextures(1, tmp, 0);
         }
-        System.out.println("[G3D][INFO]loader clean.");
+        SysLog.info("G3D|loader clean.");
     }
 
 

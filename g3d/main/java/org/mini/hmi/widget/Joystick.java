@@ -79,7 +79,7 @@ public class Joystick extends Widget {
             curX = x;
             curY = y;
             calcDegree();
-            //System.out.println("joystick:" + ((int) dx) + "," + (int) dy + "," + (int) x + "," + (int) y);
+            //SysLog.info("G3D|joystick:" + ((int) dx) + "," + (int) dy + "," + (int) x + "," + (int) y);
             callListener(JoystickListener.OPERATION_MOVE, x, y, dirDegree);
             return true;
         }
@@ -101,7 +101,7 @@ public class Joystick extends Widget {
 
     @Override
     public void keyEvent(int key, int scanCode, int action, int mods) {
-        //System.out.println("key:" + key + " doAction:" + doAction);
+        //SysLog.info("G3D|key:" + key + " doAction:" + doAction);
         boolean isDirectionKey = false;
         float dx = 0, dy = 0;
         if ((key == GLFW_KEY_W || key == GLFW_KEY_UP)) {

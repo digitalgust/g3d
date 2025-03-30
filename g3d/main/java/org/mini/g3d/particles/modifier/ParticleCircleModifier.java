@@ -62,7 +62,7 @@ public class ParticleCircleModifier extends ParticleModifier {
         float y = (float) (c2 + r * a.y * Math.cos(theta) + r * b.y * Math.sin(theta));
         float z = (float) (c3 + r * a.z * Math.cos(theta) + r * b.z * Math.sin(theta));
 
-//            System.out.println(x + "\t" + y + "\t" + z);
+//            SysLog.info("G3D|" + x + "\t" + y + "\t" + z);
 //        }
         return new Vector3f(x, y, z);
     }

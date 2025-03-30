@@ -37,7 +37,7 @@ public class ParticleFrameModifier extends ParticleModifier {
             }
             particle.setFrameChgByModifier(true);
             particle.setFrameIndex(curIndex);
-            //System.out.println("===="+curIndex);
+            //SysLog.info("G3D|===="+curIndex);
         } else {
             particle.setFrameChgByModifier(false);
         }

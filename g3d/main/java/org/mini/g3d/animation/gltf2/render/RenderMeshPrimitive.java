@@ -14,6 +14,7 @@ import org.mini.g3d.animation.gltf2.loader.data.GLTFNode;
 import org.mini.g3d.core.vector.AABBf;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
+import org.mini.util.SysLog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -146,7 +147,7 @@ public class RenderMeshPrimitive extends RenderNode {
                             glAttributes.put("a_Target_Tangent" + i, accessor);
                             break;
                         default:
-                            System.out.println("[G3D][WARN]Unhandled morph target: " + attribute);
+                            SysLog.warn("G3D|Unhandled morph target: " + attribute);
                             break;
                     }
                 }

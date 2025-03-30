@@ -12,6 +12,7 @@ import org.mini.g3d.animation.gltf2.loader.data.GLTFChannel;
 import org.mini.g3d.animation.gltf2.loader.data.GLTFNode;
 import org.mini.g3d.core.vector.Quaternionf;
 import org.mini.g3d.core.vector.Vector3f;
+import org.mini.util.SysLog;
 
 public class Interpolator {
 
@@ -32,7 +33,7 @@ public class Interpolator {
             renderNode = rootRenderNode.findRenderNode(node);//gust
             if (renderNode == null) {
                 //throw new NullPointerException();
-                System.out.println("[G3D][WARN]animation channel can not find target node, maybe some of bone is not necessary." + channel.gltf.getSource());
+                SysLog.warn("G3D|animation channel can not find target node, maybe some of bone is not necessary." + channel.gltf.getSource());
             }
         }
     }
@@ -69,7 +70,7 @@ public class Interpolator {
                 vectorDest.lerp(endV, tn, vectorDest);
                 break;
             default:
-                System.out.println("[G3D][WARN]Not implemented interpolation :" + sampler.getInterpolation());
+                SysLog.warn("G3D|Not implemented interpolation :" + sampler.getInterpolation());
         }
     }
 
@@ -114,7 +115,7 @@ public class Interpolator {
 
         //No interpolation for single key frame animations
         if (output.getCount() == 1) {
-            System.out.println("[G3D][WARN]Unhandled single key frame");
+            SysLog.warn("G3D|Unhandled single key frame");
             return;
         }
         int prevKey = renderAnimation.prevKey;
@@ -136,7 +137,7 @@ public class Interpolator {
                 linear(prevKey, nextKey, output, tn, floatArrayDest.length, floatArrayDest);
                 break;
             default:
-                System.out.println("[G3D][WARN]Not implemented interpolation :" + sampler.getInterpolation());
+                SysLog.warn("G3D|Not implemented interpolation :" + sampler.getInterpolation());
         }
     }
 

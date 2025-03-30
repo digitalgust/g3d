@@ -25,7 +25,7 @@ public class AniGroup {
         keyFrameMax = Integer.MIN_VALUE;
 
         float fpt = 1f / fps;
-        //System.out.println("setAniClips fps:" + fps);
+        //SysLog.info("G3D|setAniClips fps:" + fps);
         if (fullAniIndex >= 0) {
             aniClips.remove(fullAniIndex);
         }
@@ -103,7 +103,7 @@ public class AniGroup {
 //            System.out.print(t);
 //            System.out.print(' ');
 //        }
-//        System.out.println();
+//        SysLog.info("G3D|" );
 
         return aniMotions;
     }

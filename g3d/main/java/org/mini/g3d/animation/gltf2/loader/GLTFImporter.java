@@ -10,6 +10,7 @@ import org.mini.g3d.animation.gltf2.loader.data.GLTF;
 import org.mini.g3d.animation.gltf2.loader.data.AniGroup;
 import org.mini.gui.GToolkit;
 import org.mini.json.JsonParser;
+import org.mini.util.SysLog;
 
 import java.nio.ByteBuffer;
 
@@ -29,7 +30,7 @@ public class GLTFImporter {
             gltf.setSource(path, GLTF.ResourceFrom.JAR);
 
             if (path.endsWith(".glb")) {
-                System.out.println("[G3D][INFO]Loading .glb file: " + path);
+                SysLog.info("G3D|Loading .glb file: " + path);
                 GLBLoader glbLoader = new GLBLoader(this);
                 glbLoader.parseGLB(path);
                 ByteBuffer jasonb = glbLoader.jsonData();
@@ -55,7 +56,7 @@ public class GLTFImporter {
 
             return gltf;
         } catch (Exception e) {
-            System.out.println("[G3D][ERROR]Error loading gltf file: " + path.toString());
+            SysLog.error("G3D|Error loading gltf file: " + path.toString());
             e.printStackTrace();
             return null;
         }

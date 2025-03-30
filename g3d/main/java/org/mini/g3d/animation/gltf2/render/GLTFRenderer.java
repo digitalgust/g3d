@@ -103,7 +103,7 @@ public class GLTFRenderer {
     public void draw(ICamera camera, RenderNode rootNode, int targetDrawLimit) {
 //        GLUtil.checkGlError("draw 0");
         this.camera = camera;
-        //System.out.println("================================");
+        //SysLog.info("G3D|================================");
 
         nodeDrawLimit = targetDrawLimit;
         transparentNodes.clear();
@@ -130,7 +130,7 @@ public class GLTFRenderer {
                 if (nodeObj.getMaterial().getAlphaMode() == GLTFAlphaMode.BLEND) {
                     transparentNodes.add(nodeObj);
                 } else {
-                    //System.out.println(node);
+                    //SysLog.info("G3D|" + node);
                     AnimatedModelRenderer.putPendingRmp((RenderMeshPrimitive) node);
                 }
             }

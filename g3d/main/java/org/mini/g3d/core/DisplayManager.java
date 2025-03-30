@@ -5,6 +5,8 @@
  */
 package org.mini.g3d.core;
 
+import org.mini.util.SysLog;
+
 import static org.mini.gl.GL.*;
 
 public class DisplayManager {
@@ -40,9 +42,9 @@ public class DisplayManager {
         glVendor = new String(name);
         glRenderer = new String(biaoshifu);
         glVersion = new String(OpenGLVersion);
-        System.out.println("[G3D][INFO]Vebder : " + glVendor);
-        System.out.println("[G3D][INFO]Renderer : " + glRenderer);
-        System.out.println("[G3D][INFO]Version : " + glVersion);
+        SysLog.info("G3D|Vebder : " + glVendor);
+        SysLog.info("G3D|Renderer : " + glRenderer);
+        SysLog.info("G3D|Version : " + glVersion);
     }
 
     public static void updateDisplay() {

@@ -9,6 +9,7 @@ import org.mini.glwrap.GLUtil;
 import org.mini.gui.GForm;
 import org.mini.gui.GToolkit;
 import org.mini.gui.callback.GCmd;
+import org.mini.util.SysLog;
 
 import static org.mini.gl.GL.*;
 
@@ -22,9 +23,22 @@ public abstract class ShaderProgram {
     float[] mbuf = new float[16];
 
     public ShaderProgram(String vertexFile, String fragmentFile) {
+        long start = System.currentTimeMillis();
         int vertexShaderID = loadShader(vertexFile, GL_VERTEX_SHADER);
         int fragmentShaderID = loadShader(fragmentFile, GL_FRAGMENT_SHADER);
         linkShader(vertexShaderID, fragmentShaderID);
+        SysLog.info("G3D|init shader " + vertexFile + " + " + fragmentFile + " = " + programID + " time:" + (System.currentTimeMillis() - start));
+
+//        //把链接成功的programID生成的shader数据从显卡中取出，并保存为文件
+//        // 获取并保存着色器二进制数据
+//        int[] length = new int[1];
+//        int[] binaryFormat = new int[1];
+//        glGetProgramiv(programID, GL.GL_PROGRAM_BINARY_LENGTH, length, 0);
+//        byte[] binary = new byte[length[0]];
+//        GL.glGetProgramBinary(programID, binary.length, length, 0, binaryFormat, 0, binary);
+//
+//        // 这里可以添加代码将binary保存到文件
+//        // GToolkit.writeFile("shader.bin", binary);
 
         //release vert and frag
         glDetachShader(programID, vertexShaderID);
@@ -66,7 +80,7 @@ public abstract class ShaderProgram {
         glValidateProgram(programID);
 //        GLUtil.checkGlError("init 5");
         getAllUniformLocations();
-        System.out.println("[G3D][INFO]init shader link " + vertexShaderID + " + " + fragmentShaderID + " = " + programID);
+//        SysLog.info("G3D|init shader link " + vertexShaderID + " + " + fragmentShaderID + " = " + programID);
 //        GLUtil.checkGlError("init 8");
     }
 
@@ -96,7 +110,7 @@ public abstract class ShaderProgram {
     protected void finalize() {
         GForm.addCmd(new GCmd(() -> {
             cleanUp();
-            System.out.println("[G3D][INFO]" + this.getClass() + "shader program clean success");
+            SysLog.info("G3D|" + this.getClass() + "shader program clean success");
         }));
     }
 
@@ -173,7 +187,7 @@ public abstract class ShaderProgram {
             loadMatrix(location, (Matrix4f) value);
             return;
         }
-        System.out.println("[G3D][INFO]Unhandled type in setUniform: " + value.getClass());
+        SysLog.info("G3D|Unhandled type in setUniform: " + value.getClass());
         assert false;
     }
 
@@ -202,7 +216,7 @@ public abstract class ShaderProgram {
             GL.glGetShaderiv(shaderID, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetShaderInfoLog(shaderID, szLog.length, return_val, 0, szLog);
-            System.out.println("[G3D][ERROR]Compile Shader fail.file:" + file + ", error :" + new String(szLog, 0, return_val[0]) + ":" + file);
+            SysLog.error("G3D|Compile Shader fail.file:" + file + ", error :" + new String(szLog, 0, return_val[0]) + ":" + file);
             //System.exit(-1);
         }
         return shaderID;

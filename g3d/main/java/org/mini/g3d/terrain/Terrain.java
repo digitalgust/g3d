@@ -8,6 +8,7 @@ import org.mini.g3d.core.textures.TextureData;
 import org.mini.g3d.core.vector.Vector2f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.glwrap.GLUtil;
+import org.mini.util.SysLog;
 
 public class Terrain {
     public static final float DEFAULT_MAP_SCALE = 2;
@@ -58,7 +59,7 @@ public class Terrain {
         this.mapScale = mapScale;
         long startAt = System.currentTimeMillis();
         this.model = generateTerrain(loader, heightMap);
-        System.out.println("[G3D][INFO]load terrain cost (ms): " + (System.currentTimeMillis() - startAt));
+        SysLog.info("G3D|load terrain cost (ms): " + (System.currentTimeMillis() - startAt));
     }
 
     public float getCols() {
@@ -141,7 +142,7 @@ public class Terrain {
         }
         int vertCnt1 = vertexPointer;
 
-        //System.out.println("======================" + vertexPointer);
+        //SysLog.info("G3D|======================" + vertexPointer);
         //添加地图东西两个侧面
         for (int k = 0; k < extEastWest.length; k++) {
             int xIdx = extEastWest[k][0];
@@ -163,10 +164,10 @@ public class Terrain {
                 textureCoords[vertexPointer * 2 + 1] = (float) zIdx / ((float) rows);
                 vertexPointer++;
             }
-            //System.out.println(vertexPointer);
+            //SysLog.info("G3D|" + vertexPointer);
         }
         int vectCnt2 = vertexPointer;
-        //System.out.println("======================" + vertexPointer);
+        //SysLog.info("G3D|======================" + vertexPointer);
 
         //添加南北两个侧面, 数组第二维为{z,y}
         for (int k = 0; k < extNorthSouth.length; k++) {
@@ -189,9 +190,9 @@ public class Terrain {
                 textureCoords[vertexPointer * 2 + 1] = (float) k / ((float) rows);
                 vertexPointer++;
             }
-            //System.out.println(vertexPointer);
+            //SysLog.info("G3D|" + vertexPointer);
         }
-        //System.out.println("======================");
+        //SysLog.info("G3D|======================");
 
         int pointer = 0;
         for (int gz = 0; gz < rows; gz++) {
@@ -227,11 +228,11 @@ public class Terrain {
 //                Vector3f p2 = new Vector3f(vertices[(vertCnt1 + bottomLeft) * 3], vertices[(vertCnt1 + bottomLeft) * 3 + 1], vertices[(vertCnt1 + bottomLeft) * 3 + 2]);
 //                Vector3f p3 = new Vector3f(vertices[(vertCnt1 + topRight) * 3], vertices[(vertCnt1 + topRight) * 3 + 1], vertices[(vertCnt1 + topRight) * 3 + 2]);
 //                Vector3f p4 = new Vector3f(vertices[(vertCnt1 + bottomRight) * 3], vertices[(vertCnt1 + bottomRight) * 3 + 1], vertices[(vertCnt1 + bottomRight) * 3 + 2]);
-//                System.out.println((vertCnt1 + topLeft) + "      " + p1 + " , " + p2 + " , " + p3 + "                     " + p3 + " , " + p2 + " , " + p4);
+//                SysLog.info("G3D|" + (vertCnt1 + topLeft) + "      " + p1 + " , " + p2 + " , " + p3 + "                     " + p3 + " , " + p2 + " , " + p4);
             }
-            //System.out.println();
+            //SysLog.info("G3D|" + );
         }
-        //System.out.println("======================");
+        //SysLog.info("G3D|======================");
 
         int[] northAndSouth = {0, 1, 3, 4};//因为两行格子需要三条线,所以跳过边上那条
         for (int k = 0; k < northAndSouth.length; k++) {
@@ -251,10 +252,10 @@ public class Terrain {
 //                Vector3f p2 = new Vector3f(vertices[(vertCnt1 + bottomLeft) * 3], vertices[(vertCnt1 + bottomLeft) * 3 + 1], vertices[(vertCnt1 + bottomLeft) * 3 + 2]);
 //                Vector3f p3 = new Vector3f(vertices[(vertCnt1 + topRight) * 3], vertices[(vertCnt1 + topRight) * 3 + 1], vertices[(vertCnt1 + topRight) * 3 + 2]);
 //                Vector3f p4 = new Vector3f(vertices[(vertCnt1 + bottomRight) * 3], vertices[(vertCnt1 + bottomRight) * 3 + 1], vertices[(vertCnt1 + bottomRight) * 3 + 2]);
-//                System.out.println((vectCnt2 + topLeft) + "      " + p1 + " , " + p2 + " , " + p3 + "                     " + p3 + " , " + p2 + " , " + p4);
+//                SysLog.info("G3D|" + (vectCnt2 + topLeft) + "      " + p1 + " , " + p2 + " , " + p3 + "                     " + p3 + " , " + p2 + " , " + p4);
 
             }
-            //System.out.println();
+            //SysLog.info("G3D|" + );
         }
 
         min = new Vector3f(0.f, getHeightOfTerrain(0, 0), 0.f);

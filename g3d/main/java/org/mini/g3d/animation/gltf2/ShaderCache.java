@@ -130,7 +130,7 @@ public class ShaderCache {
             return programs.get(hash);
         }
 
-        //System.out.println("compile a new shader.");
+        //SysLog.info("G3D|compile a new shader.");
         ShaderVars vertVars = vertShaders.get(vertexShaderHash);
         ShaderVars fragVars = fragShaders.get(fragmentShaderHash);
         int programID = GLDriver.linkProgram(vertVars.glRef.intValue(), fragVars.glRef.intValue());

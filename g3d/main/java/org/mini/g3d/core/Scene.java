@@ -12,6 +12,7 @@ import org.mini.g3d.skybox.DayAndNight;
 import org.mini.g3d.skybox.Skybox;
 import org.mini.g3d.terrain.Terrain;
 import org.mini.g3d.water.WaterTile;
+import org.mini.util.SysLog;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,7 +153,7 @@ public class Scene {
     public void addLight(Light light) {
         lights.add(light);
         if (lights.size() > EntityShader.MAX_LIGHTS) {
-            System.out.println("[G3D]max light num is " + EntityShader.MAX_LIGHTS + ", exceeded " + lights.size());
+            SysLog.info("G3D|max light num is " + EntityShader.MAX_LIGHTS + ", exceeded " + lights.size());
         }
     }
 
