@@ -17,7 +17,6 @@ public class EntityShader extends ShaderProgram {
     private static final String VERTEX_FILE = "/org/mini/g3d/res/shader/entityVertex.glsl";
     private static final String FRAGMENT_FILE = "/org/mini/g3d/res/shader/entityFragment.glsl";
 
-    private int location_transformationMatrix;
     private int location_projectionMatrix;
     private int location_viewMatrix;
     private int location_lightPosition[];
@@ -28,17 +27,11 @@ public class EntityShader extends ShaderProgram {
     private int location_useFakeLightning;
     private int location_skyColour;
     private int location_numberOfRows;
-    private int location_offset;
-    int location_transparency;
     private int location_transparencyDistance;
-
 
     Vector3f defaultLightPosition = new Vector3f(0, 0, 0);
     Vector3f defaultLightColour = new Vector3f(0, 0, 0);
     Vector3f defaultLightAttenuation = new Vector3f(1, 0, 0);
-
-    //avoid new an instance
-    Vector2f cachedOffset = new Vector2f();
 
     public EntityShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -56,12 +49,17 @@ public class EntityShader extends ShaderProgram {
 
     protected void bindAttributes() {
         super.bindAttribute(0, "position");
-        super.bindAttribute(1, "textureCoords");
+        super.bindAttribute(1, "textureCoordinates");
         super.bindAttribute(2, "normal");
+        
+        super.bindAttribute(3, "instancePosition");
+        super.bindAttribute(4, "instanceRotation");
+        super.bindAttribute(5, "instanceScale");
+        super.bindAttribute(6, "instanceTextureOffset");
+        super.bindAttribute(7, "instanceTransparency");
     }
 
     protected void getAllUniformLocations() {
-        location_transformationMatrix = super.getUniformLocation("transformationMatrix");
         location_projectionMatrix = super.getUniformLocation("projectionMatrix");
         location_viewMatrix = super.getUniformLocation("viewMatrix");
         location_shineDamper = super.getUniformLocation("shineDamper");
@@ -69,8 +67,6 @@ public class EntityShader extends ShaderProgram {
         location_useFakeLightning = super.getUniformLocation("useFakeLightning");
         location_skyColour = super.getUniformLocation("skyColour");
         location_numberOfRows = super.getUniformLocation("numberOfRows");
-        location_offset = super.getUniformLocation("offset");
-        location_transparency = super.getUniformLocation("transparency");
         location_transparencyDistance = getUniformLocation("transparencyDistance");
 
         location_lightPosition = new int[MAX_LIGHTS];
@@ -86,12 +82,6 @@ public class EntityShader extends ShaderProgram {
 
     public void loadNumberOfRows(int numberOfRows) {
         super.loadFloat(location_numberOfRows, numberOfRows);
-    }
-
-    public void loadOffset(float x, float y) {
-        cachedOffset.x = x;
-        cachedOffset.y = y;
-        super.loadVector2D(location_offset, cachedOffset);
     }
 
     public void loadSkyColour(Vector3f fogColor) {
@@ -118,27 +108,16 @@ public class EntityShader extends ShaderProgram {
         }
     }
 
-    public void loadTransformationMatrix(Matrix4f matrix) {
-        super.loadMatrix(location_transformationMatrix, matrix);
-    }
-
     public void loadProjectionMatrix(Matrix4f matrix) {
         super.loadMatrix(location_projectionMatrix, matrix);
     }
 
     public void loadViewMatrix(ICamera camera) {
-//        Matrix4f viewMatrix = new Matrix4f();
-//        float[] eye = new float[]{GamePanel.sun.getPosition().left, GamePanel.sun.getPosition().top, GamePanel.sun.getPosition().z};
-//        GLUtil.mat4x4_look_at(viewMatrix.mat, eye, new float[]{-GamePanel.sun.getPosition().left, -GamePanel.sun.getPosition().top, -GamePanel.sun.getPosition().z}, new float[]{0.0f, 1.0f, 0.0f});
         super.loadMatrix(location_viewMatrix, camera.getViewMatrix());
     }
 
     public void setLightning(float useFakeLightning) {
         super.loadFloat(location_useFakeLightning, useFakeLightning);
-    }
-
-    public void loadTransparency(float transparency) {
-        super.loadFloat(location_transparency, transparency);
     }
 
     public void loadTransparencyDistance(float transparencyDistance) {
