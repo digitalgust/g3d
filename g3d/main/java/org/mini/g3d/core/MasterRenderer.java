@@ -120,7 +120,7 @@ public class MasterRenderer extends AbstractRenderer {
         waterFbos.bindRefractionFrameBuffer();
         prepare();
         terrainRenderer.render(scene);
-        //animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModels());//人走到水底下也可以看见,影响性能
+        animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModelsIterator());//人走到水底下也可以看见,影响性能
         waterFbos.unbindCurrentFrameBuffer();
     }
 
@@ -137,9 +137,9 @@ public class MasterRenderer extends AbstractRenderer {
         prepare();
         scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
         enitiyRenderer.render(scene);
-        //terrainRenderer.render(scene);
+        terrainRenderer.render(scene);
         skyboxRenderer.render(scene);
-        //animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModels()); //人会产生倒影,影响性能
+        animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModelsIterator()); //人会产生倒影,影响性能
         waterFbos.unbindCurrentFrameBuffer();
         scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
     }

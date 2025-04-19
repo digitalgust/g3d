@@ -7,12 +7,14 @@ out vec2 textureCoords;
 out vec3 toCameraVector;
 out vec2 pass_pos;
 out vec3 pass_wcolor;
+out float pass_waterHeight;
 
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 modelMatrix;
 uniform vec3 cameraPosition;
 uniform vec3 waterColor;
+uniform float waterHeight;
 
 const float tiling = 4.0;
 const float density = 0.003;
@@ -28,4 +30,5 @@ void main(void) {
     textureCoords = vec2(position.x/2.0 + 0.5, position.y/2.0 + 0.5) * tiling;
     toCameraVector = cameraPosition - worldPosition.xyz;
     pass_wcolor = waterColor;
+    pass_waterHeight = waterHeight;
 }

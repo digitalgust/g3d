@@ -57,6 +57,7 @@ public class WaterRenderer extends AbstractRenderer {
                 Matrix4f modelMatrix = createModelMatrix(water.getX(), water.getHeight(), water.getZ(), water.getTileSize());
                 shader.loadModelMatrix(modelMatrix);
                 shader.loadWaterColor(water.getWaterColor());
+                shader.loadWaterHeight(water.getHeight());
                 GL.glDrawElements(GL.GL_TRIANGLES, quad.getVertexCount(), GL.GL_UNSIGNED_INT, null, 0);
                 GLUtil.checkGlError("render " + water);
             }

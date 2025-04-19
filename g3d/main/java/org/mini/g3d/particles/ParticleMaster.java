@@ -2,6 +2,7 @@ package org.mini.g3d.particles;
 
 
 import org.mini.g3d.core.ICamera;
+import org.mini.g3d.core.util.G3dUtil;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -27,6 +28,7 @@ public class ParticleMaster {
                         iterator.remove();
                         if (list.isEmpty()) {
                             mapIterator.remove();
+                            G3dUtil.putCachedList(list);
                         }
                     }
                 }
@@ -49,7 +51,7 @@ public class ParticleMaster {
     public static void addParticle(Particle particle) {
         List<Particle> list = particles.get(particle.getTexture());
         if (list == null) {
-            list = new ArrayList<Particle>();
+            list = G3dUtil.getCachedList();
             particles.put(particle.getTexture(), list);
         }
         list.add(particle);

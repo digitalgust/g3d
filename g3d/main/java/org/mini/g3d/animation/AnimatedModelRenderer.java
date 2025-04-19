@@ -10,6 +10,7 @@ import org.mini.g3d.animation.gltf2.loader.data.GLTFSkin;
 import org.mini.g3d.animation.gltf2.render.*;
 import org.mini.g3d.core.AbstractRenderer;
 import org.mini.g3d.core.ICamera;
+import org.mini.g3d.core.util.G3dUtil;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.gl.GLMath;
 import org.mini.glwrap.GLUtil;
@@ -67,7 +68,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
             renderer.draw(camera, p.getRootRenderNode(), -1);
         }
 
-        List<RenderMeshPrimitive> batch = new ArrayList<>();
+        List<RenderMeshPrimitive> batch = G3dUtil.getCachedList();
 
         for (GLTFSkin gltfSkin : pendingRenders.keySet()) {
             Map<GLTFMeshPrimitive, List<RenderMeshPrimitive>> primitiveListMap = pendingRenders.get(gltfSkin);
@@ -91,6 +92,8 @@ public class AnimatedModelRenderer extends AbstractRenderer {
                 }
             }
         }
+
+        G3dUtil.putCachedList(batch);
     }
 
 
@@ -124,12 +127,12 @@ public class AnimatedModelRenderer extends AbstractRenderer {
         AnimatedShader shader = rmp.getShader();
         if (shader == null) {
             //select shader permutation, compile and link program.
-            List<String> vertDefines = new ArrayList<>();
+            List<String> vertDefines = G3dUtil.getCachedList();
             pushVertParameterDefines(vertDefines, rmp);
             vertDefines.addAll(rmp.getDefines());
 
 
-            List<String> fragDefines = new ArrayList<>();
+            List<String> fragDefines = G3dUtil.getCachedList();
             fragDefines.addAll(vertDefines);//Add all the vert defines, some are needed
             fragDefines.addAll(material.getDefines());
 //            if (usePunctualLighting) {
@@ -160,6 +163,10 @@ public class AnimatedModelRenderer extends AbstractRenderer {
 //            GLUtil.checkGlError("drawRenderObject 0.4");
             rmp.setShader(shader);
 //            GLUtil.checkGlError("drawRenderObject 1");
+
+            // clean up
+            G3dUtil.putCachedList(vertDefines);
+            G3dUtil.putCachedList(fragDefines);
         }
         shader.start();
 

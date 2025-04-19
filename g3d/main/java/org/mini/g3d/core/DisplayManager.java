@@ -11,7 +11,7 @@ import static org.mini.gl.GL.*;
 
 public class DisplayManager {
 
-
+    public static String G3D_VERSION = "1.0.0";
     static int width = 1280;
     static int height = 720;
     private static final int FPS_CAP = 120;
@@ -45,6 +45,7 @@ public class DisplayManager {
         SysLog.info("G3D|Vebder : " + glVendor);
         SysLog.info("G3D|Renderer : " + glRenderer);
         SysLog.info("G3D|Version : " + glVersion);
+        SysLog.info("G3D|g3d : " + G3D_VERSION);
     }
 
     public static void updateDisplay() {

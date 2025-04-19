@@ -123,9 +123,9 @@ public class ShadowMappingRenderer extends AbstractRenderer {
             RawModel rawModel = texturedModel.getRawModel();
             Texture texture = texturedModel.getTexture();
             if (rawModel.isCullingBack()) {
-                MasterRenderer.enableCulling();
+                enableCulling();
             } else {
-                MasterRenderer.disableCulling();
+                disableCulling();
             }
 
             glBindVertexArray(rawModel.getVaoID());

@@ -16,6 +16,7 @@ public class WaterShader extends ShaderProgram {
     private int location_projectionMatrix;
     private int location_moveFactor;
     private int location_waterColor;
+    private int location_waterHeight;
     private int location_cameraPosition;
     private int location_lightDirection;
     private int location_reflectionTexture;
@@ -50,6 +51,7 @@ public class WaterShader extends ShaderProgram {
         location_modelMatrix = getUniformLocation("modelMatrix");
         location_moveFactor = getUniformLocation("moveFactor");
         location_waterColor = getUniformLocation("waterColor");
+        location_waterHeight = getUniformLocation("waterHeight");
         location_cameraPosition = getUniformLocation("cameraPosition");
         location_lightDirection = getUniformLocation("lightDirection");
         location_reflectionTexture = getUniformLocation("reflectionTexture");
@@ -86,6 +88,10 @@ public class WaterShader extends ShaderProgram {
 
     public void loadWaterColor(Vector3f waterColor) {
         loadVector(location_waterColor, waterColor);
+    }
+
+    public void loadWaterHeight(float waterHeight) {
+        loadFloat(location_waterHeight, waterHeight);
     }
 
 }

@@ -11,6 +11,10 @@ import org.mini.g3d.core.vector.Vector3f;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Gust
@@ -18,6 +22,43 @@ import java.io.InputStream;
 public class G3dUtil {
 
 //    static Loader loader;
+
+    static List<Map> cachedMapPool = new ArrayList<>();
+    static List<List> cachedListPool = new ArrayList<>();
+
+    static final int MAX_POOL_SIZE = 100;
+
+    public static Map getCachedMap() {
+        synchronized (cachedMapPool) {
+            Map map = cachedMapPool.size() > 0 ? cachedMapPool.remove(cachedMapPool.size() - 1) : new HashMap();
+            return map;
+        }
+    }
+
+    public static void putCachedMap(Map map) {
+        if (map != null && cachedMapPool.size() < MAX_POOL_SIZE) {
+            synchronized (cachedMapPool) {
+                map.clear();
+                cachedMapPool.add(map);
+            }
+        }
+    }
+
+    public static List getCachedList() {
+        synchronized (cachedListPool) {
+            List list = cachedListPool.size() > 0 ? cachedListPool.remove(cachedListPool.size() - 1) : new ArrayList();
+            return list;
+        }
+    }
+
+    public static void putCachedList(List list) {
+        if (list != null && cachedListPool.size() < MAX_POOL_SIZE) {
+            synchronized (cachedListPool) {
+                list.clear();
+                cachedListPool.add(list);
+            }
+        }
+    }
 
     /**
      * 在src中搜索key
