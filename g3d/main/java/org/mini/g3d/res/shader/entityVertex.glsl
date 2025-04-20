@@ -38,7 +38,8 @@ const float density = 0.015;
 const float gradient = 2.0;
 
 // 辅助函数：旋转矩阵
-mat4 createRotationMatrix(vec3 rotation) {
+mat4 createRotationMatrix(vec3 rotationDegrees) {
+    vec3 rotation = radians(-rotationDegrees);
     float cosX = cos(rotation.x);
     float sinX = sin(rotation.x);
     float cosY = cos(rotation.y);
@@ -71,8 +72,8 @@ mat4 createRotationMatrix(vec3 rotation) {
 }
 
 // 辅助函数：变换矩阵
-mat4 createTransformationMatrix(vec3 translation, vec3 rotation, float scale) {
-    mat4 rotMatrix = createRotationMatrix(rotation);
+mat4 createTransformationMatrix(vec3 translation, vec3 rotationDegrees, float scale) {
+    mat4 rotMatrix = createRotationMatrix(rotationDegrees);
     
     mat4 scaleMatrix = mat4(
         scale, 0.0, 0.0, 0.0,
