@@ -18,10 +18,8 @@ public class ParticleRenderer extends AbstractRenderer {
 
     private static final float[] VERTICES = {-0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
     private static final int MAX_INSTANCES = 1000;
-    private static final int INSTANCE_DATA_LENGTH = 25;
+    private static final int INSTANCE_DATA_LENGTH = 21;
     Loader loader = new Loader();
-
-//    private static final FloatBuffer buffer = BufferUtils.createFloatBuffer(MAX_INSTANCES * INSTANCE_DATA_LENGTH);
 
     private RawModel quad;
     private ParticleShader shader;
@@ -29,24 +27,18 @@ public class ParticleRenderer extends AbstractRenderer {
     private int vbo;
     private int pointer = 0;
 
-    //缓存 局部变量 不每次都 new
-    Matrix4f modelMatrix = new Matrix4f();
-    Matrix4f modelViewMatrix = new Matrix4f();
-    Vector3f scaler = new Vector3f();
-
-
     public ParticleRenderer() {
 
         this.vbo = loader.createEmptyFloatVbo(INSTANCE_DATA_LENGTH * MAX_INSTANCES);
         this.quad = loader.loadToVAO(this.VERTICES, 2);
 
-        loader.addInstancedAttribute(quad.getVaoID(), vbo, 1, 4, INSTANCE_DATA_LENGTH, 0);
-        loader.addInstancedAttribute(quad.getVaoID(), vbo, 2, 4, INSTANCE_DATA_LENGTH, 4);
-        loader.addInstancedAttribute(quad.getVaoID(), vbo, 3, 4, INSTANCE_DATA_LENGTH, 8);
-        loader.addInstancedAttribute(quad.getVaoID(), vbo, 4, 4, INSTANCE_DATA_LENGTH, 12);
-        loader.addInstancedAttribute(quad.getVaoID(), vbo, 5, 4, INSTANCE_DATA_LENGTH, 16);
-        loader.addInstancedAttribute(quad.getVaoID(), vbo, 6, 1, INSTANCE_DATA_LENGTH, 20);
-        loader.addInstancedAttribute(quad.getVaoID(), vbo, 7, 4, INSTANCE_DATA_LENGTH, 21);
+        loader.addInstancedAttribute(quad.getVaoID(), vbo, 1, 3, INSTANCE_DATA_LENGTH, 0);
+        loader.addInstancedAttribute(quad.getVaoID(), vbo, 2, 3, INSTANCE_DATA_LENGTH, 3);
+        loader.addInstancedAttribute(quad.getVaoID(), vbo, 3, 1, INSTANCE_DATA_LENGTH, 6);
+        loader.addInstancedAttribute(quad.getVaoID(), vbo, 4, 1, INSTANCE_DATA_LENGTH, 7);
+        loader.addInstancedAttribute(quad.getVaoID(), vbo, 5, 4, INSTANCE_DATA_LENGTH, 8);
+        loader.addInstancedAttribute(quad.getVaoID(), vbo, 6, 1, INSTANCE_DATA_LENGTH, 12);
+        loader.addInstancedAttribute(quad.getVaoID(), vbo, 7, 4, INSTANCE_DATA_LENGTH, 13);
         shader = new ParticleShader();
     }
 
@@ -55,6 +47,7 @@ public class ParticleRenderer extends AbstractRenderer {
         Matrix4f viewMatrix = scene.getCamera().getViewMatrix();
         Matrix4f projectionMatrix = scene.getCamera().getProjectionMatrix();
         shader.loadProjectionMatrix(projectionMatrix);
+        shader.loadViewMatrix(viewMatrix);
         int depthTestState = glIsEnabled(GL_DEPTH_TEST);
 
         for (ParticleTexture texture : particles.keySet()) {
@@ -69,7 +62,7 @@ public class ParticleRenderer extends AbstractRenderer {
             float[] vboData = new float[particleList.size() * INSTANCE_DATA_LENGTH];
             for (int i = 0; i < particleList.size(); i++) {
                 Particle particle = particleList.get(i);
-                updateModelViewMatrix(particle, viewMatrix, vboData);
+                updateParticleData(particle, vboData);
                 updateTexCoordInfo(particle, vboData);
             }
             loader.updateVbo(vbo, vboData);
@@ -110,40 +103,20 @@ public class ParticleRenderer extends AbstractRenderer {
         shader.loadNumberOfRows(texture.getNumberOfRows());
     }
 
-    private void updateModelViewMatrix(Particle particle,
-                                       Matrix4f viewMatrix, float[] vboData) {
-
+    private void updateParticleData(Particle particle, float[] vboData) {
         Vector3f position = particle.getPosition();
+        vboData[pointer++] = position.x;
+        vboData[pointer++] = position.y;
+        vboData[pointer++] = position.z;
+
         Vector3f rotation = particle.getRotation();
-        float scale = particle.getScale();
-        modelMatrix.identity();
-        Matrix4f.translate(position, modelMatrix, modelMatrix);
+        vboData[pointer++] = rotation.x;
+        vboData[pointer++] = rotation.y;
+        vboData[pointer++] = rotation.z;
 
+        vboData[pointer++] = particle.getScale();
 
-        //如果面朝报像机,则进行转置,使朝向Z轴
-        if (particle.isOrientCamera()) {
-            //此处非mat4.transpose, 只转置了3x3 非4x4
-            modelMatrix.mat[Matrix4f.M00] = viewMatrix.mat[Matrix4f.M00];
-            modelMatrix.mat[Matrix4f.M01] = viewMatrix.mat[Matrix4f.M10];
-            modelMatrix.mat[Matrix4f.M02] = viewMatrix.mat[Matrix4f.M20];
-            modelMatrix.mat[Matrix4f.M10] = viewMatrix.mat[Matrix4f.M01];
-            modelMatrix.mat[Matrix4f.M11] = viewMatrix.mat[Matrix4f.M11];
-            modelMatrix.mat[Matrix4f.M12] = viewMatrix.mat[Matrix4f.M21];
-            modelMatrix.mat[Matrix4f.M20] = viewMatrix.mat[Matrix4f.M02];
-            modelMatrix.mat[Matrix4f.M21] = viewMatrix.mat[Matrix4f.M12];
-            modelMatrix.mat[Matrix4f.M22] = viewMatrix.mat[Matrix4f.M22];
-        }
-
-        Matrix4f.mul(viewMatrix, modelMatrix, modelViewMatrix);
-        Matrix4f.rotate((float) Math.toRadians(rotation.x), 1, 0, 0, modelViewMatrix, modelViewMatrix);
-        Matrix4f.rotate((float) Math.toRadians(rotation.y), 0, 1, 0, modelViewMatrix, modelViewMatrix);
-        Matrix4f.rotate((float) Math.toRadians(rotation.z), 0, 0, 1, modelViewMatrix, modelViewMatrix);
-        //Matrix4f.rotate((float) Math.toRadians(rotation), 0, 0, 1, modelViewMatrix, modelViewMatrix);
-        scaler.set(scale, scale, scale);
-        Matrix4f.scale(scaler, modelViewMatrix, modelViewMatrix);
-        modelViewMatrix.store(vboData);
-        System.arraycopy(modelViewMatrix.mat, 0, vboData, pointer, 16);
-        pointer += 16;
+        vboData[pointer++] = particle.isOrientCamera() ? 1.0f : 0.0f;
     }
 
     void prepare() {
@@ -158,7 +131,6 @@ public class ParticleRenderer extends AbstractRenderer {
         glEnableVertexAttribArray(6);
         glEnableVertexAttribArray(7);
         glEnable(GL_BLEND);
-        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(GL_FALSE);
     }
 

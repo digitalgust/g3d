@@ -10,6 +10,7 @@ public class ParticleShader extends ShaderProgram {
 
     private int location_numberOfRows;
     private int location_projectionMatrix;
+    private int location_viewMatrix;
 
     public ParticleShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -19,12 +20,16 @@ public class ParticleShader extends ShaderProgram {
     protected void getAllUniformLocations() {
         location_numberOfRows = super.getUniformLocation("numberOfRows");
         location_projectionMatrix = super.getUniformLocation("projectionMatrix");
+        location_viewMatrix = super.getUniformLocation("viewMatrix");
     }
 
     @Override
     protected void bindAttributes() {
         super.bindAttribute(0, "position");
-        super.bindAttribute(1, "modelViewMatrix");
+        super.bindAttribute(1, "particlePosition");
+        super.bindAttribute(2, "particleRotation");
+        super.bindAttribute(3, "particleScale");
+        super.bindAttribute(4, "particleOrientCamera");
         super.bindAttribute(5, "texOffsets");
         super.bindAttribute(6, "blendFactor");
         super.bindAttribute(7, "blendColor");
@@ -36,5 +41,9 @@ public class ParticleShader extends ShaderProgram {
 
     protected void loadProjectionMatrix(Matrix4f projectionMatrix) {
         loadMatrix(location_projectionMatrix, projectionMatrix);
+    }
+
+    protected void loadViewMatrix(Matrix4f viewMatrix) {
+        loadMatrix(location_viewMatrix, viewMatrix);
     }
 }

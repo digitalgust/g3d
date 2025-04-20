@@ -139,7 +139,7 @@ public class MasterRenderer extends AbstractRenderer {
         enitiyRenderer.render(scene);
         terrainRenderer.render(scene);
         skyboxRenderer.render(scene);
-        animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModelsIterator()); //人会产生倒影,影响性能
+        //animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModelsIterator()); //人会产生倒影,影响性能
         waterFbos.unbindCurrentFrameBuffer();
         scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
     }
