@@ -182,13 +182,15 @@ void main(void) {
     //    vec4 cloud = getCloud(noisetex, worldPos, cameraPos, lightPos);// 云颜色
     //    out_Color.rgb = out_Color.rgb*(1.0 - cloud.a) + cloud.rgb;// 混色
 
-    //如果这个面在xz平面45度以上，并且距离相机小于7，则使用网格显示
-    //如果没有与地面的夹角判断，地板也会用网格显示，地面会难看
-    if (angleToXZ > PI / 6.0) {
+    //如果这个面在xz平面30度以上，并且距离相机小于透明距离阈值，则使用棋盘格透明效果
+    //注意：angleToXZ实际上是法线与Y轴的夹角
+    if (angleToXZ > PI / 6.0) {  // PI/6.0 = 30度
         if (distanceToCam < transparencyDistance) {
+            // 创建棋盘格图案
             float mx = mod(gl_FragCoord.x, 2.0);
-            if (mod(floor(gl_FragCoord.y + mx), 2.0) != 0.0) {
-                discard;
+            float my = mod(gl_FragCoord.y, 2.0);
+            if ((mx < 1.0 && my < 1.0) || (mx >= 1.0 && my >= 1.0)) {
+                discard; // 丢弃片段，形成透明效果
             }
         }
     }
