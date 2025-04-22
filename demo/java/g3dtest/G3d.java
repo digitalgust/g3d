@@ -53,7 +53,7 @@ public class G3d extends GApplication  implements XuiAppHolder {
         form.setSizeChangeListener(new GSizeChangeListener() {
             @Override
             public void onSizeChange(int width, int height) {
-                ((XContainer) form.getAttachment()).reSize(width, height);
+                ((XContainer) form.getLayout()).reSize(width, height);
                 simplePanel.reSize();
             }
         });

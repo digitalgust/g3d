@@ -2,6 +2,7 @@ package org.mini.g3d.water;
 
 
 import org.mini.g3d.core.AbstractRenderer;
+import org.mini.g3d.core.DisplayManager;
 import org.mini.g3d.core.ICamera;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.textures.Texture;
@@ -12,6 +13,7 @@ import org.mini.g3d.core.vector.Vector3f;
 import org.mini.gl.GL;
 import org.mini.gl.GLMath;
 import org.mini.glwrap.GLUtil;
+import org.mini.util.SysLog;
 
 import java.util.List;
 
@@ -35,105 +37,172 @@ public class WaterRenderer extends AbstractRenderer {
     Matrix4f modelMatrix = new Matrix4f();
     Matrix4f modelMatrix1 = new Matrix4f();
 
-    public WaterRenderer(WaterFrameBuffers fbos) {
-        this.shader = new WaterShader();
-        this.fbos = fbos;
-        this.quad = QuadGenerator.generateQuad(loader);
-        this.normalMap = new Texture(loader.loadTexture(NORMAL_MAP));
-        int texid = loader.loadTexture(DUDV_MAP, true, false, false);
-        this.dudvTexture = new Texture(texid);//Texture.newTexture(DUDV_MAP).anisotropic().create();
+    boolean isInitialized = false;
+    boolean isAndroid = false;
 
-        shader.start();
-        shader.connectTextureUnits();
-        shader.stop();
-        GLUtil.checkGlError("init shader " + WaterShader.class);
+    public WaterRenderer(WaterFrameBuffers fbos) {
+        this.fbos = fbos;
+        try {
+            this.quad = QuadGenerator.generateQuad(loader);
+            this.shader = new WaterShader();
+            this.normalMap = new Texture(loader.loadTexture(NORMAL_MAP));
+            int texid = loader.loadTexture(DUDV_MAP, true, false, false);
+            this.dudvTexture = new Texture(texid);
+
+            // 确保纹理加载成功
+            if (this.normalMap.getTextureID() <= 0 || texid <= 0) {
+                throw new RuntimeException("Failed to load water textures");
+            }
+
+            shader.start();
+            shader.connectTextureUnits();
+            shader.stop();
+
+            isInitialized = true;
+            SysLog.info("G3D|WaterRenderer initialized successfully");
+        } catch (Exception e) {
+            SysLog.error("G3D|Failed to initialize WaterRenderer: " + e.getMessage());
+            cleanUp(); // 清理部分初始化的资源
+            isInitialized = false;
+        }
     }
 
     public void render(List<WaterTile> tiles, ICamera camera, Vector3f lightDir) {
-        prepareRender(camera, lightDir);
-        synchronized (tiles) {
-            for (int i = 0; i < tiles.size(); i++) {
-                WaterTile water = tiles.get(i);
-                Matrix4f modelMatrix = createModelMatrix(water.getX(), water.getHeight(), water.getZ(), water.getTileSize());
-                shader.loadModelMatrix(modelMatrix);
-                shader.loadWaterColor(water.getWaterColor());
-                shader.loadWaterHeight(water.getHeight());
-                GL.glDrawElements(GL.GL_TRIANGLES, quad.getVertexCount(), GL.GL_UNSIGNED_INT, null, 0);
-                GLUtil.checkGlError("render " + water);
-            }
+        if (!isInitialized || tiles.isEmpty() || !fbos.isInitialized()) {
+            return;
         }
-        finish();
+
+        try {
+            prepareRender(camera, lightDir);
+
+            // 查询是否有任何错误
+            int error = glGetError();
+            if (error != GL_NO_ERROR) {
+                SysLog.error("G3D|Water render prepare error: " + error);
+            }
+
+            synchronized (tiles) {
+                for (int i = 0; i < tiles.size(); i++) {
+                    WaterTile water = tiles.get(i);
+                    Matrix4f modelMatrix = createModelMatrix(water.getX(), water.getHeight(), water.getZ(), water.getTileSize());
+                    shader.loadModelMatrix(modelMatrix);
+                    shader.loadWaterColor(water.getWaterColor());
+                    shader.loadWaterHeight(water.getHeight());
+
+                    // 渲染水面
+                    GL.glDrawElements(GL.GL_TRIANGLES, quad.getVertexCount(), GL.GL_UNSIGNED_INT, null, 0);
+
+                    // 检查渲染后的错误
+                    error = glGetError();
+                    if (error != GL_NO_ERROR) {
+                        SysLog.error("G3D|Water render draw error: " + error + " for water: " + water);
+                    }
+                }
+            }
+            finish();
+        } catch (Exception e) {
+            SysLog.error("G3D|Error rendering water: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void cleanUp() {
+        if (shader != null) {
+            shader.cleanUp();
+            shader = null;
+        }
     }
 
     private void prepareRender(ICamera camera, Vector3f lightDir) {
-//        GLUtil.checkGlError("0");
         shader.start();
         shader.loadProjectionMatrix(camera.getProjectionMatrix());
         shader.loadViewMatrix(camera.getViewMatrix());
         shader.loadCameraPosition(camera.getPosition());
 
-//        GLUtil.checkGlError("1");
         moveFactor += 0.001f;
         moveFactor %= 1;
         shader.loadMoveFactor(moveFactor);
         shader.loadLightDirection(lightDir);
-//        GLUtil.checkGlError("2");
 
+        // 绑定顶点数组并启用顶点属性
         glBindVertexArray(quad.getVaoID());
         glEnableVertexAttribArray(0);
-//        GLUtil.checkGlError("2.5");
 
+        // 绑定纹理
         bindTextures();
-//        GLUtil.checkGlError("3");
+
+        // 设置渲染状态
         doRenderSettings();
     }
 
     private void bindTextures() {
+        // 在Android上，确保所有纹理都已正确绑定
+        for (int i = 0; i < 5; i++) {
+            glActiveTexture(GL_TEXTURE0 + i);
+            glBindTexture(GL_TEXTURE_2D, 0); // 先解绑所有纹理
+        }
+
+        // 按照顺序绑定纹理
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, fbos.getReflectionTexture());
+
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, fbos.getRefractionTexture());
+
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, dudvTexture.getTextureID());
+
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, normalMap.getTextureID());
+
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, fbos.getRefractionDepthTexture());
+
+        // 验证纹理绑定
+        int[] boundTexture = new int[1];
+        glActiveTexture(GL_TEXTURE0);
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, boundTexture, 0);
+        if (boundTexture[0] != fbos.getReflectionTexture()) {
+            SysLog.error("G3D|Failed to bind reflection texture: expected " + fbos.getReflectionTexture() + ", got " + boundTexture[0]);
+        }
     }
 
     private void doRenderSettings() {
-        //glEnable(GL_DEPTH_TEST);
+        glEnable(GL_DEPTH_TEST);
 
-        //glEnable(GL_MULTISAMPLE);
-
-        //glEnable(GL_CULL_FACE);
-        //glCullFace(GL_BACK);
-
+        // 设置混合模式
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // 禁用面剔除以确保水面在所有角度可见
+        glDisable(GL_CULL_FACE);
     }
 
     private void finish() {
+        // 重新启用面剔除
+        glEnable(GL_CULL_FACE);
+
+        // 禁用混合
+        glDisable(GL_BLEND);
+
+        // 禁用顶点属性并解绑顶点数组
         glDisableVertexAttribArray(0);
         glBindVertexArray(0);
+
+        // 停止着色器
         shader.stop();
     }
 
     private Matrix4f createModelMatrix(float x, float y, float z, float scale) {
-//        Matrix4f modelMatrix = new Matrix4f();
-//        Matrix4f.translate(new Vector3f(x, y, z), modelMatrix, modelMatrix);
-//        Matrix4f.scale(new Vector3f(scale, scale, scale), modelMatrix, modelMatrix);
-//        return modelMatrix;
         modelMatrix.identity();
-//        GLMath.mat4x4_translate_in_place(modelMatrix.mat, x, y, z);
         GLMath.mat4x4_translate(modelMatrix.mat, x, y, z);
         modelMatrix1.identity();
         GLMath.mat4x4_scale_aniso(modelMatrix1.mat, modelMatrix.mat, scale, scale, scale);
         return modelMatrix1;
     }
 
+    public boolean isInitialized() {
+        return isInitialized && fbos.isInitialized();
+    }
 }

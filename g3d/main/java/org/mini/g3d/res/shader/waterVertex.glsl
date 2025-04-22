@@ -17,8 +17,6 @@ uniform vec3 waterColor;
 uniform float waterHeight;
 
 const float tiling = 4.0;
-const float density = 0.003;
-const float gradient = 5.0;
 
 void main(void) {
 

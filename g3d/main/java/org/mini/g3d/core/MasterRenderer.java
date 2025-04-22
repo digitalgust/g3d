@@ -120,7 +120,7 @@ public class MasterRenderer extends AbstractRenderer {
         waterFbos.bindRefractionFrameBuffer();
         prepare();
         terrainRenderer.render(scene);
-        animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModelsIterator());//人走到水底下也可以看见,影响性能
+        //animatedModelRenderer.render(scene.getCamera(),scene.getAnimatedModelsIterator());//人走到水底下也可以看见,影响性能
         waterFbos.unbindCurrentFrameBuffer();
     }
 
