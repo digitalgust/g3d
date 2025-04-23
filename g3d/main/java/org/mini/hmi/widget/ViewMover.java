@@ -4,6 +4,7 @@ import org.mini.g3d.core.Camera;
 import org.mini.glfm.Glfm;
 import org.mini.gui.GImage;
 import org.mini.gui.GToolkit;
+import org.mini.util.SysLog;
 
 /**
  * 拖动相机
@@ -14,7 +15,7 @@ public class ViewMover extends Widget {
 
     GImage icon;
 
-
+    public static int TWO_FING_TOO_CLOSE = 30;
     int touchedId1 = NO_TOUCHEDID, touchedId2 = NO_TOUCHEDID;
     float touchedX1, touchedX2;
     float touchedY1, touchedY2;
@@ -73,7 +74,9 @@ public class ViewMover extends Widget {
 
     @Override
     public boolean touchEvent(int touchid, int phase, int x, int y) {
-        //SysLog.info("G3D|mousemover touch " + phase + "," + x + "," + y);
+//        if (Glfm.GLFMTouchPhaseMoved != phase) {
+//            SysLog.info("G3D|mousemover touch " + touchid + "  " + phase + "," + x + "," + y);
+//        }
         if (phase == Glfm.GLFMTouchPhaseBegan) {
             if (isInArea(x, y)) {
                 if (touchedId1 == NO_TOUCHEDID) {
@@ -82,6 +85,14 @@ public class ViewMover extends Widget {
                     touchedY1 = y;
                     return false;
                 } else if (touchedId2 == NO_TOUCHEDID) {
+                    if (touchedId1 == touchid) {
+                        //SysLog.info("G3D|touchid is duplicated");
+                        return false;
+                    } else if (Math.abs(x - touchedX1) < TWO_FING_TOO_CLOSE
+                            && Math.abs(y - touchedY1) < TWO_FING_TOO_CLOSE) { //如果两个手指距离太近，则不处理
+                        //SysLog.info("G3D|touch finger so close");
+                        return false;
+                    }
                     this.touchedId2 = touchid;
                     touchedX2 = x;
                     touchedY2 = y;
@@ -132,10 +143,10 @@ public class ViewMover extends Widget {
                 }
 
                 if (zoomDirection > 0) {//变近
-                    setCameraDistance(camera.getDistanceFromTarget() * 0.98f);
+                    setCameraDistance(camera.getDistanceFromTarget() * 0.99f);
                 }
                 if (zoomDirection < 0) {//变远
-                    setCameraDistance(camera.getDistanceFromTarget() * 1.02f);
+                    setCameraDistance(camera.getDistanceFromTarget() * 1.01f);
                 }
             } else {
                 //rotate

@@ -18,11 +18,11 @@ public class RenderEngine {
     WaterFrameBuffers waterFbos;
 
     public void renderScene(Scene scene) {
+        DisplayManager.updateDisplay();
 
         synchronized (scene.getLock()) {
             masterRenderer.render(scene);
         }
-        DisplayManager.updateDisplay();
     }
 
     public void clearMainFbo() {

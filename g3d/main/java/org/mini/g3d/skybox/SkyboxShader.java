@@ -18,7 +18,7 @@ public class SkyboxShader extends ShaderProgram {
     private int location_cubeMap2;
     private int location_blendFactor;
 
-    private static final float ROTATE_SPEED = 1f;
+    private static final float ROTATE_SPEED = 0.1f;
 
     private float rotation = 0;
 

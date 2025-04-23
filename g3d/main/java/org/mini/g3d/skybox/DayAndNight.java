@@ -20,14 +20,17 @@ public class DayAndNight {
     int secondsPerHour;//second
     int[][] timeSegDef;
 
+    Calendar calendar = Calendar.getInstance();
     float time = 0f;
+    float diff = 0;
     int segment;
     float percentInSeg = 0f;
 
+
     public DayAndNight() {
         setSecondsPerDay(SECONDS_PER_DAY_DEFAULT);
-        Calendar calendar = Calendar.getInstance();
-        time = calendar.get(Calendar.HOUR_OF_DAY) * secondsPerHour + calendar.get(Calendar.MINUTE) * 60 + calendar.get(Calendar.SECOND);
+        diff = 0f;
+
     }
 
     public void setSecondsPerDay(int seconds) {
@@ -36,31 +39,35 @@ public class DayAndNight {
         secondsPerDay = seconds;
         secondsPerHour = secondsPerDay / 24;
         timeSegDef = new int[][]{
-                {0 * secondsPerHour, 8 * secondsPerHour, NIGHT},//0h-5h  =0 (NIGHT)
-                {8 * secondsPerHour, 11 * secondsPerHour, NIGHT_TO_DAY},
-                {11 * secondsPerHour, 21 * secondsPerHour, DAY},
+                {0 * secondsPerHour, 5 * secondsPerHour, NIGHT},//0h-5h  =0 (NIGHT)
+                {5 * secondsPerHour, 9 * secondsPerHour, NIGHT_TO_DAY},
+                {9 * secondsPerHour, 21 * secondsPerHour, DAY},
                 {21 * secondsPerHour, 24 * secondsPerHour, DAY_TO_NIGHT},
         };
     }
 
     public void reset() {
-        time = 0;
+        diff = 0;
     }
 
 
     public void update() {
-        float sec = DisplayManager.getFrameTimeSeconds();
-        time += sec;
-        time %= secondsPerDay;
+        calendar.setTimeInMillis(DisplayManager.getCurrentTime());
+        time = calendar.get(Calendar.HOUR_OF_DAY) * 3600 + calendar.get(Calendar.MINUTE) * 60 + calendar.get(Calendar.SECOND);
 
+        float t = getTime();
 
         for (int i = 0, imax = timeSegDef.length; i < imax; i++) {
-            if (time >= timeSegDef[i][0] && time < timeSegDef[i][1]) {
+            if (t >= timeSegDef[i][0] && t < timeSegDef[i][1]) {
                 segment = timeSegDef[i][2];
-                percentInSeg = (time - timeSegDef[i][0]) / (timeSegDef[i][1] - timeSegDef[i][0]);
+                percentInSeg = (t - timeSegDef[i][0]) / (timeSegDef[i][1] - timeSegDef[i][0]);
                 break;
             }
         }
+    }
+
+    public int getSecondsPerDay() {
+        return secondsPerDay;
     }
 
     public int getSegment() {
@@ -72,10 +79,11 @@ public class DayAndNight {
     }
 
     public float getTime() {
-        return time;
+        return (time + diff) % secondsPerDay;
     }
 
-    public void setTime(float time) {
-        this.time = time;
+    public void setTime(float ptime) {
+        float t = getTime();
+        this.diff = ptime - t;
     }
 }

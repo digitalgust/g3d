@@ -5,6 +5,7 @@ import org.mini.g3d.animation.gltf2.render.RenderAnimation;
 import org.mini.g3d.animation.gltf2.render.RenderMesh;
 import org.mini.g3d.animation.gltf2.render.RenderMeshPrimitive;
 import org.mini.g3d.animation.gltf2.render.RenderNode;
+import org.mini.g3d.core.DisplayManager;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.textures.Texture;
@@ -33,7 +34,7 @@ public class AnimatedModel extends Entity implements Cloneable {
     AniGroup aniGroup;
     protected List<RenderAnimation> animations = new ArrayList<>();
     protected RenderNode rootRenderNode;
-    protected long animationStartTime = System.currentTimeMillis();//必须设置 ,否则会初始动作不播放
+    protected long animationStartTime = DisplayManager.getCurrentTime();//必须设置 ,否则会初始动作不播放
     protected int clipIndex;
     int animationPlayTimes = 0;
     Runnable onPlayEndCallback;
@@ -50,7 +51,7 @@ public class AnimatedModel extends Entity implements Cloneable {
 
     public void setAniClipIndex(int clipIndex) {
         if (this.clipIndex != clipIndex) {
-            setAnimationStartTime(System.currentTimeMillis());
+            setAnimationStartTime(DisplayManager.getCurrentTime());
         }
         this.clipIndex = clipIndex;
         animationPlayTimes = 0;
@@ -65,7 +66,7 @@ public class AnimatedModel extends Entity implements Cloneable {
      */
     public void setAniClipIndex(int clipIndex, int times, Runnable onPlayEndCallback) {
         if (this.clipIndex != clipIndex) {
-            setAnimationStartTime(System.currentTimeMillis());
+            setAnimationStartTime(DisplayManager.getCurrentTime());
         }
         //执行老的回调
         if (onPlayEndCallback != null) {
@@ -116,7 +117,7 @@ public class AnimatedModel extends Entity implements Cloneable {
 //        rootRenderNode.updateSkin();
 //    }
     public void update() {
-        long curMill = System.currentTimeMillis();
+        long curMill = DisplayManager.getCurrentTime();
         transform.setZero();
         G3dUtil.createTransformationMatrix(position, rotX, rotY, rotZ, scale, transform);
 

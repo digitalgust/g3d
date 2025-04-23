@@ -59,6 +59,7 @@ public class GLDriver {
     }
 
     public static int linkProgram(int vertex, int fragment) {
+        long startAt = System.currentTimeMillis();
         SysLog.info("G3D|gltf shader link begin vertex = " + vertex + ", fragment = " + fragment);
         int program = glCreateProgram();
         glAttachShader(program, vertex);
@@ -85,8 +86,10 @@ public class GLDriver {
             SysLog.error("G3D|gltf shader link fail :" + new String(szLog, 0, return_val[0]) + "\n vertex shader:" + vertex + "\nfragment shader:" + fragment + "\n");
             return 0;
         }
+        glDeleteShader(vertex);
+        glDeleteShader(fragment);
         SysLog.info("G3D|gltf shader link finish, vertex = " + vertex + ", fragment = " + fragment + ", program = "
-                + program);
+                + program + " time = " + (System.currentTimeMillis() - startAt));
         return program;
     }
 

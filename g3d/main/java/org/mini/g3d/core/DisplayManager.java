@@ -11,12 +11,12 @@ import static org.mini.gl.GL.*;
 
 public class DisplayManager {
 
-    public static String G3D_VERSION = "1.0.0";
-    static int width = 1280;
-    static int height = 720;
+    public static String G3D_VERSION = "1.0.1";
+    static int width = 1024;
+    static int height = 512;
     private static final int FPS_CAP = 120;
 
-    private static long lastFrameTime;
+    private static long lastFrameTime = System.currentTimeMillis();
     private static float delta;//两帧之间的时间差
     private static float totalTime;//初始化以来的总时间
 
@@ -34,8 +34,6 @@ public class DisplayManager {
         width = w;
         height = h;
 
-        lastFrameTime = getCurrentTime();
-
         byte[] name = glGetString(GL_VENDOR);
         byte[] biaoshifu = glGetString(GL_RENDERER);
         byte[] OpenGLVersion = glGetString(GL_VERSION);
@@ -50,13 +48,10 @@ public class DisplayManager {
 
     public static void updateDisplay() {
 
-        long currentFrameTime = getCurrentTime();
+        long currentFrameTime = System.currentTimeMillis();
         delta = (currentFrameTime - lastFrameTime) / 1000.0f;
         totalTime += delta;
-
-        lastFrameTime = getCurrentTime();
-
-
+        lastFrameTime = currentFrameTime;
     }
 
     /**
@@ -75,8 +70,8 @@ public class DisplayManager {
     public static void closeDisplay() {
     }
 
-    private static long getCurrentTime() {
-        return System.currentTimeMillis();
+    public static long getCurrentTime() {
+        return lastFrameTime;
     }
 
     /**
