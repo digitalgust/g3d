@@ -17,7 +17,8 @@ import static org.mini.gl.GL.*;
 public class ParticleRenderer extends AbstractRenderer {
 
     private static final float[] VERTICES = {-0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
-    private static final int MAX_INSTANCES = 1000;
+    private static final int MAX_INSTANCES = 2000;
+    float[] vboData = new float[MAX_INSTANCES * INSTANCE_DATA_LENGTH];
     private static final int INSTANCE_DATA_LENGTH = 21;
     Loader loader = new Loader();
 
@@ -25,7 +26,6 @@ public class ParticleRenderer extends AbstractRenderer {
     private ParticleShader shader;
 
     private int vbo;
-    private int pointer = 0;
 
     public ParticleRenderer() {
 
@@ -58,12 +58,9 @@ public class ParticleRenderer extends AbstractRenderer {
             }
             bindTexture(texture);
             List<Particle> particleList = particles.get(texture);
-            pointer = 0;
-            float[] vboData = new float[particleList.size() * INSTANCE_DATA_LENGTH];
             for (int i = 0; i < particleList.size(); i++) {
                 Particle particle = particleList.get(i);
-                updateParticleData(particle, vboData);
-                updateTexCoordInfo(particle, vboData);
+                updateModelData(particle, vboData, i * INSTANCE_DATA_LENGTH);
             }
             loader.updateVbo(vbo, vboData);
             glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, quad.getVertexCount(), particleList.size());
@@ -79,16 +76,31 @@ public class ParticleRenderer extends AbstractRenderer {
     public void cleanUp() {
     }
 
-    private void updateTexCoordInfo(Particle particle, float[] data) {
-        data[pointer++] = particle.getTexOffset1().x;
-        data[pointer++] = particle.getTexOffset1().y;
-        data[pointer++] = particle.getTexOffset2().x;
-        data[pointer++] = particle.getTexOffset2().y;
-        data[pointer++] = particle.getFrameBlend();
-        data[pointer++] = particle.getColor().x;
-        data[pointer++] = particle.getColor().y;
-        data[pointer++] = particle.getColor().z;
-        data[pointer++] = particle.getColor().w;
+    private void updateModelData(Particle particle, float[] data, int index) {
+        Vector3f position = particle.getPosition();
+        data[index++] = position.x;
+        data[index++] = position.y;
+        data[index++] = position.z;
+
+        Vector3f rotation = particle.getRotation();
+        data[index++] = rotation.x;
+        data[index++] = rotation.y;
+        data[index++] = rotation.z;
+
+        data[index++] = particle.getScale();
+
+        data[index++] = particle.isOrientCamera() ? 1.0f : 0.0f;
+
+        data[index++] = particle.getTexOffset1().x;
+        data[index++] = particle.getTexOffset1().y;
+        data[index++] = particle.getTexOffset2().x;
+        data[index++] = particle.getTexOffset2().y;
+        data[index++] = particle.getFrameBlend();
+        
+        data[index++] = particle.getColor().x;
+        data[index++] = particle.getColor().y;
+        data[index++] = particle.getColor().z;
+        data[index++] = particle.getColor().w;
     }
 
     private void bindTexture(ParticleTexture texture) {
@@ -101,22 +113,6 @@ public class ParticleRenderer extends AbstractRenderer {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
         shader.loadNumberOfRows(texture.getNumberOfRows());
-    }
-
-    private void updateParticleData(Particle particle, float[] vboData) {
-        Vector3f position = particle.getPosition();
-        vboData[pointer++] = position.x;
-        vboData[pointer++] = position.y;
-        vboData[pointer++] = position.z;
-
-        Vector3f rotation = particle.getRotation();
-        vboData[pointer++] = rotation.x;
-        vboData[pointer++] = rotation.y;
-        vboData[pointer++] = rotation.z;
-
-        vboData[pointer++] = particle.getScale();
-
-        vboData[pointer++] = particle.isOrientCamera() ? 1.0f : 0.0f;
     }
 
     void prepare() {

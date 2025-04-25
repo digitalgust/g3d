@@ -19,7 +19,7 @@ uniform mat4 viewMatrix;// 新增：视图矩阵
 uniform float numberOfRows;
 
 mat4 createRotationMatrix(vec3 rotationDegrees) {
-    vec3 rotation = radians(rotationDegrees);
+    vec3 rotation = radians(-rotationDegrees);
     float cosX = cos(rotation.x);
     float sinX = sin(rotation.x);
     float cosY = cos(rotation.y);
