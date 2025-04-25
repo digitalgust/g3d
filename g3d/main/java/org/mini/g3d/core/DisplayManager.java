@@ -16,6 +16,7 @@ public class DisplayManager {
     static int height = 512;
     private static final int FPS_CAP = 120;
 
+    private static long frameCount = 0;
     private static long lastFrameTime = System.currentTimeMillis();
     private static float delta;//两帧之间的时间差
     private static float totalTime;//初始化以来的总时间
@@ -52,6 +53,7 @@ public class DisplayManager {
         delta = (currentFrameTime - lastFrameTime) / 1000.0f;
         totalTime += delta;
         lastFrameTime = currentFrameTime;
+        frameCount++;
     }
 
     /**
@@ -72,6 +74,10 @@ public class DisplayManager {
 
     public static long getCurrentTime() {
         return lastFrameTime;
+    }
+
+    public static long getFrameCount() {
+        return frameCount;
     }
 
     /**

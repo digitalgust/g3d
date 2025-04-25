@@ -1,7 +1,9 @@
 package org.mini.g3d.particles.modifier;
 
 import org.mini.g3d.core.DisplayManager;
+import org.mini.g3d.core.vector.Vector;
 import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.particles.Emitter;
 import org.mini.g3d.particles.MutableLocation;
 import org.mini.g3d.particles.Particle;
 import org.mini.g3d.particles.ParticleModifier;
@@ -16,28 +18,40 @@ public class ParticleLocationModifier extends ParticleModifier {
     float endAt;
     MutableLocation mutableLocation;
     Vector3f oldPos = null;
+    Vector3f diff = new Vector3f();
 
+    long frameCount;
     //
 
     @Override
     public void update(Particle particle) {
         if (mutableLocation == null) return;
 
+        // 每帧都调用一次onNewFrame
+        if (frameCount != DisplayManager.getFrameCount()) {
+            frameCount = DisplayManager.getFrameCount();
+            onNewFrame(particle.getEmitter());
+        }
+        // 计算出相对时间差
         float cur = DisplayManager.getTime();
         float t = cur - particle.getGenerateAt();//in second
         if (t >= startAt && t <= endAt) {
-            if (oldPos == null) {
-                oldPos = new Vector3f(mutableLocation.getPosition());
-            }
             Vector3f temp = particle.getPosition();
-            Vector3f newPos = mutableLocation.getPosition();
-            temp.x += newPos.x - oldPos.x;
-            temp.y += newPos.y - oldPos.y;
-            temp.z += newPos.z - oldPos.z;
-            this.oldPos.set(newPos);
+            temp.x += diff.x;
+            temp.y += diff.y;
+            temp.z += diff.z;
         }
     }
 
+    private void onNewFrame(Emitter emitter) {
+        // 当新的一帧来临时，计算出相对位置差
+        Vector3f newPos = mutableLocation.getPosition();
+        if (oldPos == null) {
+            oldPos = new Vector3f(newPos);
+        }
+        diff.set(newPos.x - oldPos.x, newPos.y - oldPos.y, newPos.z - oldPos.z);
+        this.oldPos.set(newPos);
+    }
 
     /**
      * ======================================================
