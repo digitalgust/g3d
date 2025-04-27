@@ -46,6 +46,9 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
     int[] location_u_Lights;
     int[] location_u_MaterialProperties;
     int[] location_u_MaterialTextures;
+    // 新增贴图拆分相关变量
+    int location_u_TextureGridSize;
+    int location_u_TextureFrameIndex;
     //
     int[] location_attribute;
     public int location_a_Position;
@@ -72,6 +75,9 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
         location_u_Exposure = getUniformLocation("u_Exposure");
         location_u_Camera = getUniformLocation("u_Camera");
         location_u_morphWeights = getUniformLocation("u_morphWeights");
+        // 获取新增的uniform变量位置
+        location_u_TextureGridSize = getUniformLocation("u_TextureGridSize");
+        location_u_TextureFrameIndex = getUniformLocation("u_TextureFrameIndex");
         //GLUtil.checkGlError("getAllUniformLocations 0 ");
         if (node instanceof RenderMeshPrimitive) {
             RenderMeshPrimitive rmp = (RenderMeshPrimitive) node;
@@ -211,6 +217,14 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
 
     public void load_u_frameIndex(int[] frameIndx) {
         super.loadIntArr(location_u_frameIndex, frameIndx);
+    }
+
+    public void load_u_TextureGridSize(int gridSize) {
+        super.loadInt(location_u_TextureGridSize, gridSize);
+    }
+
+    public void load_u_TextureFrameIndex(int[] frameIndices) {
+        super.loadIntArr(location_u_TextureFrameIndex, frameIndices);
     }
 
     public void load_u_jointMatrices(List<Matrix4f> list) {

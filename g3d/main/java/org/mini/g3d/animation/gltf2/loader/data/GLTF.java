@@ -207,6 +207,16 @@ public class GLTF extends GLTFProperty {
      */
     private ByteBuffer bin;
 
+    public int getTextureGridSize() {
+        return textureGridSize;
+    }
+
+    public void setTextureGridSize(int textureGridSize) {
+        this.textureGridSize = textureGridSize;
+    }
+
+    int textureGridSize = 1; //一张贴图上有几行几列个相同的贴图，默认1行1列
+
     public enum ResourceFrom {
         JAR,
         FILE;

@@ -35,6 +35,8 @@ public class AnimatedModelRenderer extends AbstractRenderer {
 
     static Matrix4f[] modelMatrics = new Matrix4f[AnimatedShader.MAX_INSTANCED_SIZE];
     static int[] keyFrames = new int[AnimatedShader.MAX_INSTANCED_SIZE];
+    static int[] textureFrameIndices = new int[AnimatedShader.MAX_INSTANCED_SIZE];
+
 
 
     // 合批 RenderMeshPrimitive 时，
@@ -247,6 +249,10 @@ public class AnimatedModelRenderer extends AbstractRenderer {
         updateAnimationUniforms(shader, rmps);
 //        GLUtil.checkGlError("drawRenderObject 6.5");
 
+        int textureGridSize = rmp.getGltfMeshPrimitive().gltf.getTextureGridSize();
+        shader.load_u_TextureGridSize(textureGridSize);
+        shader.load_u_TextureFrameIndex(textureFrameIndices);
+
         if (drawIndexed) {
             GLTFAccessor indexAccessor = rmp.getGltfMeshPrimitive().getIndicesAccessor();
             glDrawElementsInstanced(rmp.getGltfMeshPrimitive().getMode(), indexAccessor.getCount(), indexAccessor.getGLType(), null, 0, rmps.size());
@@ -287,6 +293,8 @@ public class AnimatedModelRenderer extends AbstractRenderer {
                     mesh = rmp.getMesh();
                     int curKF = mesh.getAnimatedModel().getCurKeyFrame();
                     keyFrames[i] = curKF;
+                    
+                    textureFrameIndices[i] = mesh.getAnimatedModel().getTextureFrameIndex();
 //                    shader.load_u_jointMatrices(gltfSkin.getJointKeyFrameMatrics()[curKF]);
 //                    shader.load_u_jointNormalMatrices(gltfSkin.getJointKeyFrameNormMatrics()[curKF]);
                     // GLUtil.checkGlError("updateAnimationUniforms 5");

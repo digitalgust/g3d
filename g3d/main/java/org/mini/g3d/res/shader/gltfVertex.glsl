@@ -293,6 +293,8 @@ uniform mat4 u_ViewProjectionMatrix;
 uniform mat4 u_ModelMatrix[MAX_INSTANCED_SIZE];
 uniform mat4 u_NormalMatrix;
 
+flat out int out_gl_InstanceID;
+
 vec4 getPosition()
 {
     vec4 pos = a_Position;
@@ -344,6 +346,7 @@ vec4 getTangent()
 
 void main()
 {
+    out_gl_InstanceID = gl_InstanceID;
     vec4 pos = u_ModelMatrix[gl_InstanceID] * getPosition();
     v_Position = vec3(pos.xyz) / pos.w;
 

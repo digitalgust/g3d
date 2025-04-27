@@ -26,6 +26,8 @@
 //BEGIN tonemapping.glsl////////////////////////////
 precision highp float;
 uniform float u_Exposure;
+const int MAX_INSTANCED_SIZE = 100;
+flat in int out_gl_InstanceID;
 
 out vec4 fragColor;
 
@@ -110,6 +112,10 @@ vec3 toneMap(vec3 color)
 in vec2 v_UVCoord1;
 in vec2 v_UVCoord2;
 
+// 贴图拆分相关参数
+uniform int u_TextureGridSize; // 贴图网格大小，n行n列
+uniform int u_TextureFrameIndex[MAX_INSTANCED_SIZE]; // 每个实例使用的贴图帧索引
+
 // General Material
 #ifdef HAS_NORMAL_MAP
 uniform sampler2D u_NormalSampler;
@@ -165,6 +171,27 @@ uniform samplerCube u_SpecularEnvSampler;
 uniform sampler2D u_brdfLUT;
 #endif
 
+// 辅助函数：根据网格大小和帧索引调整UV坐标
+vec2 adjustUVForTextureGrid(vec2 uv, int frameIndex) {
+    if (u_TextureGridSize <= 1) {
+        return uv; // 不需要调整
+    }
+    
+    float gridSize = float(u_TextureGridSize);
+    float cellSize = 1.0 / gridSize;
+    
+    // 计算在网格中的行列位置
+    int col = frameIndex % u_TextureGridSize;
+    int row = frameIndex / u_TextureGridSize;
+    
+    // 调整UV坐标
+    vec2 adjustedUV;
+    adjustedUV.x = uv.x + cellSize * float(col);
+    adjustedUV.y = uv.y + cellSize * float(row);
+    
+    return adjustedUV;
+}
+
 vec2 getNormalUV()
 {
     vec3 uv = vec3(v_UVCoord1, 1.0);
@@ -174,7 +201,8 @@ vec2 getNormalUV()
     uv *= u_NormalUVTransform;
     #endif
     #endif
-    return uv.xy;
+    // 使用实例ID调整UV
+    return adjustUVForTextureGrid(uv.xy, u_TextureFrameIndex[out_gl_InstanceID]);
 }
 
 vec2 getEmissiveUV()
@@ -187,7 +215,8 @@ vec2 getEmissiveUV()
     #endif
     #endif
 
-    return uv.xy;
+    // 使用实例ID调整UV
+    return adjustUVForTextureGrid(uv.xy, u_TextureFrameIndex[out_gl_InstanceID]);
 }
 
 vec2 getOcclusionUV()
@@ -199,7 +228,8 @@ vec2 getOcclusionUV()
     uv *= u_OcclusionUVTransform;
     #endif
     #endif
-    return uv.xy;
+    // 使用实例ID调整UV
+    return adjustUVForTextureGrid(uv.xy, u_TextureFrameIndex[out_gl_InstanceID]);
 }
 
 vec2 getBaseColorUV()
@@ -211,7 +241,8 @@ vec2 getBaseColorUV()
     uv *= u_BaseColorUVTransform;
     #endif
     #endif
-    return uv.xy;
+    // 使用实例ID调整UV
+    return adjustUVForTextureGrid(uv.xy, u_TextureFrameIndex[out_gl_InstanceID]);
 }
 
 vec2 getMetallicRoughnessUV()
@@ -223,7 +254,8 @@ vec2 getMetallicRoughnessUV()
     uv *= u_MetallicRoughnessUVTransform;
     #endif
     #endif
-    return uv.xy;
+    // 使用实例ID调整UV
+    return adjustUVForTextureGrid(uv.xy, u_TextureFrameIndex[out_gl_InstanceID]);
 }
 
 vec2 getSpecularGlossinessUV()
@@ -235,7 +267,8 @@ vec2 getSpecularGlossinessUV()
     uv *= u_SpecularGlossinessUVTransform;
     #endif
     #endif
-    return uv.xy;
+    // 使用实例ID调整UV
+    return adjustUVForTextureGrid(uv.xy, u_TextureFrameIndex[out_gl_InstanceID]);
 }
 
 vec2 getDiffuseUV()
@@ -247,7 +280,8 @@ vec2 getDiffuseUV()
     uv *= u_DiffuseUVTransform;
     #endif
     #endif
-    return uv.xy;
+    // 使用实例ID调整UV
+    return adjustUVForTextureGrid(uv.xy, u_TextureFrameIndex[out_gl_InstanceID]);
 }
 
 //BEGIN funtions.glsl/////////////////////////////

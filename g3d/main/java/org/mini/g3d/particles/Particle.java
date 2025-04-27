@@ -127,6 +127,13 @@ public class Particle {
      * ======================================================
      */
 
+    public void setVelocity(Vector3f velocity) {
+        this.velocity = velocity;
+    }
+
+    public Vector3f getVelocity() {
+        return velocity;
+    }
 
     public float getDistance() {
         return distance;

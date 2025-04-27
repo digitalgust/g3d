@@ -40,6 +40,8 @@ public class AnimatedModel extends Entity implements Cloneable {
     Runnable onPlayEndCallback;
     float animationTimeScale = 1.f;
     int curKeyFrame;
+    // 新增，用于存储纹理帧索引
+    protected int textureFrameIndex = 0;
 
     public Entity getShadowNode() {
         return shadowNode;
@@ -350,6 +352,16 @@ public class AnimatedModel extends Entity implements Cloneable {
 
     public Matrix4f getTransform() {
         return transform;
+    }
+
+    // 新增：获取纹理帧索引
+    public int getTextureFrameIndex() {
+        return textureFrameIndex;
+    }
+    
+    // 新增：设置纹理帧索引
+    public void setTextureFrameIndex(int index) {
+        this.textureFrameIndex = index;
     }
 
 }
