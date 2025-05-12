@@ -11,7 +11,7 @@ import static org.mini.gl.GL.*;
 
 public class DisplayManager {
 
-    public static String G3D_VERSION = "1.0.1";
+    public static String G3D_VERSION = "1.0.2";
     static int width = 1024;
     static int height = 512;
     private static final int FPS_CAP = 120;

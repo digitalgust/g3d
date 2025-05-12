@@ -57,7 +57,7 @@ void main(void) {
     // 调整反射系数，考虑水面高度
     float waterHeightFactor = pass_waterHeight / (pass_waterHeight*2.0); // 归一化水面高度影响
     float viewFactor = min(1.0, 2.0 / (viewAngle + 0.5)); // 减少viewAngle对反射的影响
-    float reflectionScale = mix(0.4, 1.0, viewFactor) + waterHeightFactor; // 确保即使视角较大时也有反射
+    float reflectionScale = mix(0.4, 1.0, viewFactor); // 确保即使视角较大时也有反射
     
     // 应用调整后的反射坐标
     vec2 reflectTexCoords = vec2(ndc.x, -ndc.y * reflectionScale);
