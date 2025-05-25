@@ -301,7 +301,7 @@ public class Loader {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    private void unbindVAO() {
+    public void unbindVAO() {
         glBindVertexArray(0);
     }
 
@@ -366,6 +366,132 @@ public class Loader {
             cleanUp();
         }));
 
+    }
+
+    /**
+     * 加载3D柏林噪声纹理
+     *
+     * @param fileName 噪声数据文件路径
+     * @param width    纹理宽度
+     * @param height   纹理高度
+     * @param depth    纹理深度
+     * @return 纹理ID
+     */
+    public int loadTexture3D(String fileName, int width, int height, int depth) {
+        byte[] filecont = loadFileFromJar(fileName);
+        if (filecont == null) {
+            throw new RuntimeException("[G3D][WARN]file not found: " + fileName);
+        }
+
+        // 检查数据大小是否匹配
+        int expectedSize = width * height * depth;
+        if (filecont.length != expectedSize) {
+            throw new RuntimeException("[G3D][WARN]Invalid data size for 3D texture. Expected " +
+                    expectedSize + " bytes but got " + filecont.length + " bytes");
+        }
+
+        int[] tex = {0};
+        glGenTextures(1, tex, 0);
+        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        glBindTexture(GL_TEXTURE_3D, tex[0]);
+        GLUtil.checkGlError(this.getClass().getCanonicalName());
+
+        // 设置纹理参数
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+
+        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        // 加载3D纹理数据 (固定8位深度)
+        glTexImage3D(GL_TEXTURE_3D, 0, GL_R8, width, height, depth, 0,
+                GL_RED, GL_UNSIGNED_BYTE, filecont, 0);
+
+        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        glBindTexture(GL_TEXTURE_3D, 0);
+        textures.add(Integer.valueOf(tex[0]));
+        return tex[0];
+    }
+
+    /**
+     * 加载不需要法线的模型数据到VAO
+     *
+     * @param positions     顶点位置数组
+     * @param textureCoords 纹理坐标数组
+     * @param indices       索引数组
+     * @return RawModel对象
+     */
+    public RawModel loadToVAOWithoutNormals(float[] positions, float[] textureCoords, int[] indices) {
+        int vaoID = createVAO();
+        bindIndicesBuffer(indices);
+        storeDataInAttributeList(0, 3, positions);
+        storeDataInAttributeList(1, 2, textureCoords);
+        unbindVAO();
+        return new RawModel(vaoID, indices.length);
+    }
+
+    /**
+     * 绑定纹理到指定的纹理单元
+     *
+     * @param textureID   纹理ID
+     * @param textureUnit 纹理单元
+     */
+    public void bindTexture(int textureID, int textureUnit) {
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+    }
+
+    /**
+     * 绑定3D纹理到指定的纹理单元
+     *
+     * @param textureID   纹理ID
+     * @param textureUnit 纹理单元
+     */
+    public void bindTexture3D(int textureID, int textureUnit) {
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        glBindTexture(GL_TEXTURE_3D, textureID);
+    }
+
+    /**
+     * 绑定VAO
+     *
+     * @param vaoID VAO ID
+     */
+    public void bindVAO(int vaoID) {
+        glBindVertexArray(vaoID);
+    }
+
+    /**
+     * 启用顶点属性数组
+     *
+     * @param attributeNumber 属性编号
+     */
+    public void enableVertexAttribArray(int attributeNumber) {
+        glEnableVertexAttribArray(attributeNumber);
+    }
+
+    /**
+     * 禁用顶点属性数组
+     *
+     * @param attributeNumber 属性编号
+     */
+    public void disableVertexAttribArray(int attributeNumber) {
+        glDisableVertexAttribArray(attributeNumber);
+    }
+
+    /**
+     * 删除纹理
+     *
+     * @param textureID 纹理ID
+     */
+    public void deleteTexture(int textureID) {
+        int[] tmp = {textureID};
+        glDeleteTextures(1, tmp, 0);
     }
 
 }

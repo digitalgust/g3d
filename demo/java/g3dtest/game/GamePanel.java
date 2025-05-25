@@ -79,7 +79,7 @@ public class GamePanel extends GOpenGLPanel {
         renderEngine = new RenderEngine();
         renderEngine.gl_init(getW(), getH());
         setGlRendereredImg(renderEngine.getMainFbo().getFboimg());
-        scene.getDayAndNight().setSecondsPerDay(48);
+        scene.getDayAndNight().setSecondsPerDay(144);
         //Gutil.checkGlError("Game glinit 0.1");
 
         picker = new MousePicker(scene);

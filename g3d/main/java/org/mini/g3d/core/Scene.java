@@ -80,6 +80,8 @@ public class Scene {
     public Light sun;
     DayAndNight dayAndNight;
 
+    boolean volumetricFog = false;
+
 
     //用于标志当前是否是在进行阴影渲染
     private boolean shadowRender = false;
@@ -349,5 +351,13 @@ public class Scene {
 
     public Object getLock() {
         return lock;
+    }
+
+    public boolean isVolumetricFog() {
+        return volumetricFog;
+    }
+
+    public void setVolumetricFog(boolean volumetricFog) {
+        this.volumetricFog = volumetricFog;
     }
 }
