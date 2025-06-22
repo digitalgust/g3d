@@ -41,10 +41,8 @@ public class GLTFImporter {
                 gltf.setBin(glbLoader.binData());
             } else {
                 ByteBuffer jasonb = GLTF.getDirectByteBuffer(path);
-                byte[] b = new byte[jasonb.capacity()];
                 jasonb.rewind();
-                jasonb.get(b);
-                jsonStr = new String(b, "utf-8");
+                jsonStr = new String(jasonb.array(), 0, jasonb.limit(), "utf-8");
             }
 
             JsonParser.InjectableValues v = new JsonParser.InjectableValues();

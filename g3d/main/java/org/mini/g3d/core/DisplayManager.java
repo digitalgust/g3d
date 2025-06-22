@@ -7,11 +7,23 @@ package org.mini.g3d.core;
 
 import org.mini.util.SysLog;
 
+import java.util.Properties;
+
 import static org.mini.gl.GL.*;
 
 public class DisplayManager {
+    public static String G3D_VERSION = "1.0.0.0";
 
-    public static String G3D_VERSION = "1.0.2";
+    static {
+        Properties prop = new Properties();
+        try {
+            prop.load(DisplayManager.class.getClassLoader().getResourceAsStream("/org/mini/g3d/res/version.properties"));
+            G3D_VERSION = prop.getProperty("version");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     static int width = 1024;
     static int height = 512;
     private static final int FPS_CAP = 120;

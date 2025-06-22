@@ -344,16 +344,14 @@ public class GLTF extends GLTFProperty {
      */
     static public ByteBuffer getDirectByteBuffer(String path) {//gust
         try {
-//            FileInputStream is = new FileInputStream(path);
             if (path.charAt(0) != '/') path = "/" + path;
             InputStream is = GLTF.class.getResourceAsStream(path);
-            DataInputStream dis = new DataInputStream(is);
-            byte[] fb = new byte[dis.available()];
-            dis.readFully(fb);
-            dis.close();
+            byte[] fb = new byte[is.available()];
+            int read = 0;
+            while ((read += is.read(fb, read, fb.length - read)) >= 0) {
+            }
             ByteBuffer bb = ByteBuffer.wrap(fb);
             bb.position(bb.limit());
-//            ByteBuffer bb = ByteBuffer.allocateDirect(fb.length).put(fb);
             bb.order(ByteOrder.LITTLE_ENDIAN);
             return (ByteBuffer) bb;
         } catch (Exception e) { //Thrown by .map on a JarFileSystem entry
