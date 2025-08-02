@@ -34,7 +34,6 @@ package org.mini.g3d.core.vector;
 import java.io.Serializable;
 
 /**
- *
  * Base class for vectors.
  *
  * @author cix_foo <cix_foo@users.sourceforge.net>
@@ -83,6 +82,9 @@ public abstract class Vector implements Serializable, ReadableVector {
      */
     public Vector normalise() {
         float len = length();
+        if (len == 0f) {
+            len = 0.0001f;
+        }
         if (len != 0.0f) {
             float l = 1.0f / len;
             return scale(l);
