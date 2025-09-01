@@ -90,6 +90,25 @@ public class Player extends AnimatedModel implements Cloneable {
         if (key == Glfw.GLFW_KEY_SPACE && action == GLFW_PRESS) {
             jump();
         }
+        
+        // 按Q键触发武器流光效果
+        if (key == Glfw.GLFW_KEY_Q && action == GLFW_PRESS) {
+            // 在玩家前方1米位置显示武器流光效果
+            Vector3f weaponPos = new Vector3f();
+            weaponPos.x = position.x + (float) Math.sin(Math.toRadians(rotY)) * 1.0f;
+            weaponPos.y = position.y + 1.0f; // 武器高度
+            weaponPos.z = position.z + (float) Math.cos(Math.toRadians(rotY)) * 1.0f;
+            GamePanel.showWeaponAura(weaponPos);
+        }
+        
+        // 按E键触发拖尾流光效果（使用动画纹理）
+        if (key == Glfw.GLFW_KEY_E && action == GLFW_PRESS) {
+            Vector3f weaponPos = new Vector3f();
+            weaponPos.x = position.x + (float) Math.sin(Math.toRadians(rotY)) * 1.0f;
+            weaponPos.y = position.y + 1.0f;
+            weaponPos.z = position.z + (float) Math.cos(Math.toRadians(rotY)) * 1.0f;
+            GamePanel.showWeaponTrailAura(weaponPos);
+        }
     }
 
     public void turnLeft() {

@@ -1,0 +1,25 @@
+1.这个项目中依赖于其他项目:
+
+项目miniJVM
+这个项目位于：D:\GitHub\miniJVM
+
+其中，桌面版OPENGL的支持位于： D:\GitHub\miniJVM\desktop\glfw_gui
+gl函数位于：D:\GitHub\miniJVM\desktop\glfw_gui\java\src\main\java\org\mini\gl\GL.java
+
+其中，移动版OPENGLES的支持位于：D:\GitHub\miniJVM\mobile\java\glfm_gui
+gl函数位于：D:\GitHub\miniJVM\mobile\java\glfm_gui\src\main\java\org\mini\gl\GL.java
+
+其中，UI方面及其他声音的支持位于：D:\GitHub\miniJVM\extlib\xgui
+
+
+2.后面所有的回答或分析，均使用中文
+3.如果在你回答过程中，有疑问，可以停下来向我提问，我补充回答后继续，这样可以避免反复的修改
+4.不用写测试用例，那样更担误时间，浪费token
+
+5.本项目是一个3D游戏引擎，引擎位于 ./g3d
+   应用这个g3d引擎的DEMO代码位于 ./应用这个g3d引擎的DEMO代码位于
+
+
+
+
+   

@@ -29,6 +29,8 @@ public class ParticleModifier implements JsonParser.Polymorphic {
                 return ParticleScaleModifier.class;
             case "Rotation":
                 return ParticleRotationModifier.class;
+            case "WeaponAura":
+                return ParticleWeaponAuraModifier.class;
             default://try to parse as class name
                 try {
                     return Class.forName(modifierType);

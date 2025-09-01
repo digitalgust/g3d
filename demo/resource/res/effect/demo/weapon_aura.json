@@ -1,0 +1,285 @@
+{
+  "emitters": [
+    {
+      "startAt": 0.0,
+      "emitterLife": 8.0,
+      "name": "WeaponAura_Main",
+      "imagePath": "/res/textures/particle_whiteball.png",
+      "imageGrids": 1,
+      "location": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "pps": 25,
+      "min": 15,
+      "max": 30,
+      "speed": 0.1,
+      "speedError": 0.05,
+      "gravity": 0,
+      "particleLife": 3.0,
+      "particleLifeError": 0.8,
+      "scale": 0.4,
+      "scaleError": 0.3,
+      "randomRotation": false,
+      "modifiers": [
+        {
+          "modifierType": "WeaponAura",
+          "startAt": 0.0,
+          "endAt": 3.0,
+          "radius": 1.5,
+          "radiusVariation": 0.4,
+          "height": 2.5,
+          "spiralSpeed": 0.8,
+          "verticalSpeed": 1.0,
+          "spiralLayers": 4.0,
+          "particleOffset": 8.0
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 0.0,
+          "endAt": 0.8,
+          "startColor": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.9
+          }
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 0.8,
+          "endAt": 1.5,
+          "startColor": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 0.0,
+            "w": 0.9
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 0.8,
+            "z": 0.0,
+            "w": 1.0
+          }
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 1.5,
+          "endAt": 2.2,
+          "startColor": {
+            "x": 1.0,
+            "y": 0.8,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "endColor": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": 1.0
+          }
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 1.5,
+          "endAt": 2.0,
+          "startColor": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "endColor": {
+            "x": 0.0,
+            "y": 0.8,
+            "z": 1.0,
+            "w": 1.0
+          }
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 2.0,
+          "endAt": 2.5,
+          "startColor": {
+            "x": 0.0,
+            "y": 0.8,
+            "z": 1.0,
+            "w": 1.0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 1.0,
+            "w": 0.8
+          }
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 2.5,
+          "endAt": 3.0,
+          "startColor": {
+            "x": 1.0,
+            "y": 0.0,
+            "z": 1.0,
+            "w": 0.8
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "startAt": 0.2,
+      "emitterLife": 8.0,
+      "name": "WeaponAura_Inner",
+      "imagePath": "/res/textures/particle_whiteball.png",
+      "imageGrids": 1,
+      "location": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "pps": 15,
+      "min": 8,
+      "max": 15,
+      "speed": 0.05,
+      "speedError": 0.02,
+      "gravity": 0,
+      "particleLife": 2.5,
+      "particleLifeError": 0.5,
+      "scale": 0.25,
+      "scaleError": 0.15,
+      "randomRotation": false,
+      "modifiers": [
+        {
+          "modifierType": "WeaponAura",
+          "startAt": 0.0,
+          "endAt": 2.5,
+          "radius": 0.9,
+          "radiusVariation": 0.25,
+          "height": 1.8,
+          "spiralSpeed": -1.2,
+          "verticalSpeed": 0.8,
+          "spiralLayers": 3.0,
+          "particleOffset": 5.0
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 0.0,
+          "endAt": 0.4,
+          "startColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 0.0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 0.7
+          }
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 2.0,
+          "endAt": 2.5,
+          "startColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 0.7
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0,
+            "w": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "startAt": 0.5,
+      "emitterLife": 8.0,
+      "name": "WeaponAura_Sparkles",
+      "imagePath": "/res/textures/particle_whiteball.png",
+      "imageGrids": 1,
+      "location": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "pps": 8,
+      "min": 3,
+      "max": 8,
+      "speed": 0.2,
+      "speedError": 0.1,
+      "gravity": 0,
+      "particleLife": 1.5,
+      "particleLifeError": 0.3,
+      "scale": 0.15,
+      "scaleError": 0.1,
+      "randomRotation": false,
+      "modifiers": [
+        {
+          "modifierType": "WeaponAura",
+          "startAt": 0.0,
+          "endAt": 1.5,
+          "radius": 2.0,
+          "radiusVariation": 0.6,
+          "height": 3.0,
+          "spiralSpeed": 1.5,
+          "verticalSpeed": 1.2,
+          "spiralLayers": 5.0,
+          "particleOffset": 10.0
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 0.0,
+          "endAt": 0.2,
+          "startColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": 0.0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": 1.0
+          }
+        },
+        {
+          "modifierType": "Color",
+          "startAt": 1.2,
+          "endAt": 1.5,
+          "startColor": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": 1.0
+          },
+          "endColor": {
+            "x": 1.0,
+            "y": 0.5,
+            "z": 1.0,
+            "w": 0.0
+          }
+        }
+      ]
+    }
+  ]
+}

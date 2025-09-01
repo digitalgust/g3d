@@ -6,6 +6,7 @@
 
 package org.mini.g3d.animation.gltf2.loader.data;
 
+import org.mini.gui.GToolkit;
 import org.mini.util.SysLog;
 
 import java.nio.ByteBuffer;
@@ -62,8 +63,13 @@ public class GLTFImage extends GLTFChildOfRootProperty {
         if (bufferView != null) {
             imgBuffer = bufferView.getData(0, bufferView.getByteLength());
         } else {
-            imgBuffer = GLTF.getDirectByteBuffer(gltf.getRelativePath() + uri);
-            SysLog.info("G3D|Image data from URI");
+            String pstr = gltf.getRelativePath() + uri;
+            imgBuffer = GLTF.getDirectByteBuffer(pstr);
+            if (imgBuffer == null) {
+                //SysLog.info("G3D|Image data load fail " + pstr);
+                byte[] data = GToolkit.readFileFromJar("/org/mini/g3d/res/pink.png");
+                imgBuffer = ByteBuffer.wrap(data);
+            }
         }
         return imgBuffer;
     }

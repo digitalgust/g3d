@@ -6,6 +6,8 @@
 
 package org.mini.g3d.animation.gltf2.loader.data;
 
+import org.mini.util.SysLog;
+
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -355,7 +357,8 @@ public class GLTF extends GLTFProperty {
             bb.order(ByteOrder.LITTLE_ENDIAN);
             return (ByteBuffer) bb;
         } catch (Exception e) { //Thrown by .map on a JarFileSystem entry
-            e.printStackTrace();
+            //e.printStackTrace();
+            SysLog.info("G3D|Data load fail " + path);
         }
         return null;
     }

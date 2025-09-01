@@ -56,6 +56,7 @@ public class GamePanel extends GOpenGLPanel {
     ViewMover viewMover;
     Joystick joystick;
     WButton jumpBtn;
+    int particleIndex = 0;
     Scene scene;
     RenderEngine renderEngine;
 
@@ -215,8 +216,12 @@ public class GamePanel extends GOpenGLPanel {
         jumpBtn.setListener(new WidgetListener() {
             @Override
             public void action(Widget widget) {
-                int i = random.nextInt(5);
-                switch (i) {
+                showWeaponAura(player.getPosition());
+//                showWeaponTrailAura(player.getPosition());
+                if (true) return;
+
+                int i = random.nextInt(6); // 增加到6个效果
+                switch (particleIndex % 6) {
                     case 0:
                         showFalldown(player.getPosition());
                         break;
@@ -232,10 +237,19 @@ public class GamePanel extends GOpenGLPanel {
                     case 4:
                         showTest(player.getPosition());
                         break;
+                    case 5:
+                        // 武器流光效果
+                        Vector3f weaponPos = new Vector3f();
+                        weaponPos.x = player.getPosition().x + (float) Math.sin(Math.toRadians(player.getRotY())) * 1.0f;
+                        weaponPos.y = player.getPosition().y + 1.0f;
+                        weaponPos.z = player.getPosition().z + (float) Math.cos(Math.toRadians(player.getRotY())) * 1.0f;
+                        showWeaponAura(weaponPos);
+                        break;
                     default:
                         showColorChange(player.getPosition());
                 }
-                SysLog.info("G3D|player jump");
+                SysLog.info("G3D|player particles  " + particleIndex);
+                particleIndex++;
             }
         });
         widgets.add(jumpBtn);
@@ -300,7 +314,6 @@ public class GamePanel extends GOpenGLPanel {
             player.moveStop();
         }
         lightOnHead.setPosition(player.getPosition());
-
 
 
         updateAnimatedModel();
@@ -394,6 +407,10 @@ public class GamePanel extends GOpenGLPanel {
     @Override
     public void keyEventGlfw(int key, int scanCode, int action, int mods) {
         widgets.keyEvent(key, scanCode, action, mods);
+        // 转发键盘事件给玩家
+        if (player != null) {
+            player.key(key, scanCode, action, mods);
+        }
     }
 
 
@@ -495,6 +512,22 @@ public class GamePanel extends GOpenGLPanel {
         String STR_PE_7 = GToolkit.readFileFromJarAsString("/res/effect/demo/test.json", "utf-8");
         Effect pe1 = EffectMaster.parseEffect(STR_PE_7);
         EmitterLocationControler etc = new EmitterLocationControler(loc, null);
+        pe1.addControler(etc);
+        EffectMaster.add(pe1);
+    }
+
+    public static void showWeaponAura(Vector3f weaponLoc) {
+        String STR_PE_WEAPON = GToolkit.readFileFromJarAsString("/res/effect/demo/weapon_aura.json", "utf-8");
+        Effect pe1 = EffectMaster.parseEffect(STR_PE_WEAPON);
+        EmitterLocationControler etc = new EmitterLocationControler(weaponLoc, null);
+        pe1.addControler(etc);
+        EffectMaster.add(pe1);
+    }
+
+    public static void showWeaponTrailAura(Vector3f weaponLoc) {
+        String STR_PE_TRAIL = GToolkit.readFileFromJarAsString("/res/effect/demo/weapon_trail_aura.json", "utf-8");
+        Effect pe1 = EffectMaster.parseEffect(STR_PE_TRAIL);
+        EmitterLocationControler etc = new EmitterLocationControler(weaponLoc, null);
         pe1.addControler(etc);
         EffectMaster.add(pe1);
     }
