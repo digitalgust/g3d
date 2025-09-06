@@ -97,9 +97,11 @@
                             <target>D:\GitHub\g3d\g3d\main\java\org\mini\g3d\res\version.properties
                                 <script language="javascript">
                                     <![CDATA[
-                            var file = new java.io.File("./g3d/main/java/org/mini/g3d/res/version.properties");
+                            var file = new java.io.File("./src/main/resource/config.txt");
                             var lines = [];
-                            var input = new java.io.BufferedReader(new java.io.FileReader(file));
+                            // 使用UTF-8编码读取文件
+                            var input = new java.io.BufferedReader(new java.io.InputStreamReader(
+                                new java.io.FileInputStream(file), "UTF-8"));
                             var line;
                             while ((line = input.readLine()) != null) {
                                 if (line.startsWith("version=")) {
@@ -114,7 +116,9 @@
                             }
                             input.close();
 
-                            var output = new java.io.BufferedWriter(new java.io.FileWriter(file));
+                            // 使用UTF-8编码写入文件
+                            var output = new java.io.BufferedWriter(new java.io.OutputStreamWriter(
+                                new java.io.FileOutputStream(file), "UTF-8"));
                             for (var i in lines) {
                                 output.write(lines[i]);
                                 output.newLine();

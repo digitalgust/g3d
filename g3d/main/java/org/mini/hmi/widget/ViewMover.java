@@ -25,6 +25,8 @@ public class ViewMover extends Widget {
     float cameraDistanceFar = 30;
     float cameraDistanceNear = 5;
 
+    ViewMoverListener listener;
+
 
     public ViewMover(String iconPath, float left, float top, float w, float h) {
         super(left, top, w, h);
@@ -155,11 +157,17 @@ public class ViewMover extends Widget {
                     float a = camera.getAngleAroundTarget();
                     float adjx = dx * 0.5f;
                     camera.setAngleAroundTarget(a - adjx);
+                    if (listener != null) {
+                        listener.onAngleChanged(a - adjx);
+                    }
                     float pitch = camera.getPitch();
                     float adjy = dy * 0.3f;
                     float newpitch = pitch + adjy;
                     if (newpitch > 2f && newpitch < 70f) {
                         camera.setPitch(newpitch);
+                        if (listener != null) {
+                            listener.onPitchChanged(newpitch);
+                        }
                     }
                     return true;
                 }
@@ -182,6 +190,9 @@ public class ViewMover extends Widget {
                 distance = cameraDistanceNear;
             }
             camera.setDistanceFromTarget(distance);
+            if (listener != null) {
+                listener.onDistanceChanged(distance);
+            }
         }
     }
 
@@ -191,5 +202,13 @@ public class ViewMover extends Widget {
 
     public float getCameraDistanceFar() {
         return cameraDistanceFar;
+    }
+
+    public void setViewMoverListener(ViewMoverListener listener) {
+        this.listener = listener;
+    }
+
+    public ViewMoverListener getViewMoverListener() {
+        return listener;
     }
 }
