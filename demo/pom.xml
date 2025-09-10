@@ -40,7 +40,7 @@
                             <goal>run</goal>        
                         </goals>             
                         <configuration>       
-                            <tasks>
+                            <target>
                                 <copy todir="${basedir}/../../miniJVM/binary/win_x64/apps/" overwrite="true">
                                     <fileset dir="${project.build.directory}" erroronmissingdir="false">
                                         <include name="${project.artifactId}.jar"/>
@@ -51,7 +51,7 @@
                                         <include name="${project.artifactId}.jar"/>
                                     </fileset>
                                 </copy>
-                            </tasks>
+                            </target>
                         </configuration>        
                     </execution>    
                 </executions>  

@@ -97,7 +97,7 @@
                             <target>D:\GitHub\g3d\g3d\main\java\org\mini\g3d\res\version.properties
                                 <script language="javascript">
                                     <![CDATA[
-                            var file = new java.io.File("./src/main/resource/config.txt");
+                            var file = new java.io.File("./g3d/main/java/org/mini/g3d/res/version.properties");
                             var lines = [];
                             // 使用UTF-8编码读取文件
                             var input = new java.io.BufferedReader(new java.io.InputStreamReader(
