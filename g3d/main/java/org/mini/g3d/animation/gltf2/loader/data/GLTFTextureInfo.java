@@ -74,4 +74,11 @@ public class GLTFTextureInfo extends GLTFProperty {
         }
     }
 
+    public String toString() {
+        return "GLTFTextureInfo{" +
+                "texture=" + texture +
+                ", uri=" + texture.getSourceImage().getUri() +
+                '}';
+    }
+
 }

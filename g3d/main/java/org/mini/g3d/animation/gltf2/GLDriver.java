@@ -27,7 +27,7 @@ public class GLDriver {
 
 
     //todo gust what time to clear the cache
-    private static final Map<GLTFTextureInfo, int[]> texInfo2GlTextureMap = new HashMap<>();
+    private static final Map<Object, int[]> texInfo2GlTextureMap = new HashMap<>();
     private static final Map<GLTFAccessor, int[]> accessor2GlBufferMap = new HashMap<>();
     static int[] max = {0};
 
@@ -153,14 +153,14 @@ public class GLDriver {
         glTexImage2D(type, renderTexture.getMipLevel(), glType, width, height, 0, glType, GL_UNSIGNED_BYTE, buffer.array(), buffer.arrayOffset());
     }
 
-    public static int getTexture(RenderTexture renderTexture, GLTFTextureInfo info) {
+    public static int getTexture(RenderTexture renderTexture, Object info) {
         int[] tex = texInfo2GlTextureMap.get(info);
         if (tex == null) {
             tex = new int[]{0};
             glGenTextures(1, tex, 0);
             glBindTexture(renderTexture.getType(), tex[0]);
             texInfo2GlTextureMap.put(info, tex);
-            SysLog.info("G3D|Begin init texture");
+            SysLog.info("G3D|Begin init texture " + info);
 
             GLTFSampler sampler = renderTexture.getSampler();
 //            if (useSampler) {
@@ -254,8 +254,8 @@ public class GLDriver {
     }
 
     public static void cleanUp() {
-        for (Iterator<GLTFTextureInfo> it = texInfo2GlTextureMap.keySet().iterator(); it.hasNext(); ) {
-            GLTFTextureInfo info = it.next();
+        for (Iterator<Object> it = texInfo2GlTextureMap.keySet().iterator(); it.hasNext(); ) {
+            Object info = it.next();
             int[] tex = texInfo2GlTextureMap.get(info);
             glDeleteTextures(1, tex, 0);
             it.remove();

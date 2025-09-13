@@ -60,7 +60,6 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
      */
     public static GLTF export(GLTF gltf, AniGroup aniGroup) {
         if (aniGroup == null) return gltf;
-        SysLog.info("G3D|export " + gltf.getSource());
         gltf.setAniGroup(aniGroup);
 
         String gltffn = gltf.getSource();

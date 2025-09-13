@@ -21,4 +21,9 @@ public interface ViewMoverListener {
      * @param pitch
      */
     void onPitchChanged(float pitch);
+
+    /**
+     * Called when the touch has ended. now can save the current state
+     */
+    void onChangeEnded();
 }

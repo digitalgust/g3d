@@ -58,6 +58,7 @@ public class MasterRenderer extends AbstractRenderer {
 
     public void render(Scene scene) {
         renderShadowPass(scene);
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderShadowPass");
 
         glEnable(GL_CLIP_DISTANCE0);
         renderWaterRefractionPass(scene);

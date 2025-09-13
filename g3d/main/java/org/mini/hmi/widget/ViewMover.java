@@ -26,6 +26,7 @@ public class ViewMover extends Widget {
     float cameraDistanceNear = 5;
 
     ViewMoverListener listener;
+    boolean changed = false;
 
 
     public ViewMover(String iconPath, float left, float top, float w, float h) {
@@ -55,6 +56,12 @@ public class ViewMover extends Widget {
                 return false; //可以穿透这个板到达其他层
             }
         } else {
+            if (changed) {
+                changed = false;
+                if (listener != null) {
+                    listener.onChangeEnded();
+                }
+            }
             if (this.touchedId1 == button) {
                 touchedId1 = NO_TOUCHEDID;
                 return false;
@@ -108,6 +115,12 @@ public class ViewMover extends Widget {
             if (this.touchedId2 == touchid) {
                 touchedId2 = NO_TOUCHEDID;
             }
+            if (changed) {
+                changed = false;
+                if (listener != null) {
+                    listener.onChangeEnded();
+                }
+            }
             return false;
         }
         return false;
@@ -158,6 +171,7 @@ public class ViewMover extends Widget {
                     float adjx = dx * 0.5f;
                     camera.setAngleAroundTarget(a - adjx);
                     if (listener != null) {
+                        changed = true;
                         listener.onAngleChanged(a - adjx);
                     }
                     float pitch = camera.getPitch();
@@ -166,6 +180,7 @@ public class ViewMover extends Widget {
                     if (newpitch > 2f && newpitch < 70f) {
                         camera.setPitch(newpitch);
                         if (listener != null) {
+                            changed = true;
                             listener.onPitchChanged(newpitch);
                         }
                     }
@@ -191,6 +206,7 @@ public class ViewMover extends Widget {
             }
             camera.setDistanceFromTarget(distance);
             if (listener != null) {
+                changed = true;
                 listener.onDistanceChanged(distance);
             }
         }

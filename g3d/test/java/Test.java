@@ -1,7 +1,27 @@
 import org.mini.g3d.core.vector.Vector3f;
 
+import java.io.UnsupportedEncodingException;
+
 public class Test {
     public static void main(String[] args) throws Exception {
+        //a();
+        b();
+    }
+
+    static void b() throws UnsupportedEncodingException {
+        char[] chars = new char[]{0xff1f, 0xd83d};
+        String s = new String(chars);
+
+        System.out.println(s);
+        String s1 = "登不上了，是要倒闭了还是要出新东西了？\uD83D\uDE02";
+        String s2 = s1.substring(0, 20);
+        byte[] bytes = s2.getBytes("utf-8");
+        System.out.println(bytes.length);
+        System.out.println(s2);
+
+    }
+
+    static void a() {
         float noise = 0.5f;
         float distance = 50;
         float farPlane = 500f;
@@ -16,7 +36,7 @@ public class Test {
 
         fogFactor = (float) Math.pow(fogFactor, 2.0);
         System.out.println("fogFactor2=" + fogFactor);
-        fogFactor = fogFactor * ( noise );  // 降低噪声影响（原0.3→0.2，减少团雾强度）
+        fogFactor = fogFactor * (noise);  // 降低噪声影响（原0.3→0.2，减少团雾强度）
         System.out.println("fogFactor3=" + fogFactor);
         fogFactor *= 5000.0;  // 全局缩放从0.5→0.4，进一步降低fogFactor
         System.out.println("fogFactor4=" + fogFactor);

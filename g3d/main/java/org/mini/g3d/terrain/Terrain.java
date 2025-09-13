@@ -28,37 +28,37 @@ public class Terrain {
     private float[][] heights;
 
     private Vector3f min, max;
+    Loader loader;
 
     /**
      * @param cols
      * @param rows
-     * @param loader
      * @param texturePack
      * @param blendMap
      * @param heightMap
      */
 
-    public Terrain(int cols, int rows, Loader loader, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap) {
-        this(cols, rows, loader, texturePack, blendMap, heightMap, DEFAULT_MAP_SCALE);
+    public Terrain(int cols, int rows, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap) {
+        this(cols, rows, texturePack, blendMap, heightMap, DEFAULT_MAP_SCALE);
     }
 
     /**
      * @param cols
      * @param rows
-     * @param loader
      * @param texturePack
      * @param blendMap
      * @param heightMap
      * @param mapScale
      */
-    public Terrain(int cols, int rows, Loader loader, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap, float mapScale) {
+    public Terrain(int cols, int rows, TerrainTexturePack texturePack, TerrainTexture blendMap, String heightMap, float mapScale) {
         this.cols = cols;
         this.rows = rows;
         this.texturePack = texturePack;
         this.blendMap = blendMap;
         this.mapScale = mapScale;
         long startAt = System.currentTimeMillis();
-        this.model = generateTerrain(loader, heightMap);
+        loader = new Loader();
+        this.model = generateTerrain(heightMap);
         SysLog.info("G3D|load terrain cost (ms): " + (System.currentTimeMillis() - startAt));
     }
 
@@ -89,11 +89,10 @@ public class Terrain {
      * <p>
      * 另一个是生成了侧面网络,使地图看起来并不单薄,同样要注意生成时,三条线才能生成两行
      *
-     * @param loader
      * @param heightMap
      * @return
      */
-    private RawModel generateTerrain(Loader loader, String heightMap) {
+    private RawModel generateTerrain(String heightMap) {
 
 //		BufferedImage image = null;
 //		try {

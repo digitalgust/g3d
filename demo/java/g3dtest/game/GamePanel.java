@@ -101,7 +101,7 @@ public class GamePanel extends GOpenGLPanel {
         // getting the design, pattern of how we are painting the terrain.
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("/res/textures/terrain/blendMap1.png"));
         GImage img = GImage.createImageFromJar("/res/textures/terrain/heightmap1.png");
-        terrain = new Terrain(img.getWidth(), img.getHeight(), loader, texturePack, blendMap, "/res/textures/terrain/heightmap1.png", 1.5f);
+        terrain = new Terrain(img.getWidth(), img.getHeight(), texturePack, blendMap, "/res/textures/terrain/heightmap1.png", 1.5f);
         scene.setTerrain(terrain);
         //Gutil.checkGlError("Game glinit 3");
         // Terrain end

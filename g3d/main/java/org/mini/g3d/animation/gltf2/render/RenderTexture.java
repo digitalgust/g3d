@@ -33,11 +33,14 @@ public class RenderTexture {
     private int pixBytes = -1;
 
     GLTFTextureInfo info;
+    Object texKey;
 
     public RenderTexture(GLTFTextureInfo info) {
         this.info = info;
         this.sampler = info.getTexture().getSampler();
         getData = info.getTexture().getSourceImage()::getDirectByteBuffer;
+        texKey = info;
+        GLDriver.getTexture(this, texKey);
     }
 
     //Initialize a texture not referenced by the glTF file
@@ -51,15 +54,16 @@ public class RenderTexture {
         }
         this.type = type;
         this.mipLevel = mipLevel;
+        texKey = imagePath;
+        GLDriver.getTexture(this, texKey);
     }
 
     RenderTexture(InputStream stream, int type) {
         getData = () -> {
             try {
-                //gust
+                //gust todo
                 byte[] bytes = new byte[stream.available()];
                 stream.read(bytes, 0, bytes.length);
-//        var bytes = stream.readAllBytes();
                 ByteBuffer dbb = ByteBuffer.allocateDirect(bytes.length);
                 dbb.put(bytes);
                 return dbb;
@@ -75,10 +79,11 @@ public class RenderTexture {
     public RenderTexture(int type) {
         this.type = type;
         this.mipLevel = 0;
+        //todo
     }
 
     public void bindTexture() {
-        int texid = GLDriver.getTexture(this, info);
+        int texid = GLDriver.getTexture(this, texKey);
         glBindTexture(getType(), texid);
     }
 
