@@ -50,6 +50,18 @@ public class EntityRenderer extends AbstractRenderer {
                 return;
             }
             if (texturedModel.getTexture() != null) {
+                // 根据批次第一个实例的透明度决定混合模式（整批生效）
+                boolean glowBatch = !batch.isEmpty() && batch.get(0).getTransparency() < 1.0f;
+                if (glowBatch) {
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+                    // 为了避免半透物体被前景遮挡，保持深度写入开启
+                    glDepthMask(GL_TRUE);
+                } else {
+                    glDepthMask(GL_TRUE);
+                    glDisable(GL_BLEND);
+                }
+
                 prepareTexturedModel(texturedModel);
 
                 // 准备实例数据
@@ -68,6 +80,10 @@ public class EntityRenderer extends AbstractRenderer {
                 glDrawElementsInstanced(GL_TRIANGLES, texturedModel.getRawModel().getVertexCount(),
                         GL_UNSIGNED_INT, null, 0, instanceCount);
                 MainFrameBuffer.triangles += texturedModel.getRawModel().getVertexCount() * instanceCount;
+
+                // 恢复状态，避免影响后续渲染器
+                glDepthMask(GL_TRUE);
+                glDisable(GL_BLEND);
 
                 // 解绑实例属性
                 disableInstanceAttributes();

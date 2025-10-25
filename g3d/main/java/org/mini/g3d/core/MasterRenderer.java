@@ -75,12 +75,7 @@ public class MasterRenderer extends AbstractRenderer {
         prepare();
         enableCulling();
 
-        enitiyRenderer.render(scene);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass enitiyRenderer");
-
-        animatedModelRenderer.render(scene.getCamera(), scene.getAnimatedModelsIterator());
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass animatedModelRenderer");
-
+        // 先渲染背景与不透明基础内容
         terrainRenderer.render(scene);
         GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass terrainRenderer");
 
@@ -90,9 +85,17 @@ public class MasterRenderer extends AbstractRenderer {
         waterRenderer.render(scene.getWaters(), scene.getCamera(), scene.getSun().getDirection());
         GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass waterRenderer");
 
+        // 再渲染实体（含可能的加法混合），此时已有背景色，发光可见
+        enitiyRenderer.render(scene);
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass enitiyRenderer");
+
+        // 渲染动画模型
+        animatedModelRenderer.render(scene.getCamera(), scene.getAnimatedModelsIterator());
+        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass animatedModelRenderer");
+
+        // 粒子（本身包含混合控制）
         particleRenderer.render(ParticleMaster.getParticles(), scene);
         GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass particleRenderer");
-
 
         if (scene.isVolumetricFog()) {
             // 在主帧缓冲结束后渲染体积雾效
