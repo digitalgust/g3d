@@ -40,6 +40,9 @@ public class DisplayManager {
 
 
     public static String getGlVersion() {
+        if (glVersion == null) {
+            createDisplay(width, height);
+        }
         return glVersion;
     }
 

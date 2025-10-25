@@ -22,25 +22,86 @@ public abstract class ShaderProgram {
 
     float[] mbuf = new float[16];
 
-    public ShaderProgram(String vertexFile, String fragmentFile) {
+    public static final int LOAD_FROM_JAR = 0;
+    public static final int LOAD_FROM_FILE = 1;
+    public static final int LOAD_FROM_CONTENT = 2;
+
+
+    /**
+     * 从文件加载shader
+     *
+     * @param vertexFile
+     * @param fragmentFile
+     * @param loadFromFile
+     */
+    public ShaderProgram(String vertexFile, String fragmentFile, int loadFromFile) {
         long start = System.currentTimeMillis();
-        int vertexShaderID = loadShader(vertexFile, GL_VERTEX_SHADER);
-        int fragmentShaderID = loadShader(fragmentFile, GL_FRAGMENT_SHADER);
-        linkShader(vertexShaderID, fragmentShaderID);
-        SysLog.info("G3D|init shader " + vertexFile + " + " + fragmentFile + " = " + programID + " time:" + (System.currentTimeMillis() - start));
+        if (loadFromFile == LOAD_FROM_FILE) {
+            String vcontent = GToolkit.readFileFromFileAsString(vertexFile, "utf-8");
+            int vertexShaderID = loadShaderContents(vcontent, vertexFile, GL_VERTEX_SHADER);
+            String fcontent = GToolkit.readFileFromFileAsString(fragmentFile, "utf-8");
+            int fragmentShaderID = loadShaderContents(fcontent, fragmentFile, GL_FRAGMENT_SHADER);
+            link(vertexShaderID, fragmentShaderID);
+        } else if (loadFromFile == LOAD_FROM_JAR) {
+            String vcontent = GToolkit.readFileFromJarAsString(vertexFile, "utf-8");
+            int vertexShaderID = loadShaderContents(vcontent, vertexFile, GL_VERTEX_SHADER);
+            String fcontent = GToolkit.readFileFromJarAsString(fragmentFile, "utf-8");
+            int fragmentShaderID = loadShaderContents(fcontent, fragmentFile, GL_FRAGMENT_SHADER);
+            link(vertexShaderID, fragmentShaderID);
+        } else if (loadFromFile == LOAD_FROM_CONTENT) {
+            int vertexShaderID = loadShaderContents(vertexFile, "vertfile", GL_VERTEX_SHADER);
+            int fragmentShaderID = loadShaderContents(fragmentFile, "fragmentfile", GL_FRAGMENT_SHADER);
+            link(vertexShaderID, fragmentShaderID);
+        }
+        SysLog.info("G3D|init shader " + programID + " time:" + (System.currentTimeMillis() - start));
+    }
 
-//        //把链接成功的programID生成的shader数据从显卡中取出，并保存为文件
-//        // 获取并保存着色器二进制数据
-//        int[] length = new int[1];
-//        int[] binaryFormat = new int[1];
-//        glGetProgramiv(programID, GL.GL_PROGRAM_BINARY_LENGTH, length, 0);
-//        byte[] binary = new byte[length[0]];
-//        GL.glGetProgramBinary(programID, binary.length, length, 0, binaryFormat, 0, binary);
-//
-//        // 这里可以添加代码将binary保存到文件
-//        // GToolkit.writeFile("shader.bin", binary);
+    /**
+     * 从jar包加载shader
+     *
+     * @param vertexFile
+     * @param fragmentFile
+     */
+    public ShaderProgram(String vertexFile, String fragmentFile) {
+        this(vertexFile, fragmentFile, LOAD_FROM_JAR);
+    }
 
-        //release vert and frag
+    private void link(int vertexShaderID, int fragmentShaderID) {
+
+        programID = glCreateProgram();
+        // GLUtil.checkGlError("init 0");
+        glAttachShader(programID, vertexShaderID);
+        // GLUtil.checkGlError("init 1");
+        glAttachShader(programID, fragmentShaderID);
+        // GLUtil.checkGlError("init 2");
+
+        bindAttributes();
+
+        // GLUtil.checkGlError("init 3");
+        glLinkProgram(programID);
+
+        // GLUtil.checkGlError("init 4");
+
+        glValidateProgram(programID);
+        // GLUtil.checkGlError("init 5");
+        getAllUniformLocations();
+        // SysLog.info("G3D|init shader link " + vertexShaderID + " + " +
+        // fragmentShaderID + " = " + programID);
+        // GLUtil.checkGlError("init 8");
+
+
+        // //把链接成功的programID生成的shader数据从显卡中取出，并保存为文件
+        // // 获取并保存着色器二进制数据
+        // int[] length = new int[1];
+        // int[] binaryFormat = new int[1];
+        // glGetProgramiv(programID, GL.GL_PROGRAM_BINARY_LENGTH, length, 0);
+        // byte[] binary = new byte[length[0]];
+        // GL.glGetProgramBinary(programID, binary.length, length, 0, binaryFormat, 0, binary);
+        //
+        // // 这里可以添加代码将binary保存到文件
+        // // GToolkit.writeFile("shader.bin", binary);
+
+        // release vert and frag
         glDetachShader(programID, vertexShaderID);
         glDetachShader(programID, fragmentShaderID);
         glDeleteShader(vertexShaderID);
@@ -48,40 +109,11 @@ public abstract class ShaderProgram {
     }
 
     public ShaderProgram(int vertexShaderID, int fragmentShaderID) {
-        linkShader(vertexShaderID, fragmentShaderID);
+        link(vertexShaderID, fragmentShaderID);
     }
 
     public ShaderProgram(int programID) {
         this.programID = programID;
-    }
-
-    /**
-     * link shader and MUST NOT release vertex and fragment
-     *
-     * @param vertexShaderID
-     * @param fragmentShaderID
-     */
-    public void linkShader(int vertexShaderID, int fragmentShaderID) {
-
-        programID = glCreateProgram();
-//        GLUtil.checkGlError("init 0");
-        glAttachShader(programID, vertexShaderID);
-//        GLUtil.checkGlError("init 1");
-        glAttachShader(programID, fragmentShaderID);
-//        GLUtil.checkGlError("init 2");
-
-        bindAttributes();
-
-//        GLUtil.checkGlError("init 3");
-        glLinkProgram(programID);
-
-//        GLUtil.checkGlError("init 4");
-
-        glValidateProgram(programID);
-//        GLUtil.checkGlError("init 5");
-        getAllUniformLocations();
-//        SysLog.info("G3D|init shader link " + vertexShaderID + " + " + fragmentShaderID + " = " + programID);
-//        GLUtil.checkGlError("init 8");
     }
 
     protected abstract void getAllUniformLocations();
@@ -157,10 +189,9 @@ public abstract class ShaderProgram {
     }
 
     protected void loadMatrix(int location, Matrix4f matrix) {
-        //matrix.store(mbuf);
-        glUniformMatrix4fv(location, 1, GL_FALSE, matrix.mat, 0);//gust
+        // matrix.store(mbuf);
+        glUniformMatrix4fv(location, 1, GL_FALSE, matrix.mat, 0);// gust
     }
-
 
     public void loadUniform(int location, Object value) {
         if (value instanceof Float) {
@@ -183,7 +214,7 @@ public abstract class ShaderProgram {
             loadInt(location, (int) value);
             return;
         }
-        if (value instanceof Matrix4f[]) {//We most likely don't want this to actually be called
+        if (value instanceof Matrix4f[]) {// We most likely don't want this to actually be called
             loadMatrix(location, (Matrix4f) value);
             return;
         }
@@ -195,9 +226,8 @@ public abstract class ShaderProgram {
         return shader;
     }
 
-    private int loadShader(String file, int type) {
+    private int loadShaderContents(String sstr, String fileName, int type) {
 
-        String sstr = GToolkit.readFileFromJarAsString(file, "utf-8");
         sstr = preProcessShader(sstr, type);
         sstr = adapteOpenGLorES(sstr);
         byte[] sb = null;
@@ -216,15 +246,17 @@ public abstract class ShaderProgram {
             GL.glGetShaderiv(shaderID, GL.GL_INFO_LOG_LENGTH, return_val, 0);
             byte[] szLog = new byte[return_val[0] + 1];
             GL.glGetShaderInfoLog(shaderID, szLog.length, return_val, 0, szLog);
-            SysLog.error("G3D|Compile Shader fail.file:" + file + ", error :" + new String(szLog, 0, return_val[0]) + ":" + file);
-            //System.exit(-1);
+            SysLog.error("G3D|Compile Shader fail.file:" + fileName + ", error :" + new String(szLog, 0, return_val[0])
+                    + ":" + fileName);
+            // System.exit(-1);
         }
         return shaderID;
     }
 
     public static String adapteOpenGLorES(String shaderBytes) {
         if (DisplayManager.getGlVersion().toLowerCase().contains("opengl es")) {
-            shaderBytes = shaderBytes.replace("#version 330", "#version 300 es\r\nprecision highp float;\r\nprecision highp sampler2DShadow;\r\nprecision highp sampler2D;\r\nprecision highp samplerCube;\r\n");
+            shaderBytes = shaderBytes.replace("#version 330",
+                    "#version 300 es\r\nprecision highp float;\r\nprecision highp sampler2DShadow;\r\nprecision highp sampler2D;\r\nprecision highp samplerCube;\r\n");
 
         }
         return shaderBytes;
