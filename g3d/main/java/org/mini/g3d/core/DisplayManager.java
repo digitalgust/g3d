@@ -17,7 +17,8 @@ public class DisplayManager {
     static {
         Properties prop = new Properties();
         try {
-            prop.load(DisplayManager.class.getClassLoader().getResourceAsStream("/org/mini/g3d/res/version.properties"));
+            prop.load(
+                    DisplayManager.class.getClassLoader().getResourceAsStream("/org/mini/g3d/res/version.properties"));
             G3D_VERSION = prop.getProperty("version");
         } catch (Exception e) {
             e.printStackTrace();
@@ -30,14 +31,12 @@ public class DisplayManager {
 
     private static long frameCount = 0;
     private static long lastFrameTime = System.currentTimeMillis();
-    private static float delta;//两帧之间的时间差
-    private static float totalTime;//初始化以来的总时间
-
+    private static float delta;// 两帧之间的时间差
+    private static float totalTime;// 初始化以来的总时间
 
     static String glVendor;
     static String glRenderer;
     static String glVersion;
-
 
     public static String getGlVersion() {
         if (glVersion == null) {
@@ -69,6 +68,10 @@ public class DisplayManager {
         totalTime += delta;
         lastFrameTime = currentFrameTime;
         frameCount++;
+    }
+
+    public static boolean isOpenGLES() {
+        return glVersion.toLowerCase().contains("opengl es");
     }
 
     /**
@@ -108,6 +111,5 @@ public class DisplayManager {
     public static int getHeight() {
         return height;
     }
-
 
 }

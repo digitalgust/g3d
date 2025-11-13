@@ -16,6 +16,7 @@ public class WButton extends Widget {
     int touchedId = NO_TOUCHEDID;
     int redPoint = 0;
     boolean border = false;
+    boolean hideText = false;
 
 
     public WButton(String iconPath, String text, float left, float top, float w, float h) {
@@ -35,7 +36,7 @@ public class WButton extends Widget {
         if (icon != null) {
             GToolkit.drawImage(vg, icon, getX(), getY(), w, h, isBorder(), imgAlpha);
         }
-        if (text != null) {
+        if (text != null && !hideText) {
             GToolkit.drawTextLineWithShadow(vg, getX() + w / 2, getY() + h, text, 14, color, Nanovg.NVG_ALIGN_CENTER | Nanovg.NVG_ALIGN_TOP, GToolkit.getStyle().getTextShadowColor(), 3f);
         }
         if (redPoint != 0) {
@@ -117,5 +118,12 @@ public class WButton extends Widget {
         this.border = border;
     }
 
+    public void setHideText(boolean hideText) {
+        this.hideText = hideText;
+    }
+
+    public boolean isHideText() {
+        return hideText;
+    }
 
 }
