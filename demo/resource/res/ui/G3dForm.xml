@@ -2,16 +2,12 @@
     <script>
     </script>
     <panel w="100%" h="10%"></panel>
-<!--    <g3dtest.game.XGamePanel name="GLP_GAME" x="0" y="10%" w="100%" h="90%" align="top,left"></g3dtest.game.XGamePanel>-->
+    <g3dtest.game.XGamePanel name="GLP_GAME" x="0" y="10%" w="100%" h="90%" align="top,left"></g3dtest.game.XGamePanel>
     <g3dtest.simple.XSimplePanel name="GLP_SIMPLE" x="0" y="10%" w="100%" h="90%" align="top,left"></g3dtest.simple.XSimplePanel>
-    <g3dtest.crypto.XCryptoPanel name="GLP_CRYPTO" x="0" y="10%" w="100%" h="90%" align="top,left"></g3dtest.crypto.XCryptoPanel>
-    <g3dtest.gpucrypto.XGpuCryptoPanel name="GLP_GPUCRYPTO" x="0" y="10%" w="100%" h="90%" align="top,left"></g3dtest.gpucrypto.XGpuCryptoPanel>
 
     <menu name="MENU_MAIN" x="0" y="0" w="100%" h="10%" fixed="1">
         <mi name="MI_SIMPLE">{Test}</mi>
         <mi name="MI_GAME">{Game}</mi>
-        <mi name="MI_CRYPTO">GPU加密演示</mi>
-        <mi name="MI_GPUCRYPTO">GPU加密演示2</mi>
         <mi name="MI_EXIT">{Exit}</mi>
     </menu>
 </form>

@@ -153,12 +153,14 @@ public class AnimatedModelRenderer extends AbstractRenderer {
 //                fragDefines.add(debugType.getDefine());
 //            }
 
-            int vertexHash = ShaderCache.selectShader(rmp.getShaderIdentifier(), vertDefines);
+//            int vertexHash = ShaderCache.selectShader(rmp.getShaderIdentifier(), vertDefines);
 //            GLUtil.checkGlError("drawRenderObject 0.1");
-            int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
+//            int fragmentHash = ShaderCache.selectShader(material.getShaderIdentifier(), fragDefines);
 //            GLUtil.checkGlError("drawRenderObject 0.2");
+//            shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
 
-            shader = ShaderCache.getShaderProgram(vertexHash, fragmentHash);
+
+            shader = ShaderCache.getShaderProgram(rmp.getShaderIdentifier(), vertDefines, material.getShaderIdentifier(), fragDefines);
 //            GLUtil.checkGlError("drawRenderObject 0.3");
 
             shader.getAllUniformLocations(rmp, 0);

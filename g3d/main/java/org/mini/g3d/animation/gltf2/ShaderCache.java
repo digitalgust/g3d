@@ -8,6 +8,7 @@ package org.mini.g3d.animation.gltf2;
 
 
 import org.mini.g3d.core.DisplayManager;
+import org.mini.glwrap.GLUtil;
 import org.mini.gui.GToolkit;
 
 import java.util.*;
@@ -139,6 +140,16 @@ public class ShaderCache {
         //glBindFragDataLocation(programId, 0, "fragColor"); //Personally defined always used
         programs.put(hash, program);
 
+        return program;
+    }
+
+    public static AnimatedShader getShaderProgram(String vertIdentifier, List<String> vertDefines, String fragIdentifier, List<String> fragDefines) {
+        int vertexHash = ShaderCache.selectShader(vertIdentifier, vertDefines);
+        GLUtil.checkGlError("drawRenderObject 0.1");
+        int fragmentHash = ShaderCache.selectShader(fragIdentifier, fragDefines);
+        GLUtil.checkGlError("drawRenderObject 0.2");
+        AnimatedShader program = getShaderProgram(vertexHash, fragmentHash);
+        GLUtil.checkGlError("drawRenderObject 0.3");
         return program;
     }
 
