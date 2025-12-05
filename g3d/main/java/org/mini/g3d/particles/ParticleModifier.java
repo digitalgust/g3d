@@ -27,8 +27,12 @@ public class ParticleModifier implements JsonParser.Polymorphic {
                 return ParticleFrameModifier.class;
             case "Scale":
                 return ParticleScaleModifier.class;
+            case "SoftLocation":
+                return ParticleSoftLocationModifier.class;
             case "Rotation":
                 return ParticleRotationModifier.class;
+            case "Wander":
+                return ParticleWanderModifier.class;
             case "WeaponAura":
                 return ParticleWeaponAuraModifier.class;
             default://try to parse as class name

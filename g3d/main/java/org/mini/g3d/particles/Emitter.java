@@ -325,6 +325,10 @@ public class Emitter {
         return speed;
     }
 
+    public Vector4f getColor() {
+        return color;
+    }
+
     public float getSpeedError() {
         return speedError;
     }
