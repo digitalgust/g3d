@@ -56,7 +56,7 @@ public class DynTextureGenerator {
     }
 
     public void gl_init() {
-        dynamicContentFbo = new GLFrameBuffer((int) texW, (int) texH);
+        dynamicContentFbo = new GLFrameBuffer((int) texW, (int) texH, 1f);
         dynamicContentFbo.gl_init();
 
         dynamicContentCamera = new Camera(texW, texH, Camera.FOV, Camera.NEAR_PLANE, Camera.FAR_PLANE);

@@ -14,8 +14,8 @@ import java.util.List;
  */
 public class BitmapFont {
 
-    static final int GUI_FBO_W = 512, GUI_FBO_H = 512;
-    static final int ROWS_OF_GUI_FBO = 8;
+    static final int GUI_FBO_W = 1024, GUI_FBO_H = 1024;
+    static final int ROWS_OF_GUI_FBO = 16;
 
     GImage numberImg;
     int rowsOfNumberTex;

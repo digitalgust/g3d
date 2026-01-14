@@ -66,6 +66,18 @@ public class RenderEngine {
 
 
     public void cleanup() {
+        if (masterRenderer != null) {
+            masterRenderer.cleanUp();
+        }
+        if (waterFbos != null) {
+            waterFbos.cleanUp();
+        }
+        if (mainFbo != null) {
+            mainFbo.delete();
+        }
+        if (shadowMappingFbo != null) {
+            shadowMappingFbo.delete();
+        }
         ParticleMaster.cleanUp();
         GLDriver.cleanUp();
         DisplayManager.closeDisplay();

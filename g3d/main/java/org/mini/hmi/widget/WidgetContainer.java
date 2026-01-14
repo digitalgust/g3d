@@ -61,13 +61,16 @@ public class WidgetContainer extends Widget {
         return glPanel.getY() + top;
     }
 
-    public void keyEvent(int key, int scanCode, int action, int mods) {
-        if (!isEnable()) return;
+    public boolean keyEvent(int key, int scanCode, int action, int mods) {
+        if (!isEnable()) return false;
 
         for (Widget w : widgets) {
             if (!w.isEnable()) continue;
-            w.keyEvent(key, scanCode, action, mods);
+            if (w.keyEvent(key, scanCode, action, mods)) {
+                return true;
+            }
         }
+        return super.keyEvent(key, scanCode, action, mods);
     }
 
     public boolean mouseButtonEvent(int button, boolean pressed, int x, int y) {

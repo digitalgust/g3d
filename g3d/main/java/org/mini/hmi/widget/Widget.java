@@ -45,7 +45,8 @@ abstract public class Widget {
         return false;
     }
 
-    public void keyEvent(int key, int scanCode, int action, int mods) {
+    public boolean keyEvent(int key, int scanCode, int action, int mods) {
+        return false;
     }
 
     public boolean mouseButtonEvent(int button, boolean pressed, int x, int y) {
@@ -76,6 +77,14 @@ abstract public class Widget {
     public void setSize(float w, float h) {
         this.w = w;
         this.h = h;
+    }
+
+    public float getLeft() {
+        return left;
+    }
+
+    public float getTop() {
+        return top;
     }
 
     public float getX() {

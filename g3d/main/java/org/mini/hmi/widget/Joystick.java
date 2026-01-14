@@ -100,7 +100,7 @@ public class Joystick extends Widget {
 
 
     @Override
-    public void keyEvent(int key, int scanCode, int action, int mods) {
+    public boolean keyEvent(int key, int scanCode, int action, int mods) {
         //SysLog.info("G3D|key:" + key + " doAction:" + doAction);
         boolean isDirectionKey = false;
         float dx = 0, dy = 0;
@@ -155,7 +155,9 @@ public class Joystick extends Widget {
             } else {
                 callListener(JoystickListener.OPERATION_RELEASE, curX, curY, dirDegree);
             }
+            return true;
         }
+        return false;
     }
 
 
