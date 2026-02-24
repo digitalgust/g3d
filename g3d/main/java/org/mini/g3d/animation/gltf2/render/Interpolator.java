@@ -33,7 +33,7 @@ public class Interpolator {
             renderNode = rootRenderNode.findRenderNode(node);//gust
             if (renderNode == null) {
                 //throw new NullPointerException();
-                SysLog.warn("G3D|animation channel can not find target node, maybe some of bone is not necessary." + channel.gltf.getSource());
+                //SysLog.warn("G3D|animation channel can not find target node, maybe some of bone is not necessary." + channel.gltf.getSource());
             }
         }
     }

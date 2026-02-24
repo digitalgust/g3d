@@ -107,4 +107,72 @@ public class RenderAnimation {
         }
     }
 
+    public void advance(float totalTime, int clipIndex, List<RenderNode> filter) {
+        long startAt = System.nanoTime() / 1000000;
+        if (channels == null) {
+            return;
+        }
+        GLTFAnimationSampler samplerEx = samplers.get(0);
+        GLTFAccessor input = samplerEx.getInput();
+        AniClip a = aniGroup.getAniClips(samplerEx.getInput())[clipIndex];
+        float pos = a.beginAt;
+        float progressOfMotion = a.endAt - a.beginAt;
+        if (progressOfMotion != 0) {
+            float offset = totalTime % (progressOfMotion);
+            pos += offset;
+        }
+        nextKey = -1;
+        if (prevKey < a.begin || prevKey >= a.end - 1 || prevT > pos || pos >= input.getFloat(a.end - 1)) {
+            prevKey = a.begin;
+        }
+        this.prevT = pos;
+        for (int i = this.prevKey + 1; i <= a.end; i++) {
+            if (pos <= input.getFloat(i)) {
+                nextKey = i;
+                break;
+            }
+        }
+        this.prevKey = nextKey - 1;
+        keyDelta = input.getFloat(nextKey) - input.getFloat(prevKey);
+        float pf = input.getFloat(prevKey);
+        timeNormal = (pos - pf) / keyDelta;
+        if (filter == null || filter.isEmpty()) {
+            return;
+        }
+        for (int i = 0, imax = interpolators.size(); i < imax; i++) {
+            Interpolator interpolator = interpolators.get(i);
+            GLTFChannel channel = interpolator.getChannel();
+            GLTFAnimationSampler sampler = samplers.get(channel.getAnimationSamplerIndex());
+            RenderNode node = interpolator.getRenderNode();
+            if (node == null) continue;
+            boolean need = false;
+            for (int j = 0, jmax = filter.size(); j < jmax; j++) {
+                if (filter.get(j) == node) {
+                    need = true;
+                    break;
+                }
+            }
+            if (!need) continue;
+            switch (channel.getTarget().getPath()) {
+                case TRANSLATION:
+                    interpolator.interpolate(sampler, node.getTranslation());
+                    break;
+                case ROTATION:
+                    interpolator.interpolate(sampler, node.getRotation());
+                    break;
+                case SCALE:
+                    interpolator.interpolate(sampler, node.getScale());
+                    break;
+                case WEIGHTS:
+                    if (node instanceof RenderMesh) {
+                        RenderMesh mesh = (RenderMesh) node;
+                        interpolator.interpolate(sampler, mesh.getWeights());
+                    } else {
+                        SysLog.error("G3D|Error weights must be applied to RenderMesh");
+                    }
+                    break;
+            }
+        }
+    }
+
 }

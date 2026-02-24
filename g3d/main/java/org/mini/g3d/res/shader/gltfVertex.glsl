@@ -1,3 +1,9 @@
+#if !defined(JOINT_COUNT) || (JOINT_COUNT <= 0)
+#ifdef USE_SKINNING
+#undef USE_SKINNING
+#endif
+#endif
+
 //animation.glsl/////////
 
 const int MAX_INSTANCED_SIZE = 100;

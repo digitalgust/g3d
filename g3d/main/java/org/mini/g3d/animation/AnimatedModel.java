@@ -42,6 +42,18 @@ public class AnimatedModel extends Entity implements Cloneable {
     int curKeyFrame;
     // 新增，用于存储纹理帧索引
     protected int textureFrameIndex = 0;
+    private final List<RenderNode> animationFilter = new ArrayList<>();
+
+    private static class Attachment {
+        RenderNode host;
+        RenderNode target;
+        AnimatedModel model;
+        long start;
+        float timeScale;
+        int curKF;
+    }
+
+    private final List<Attachment> attachments = new ArrayList<>();//用于挂载翅膀等
 
     public Entity getShadowNode() {
         return shadowNode;
@@ -136,16 +148,37 @@ public class AnimatedModel extends Entity implements Cloneable {
             }
             curKeyFrame = curKF;
 
-            //注释掉以前每帧计算模型变换矩阵的代码
-//            animateNode(elapsedTime);
-//            rootRenderNode.applyTransform(transform_backend);
-//            rootRenderNode.updateSkin();
+            if (!attachments.isEmpty()) {
+                buildAnimationFilter();
+                animateNodeFiltered(elapsedTime);
+            }
         } else {
             animateNode(elapsedTime);
             rootRenderNode.applyTransform(transform);
             rootRenderNode.updateSkin();
         }
         checkNextAni(elapsedTime);
+        if (!attachments.isEmpty()) {
+            long curMill2 = DisplayManager.getCurrentTime();
+            for (int i = 0, imax = attachments.size(); i < imax; i++) {
+                Attachment att = attachments.get(i);
+                float e = (curMill2 - att.start) / 1000f * att.timeScale;
+                if (att.model.aniGroup != null) {
+                    AniClip clip = att.model.aniGroup.getAniClips().get(att.model.clipIndex);
+                    e = (e % (clip.endAt - clip.beginAt));
+                    int kf = clip.begin + (int) (e / att.model.aniGroup.getFpt());
+                    if (kf < clip.begin) kf = clip.begin;
+                    if (kf >= att.model.aniGroup.getKeyFrameMax()) kf = clip.begin;
+                    att.curKF = kf;
+                    att.model.curKeyFrame = kf;
+                } else {
+                    att.model.animateNode(e);
+                }
+                Matrix4f follow = computeBoneWorldTransform(att.host);
+                att.model.transform.setZero();
+                org.mini.gl.GLMath.mat4x4_dup(att.model.transform.mat, follow.mat);
+            }
+        }
     }
 
     //  private static float debugStep = -0.25f;
@@ -179,6 +212,12 @@ public class AnimatedModel extends Entity implements Cloneable {
     public void animateNode(float elapsedTime) {
         if (!animations.isEmpty()) {
             animations.get(0).advance(elapsedTime, clipIndex);
+        }
+    }
+
+    private void animateNodeFiltered(float elapsedTime) {
+        if (!animations.isEmpty()) {
+            animations.get(0).advance(elapsedTime, clipIndex, animationFilter);
         }
     }
 
@@ -309,6 +348,84 @@ public class AnimatedModel extends Entity implements Cloneable {
         }
     }
 
+    public void attach(String slotName, GLTF gltf) {
+        attachRigid(slotName, null, gltf);
+    }
+
+    public void attachRigid(String slotName, String boneName, GLTF gltf) {
+        RenderNode host = findRenderNode(slotName, rootRenderNode);
+        if (host == null) return;
+        RenderNode renderNode = genRenderNode(gltf);
+        RenderNode target = findRenderNode(slotName, renderNode);
+        if (target == null) return;
+        RenderNode bone = boneName != null ? findRenderNode(boneName, rootRenderNode) : host;
+        if (bone == null) bone = host;
+        bone.addAttachment(target);
+        AnimatedModel wingModel = new AnimatedModel(gltf);
+        setAltContext(target, wingModel);
+        Attachment att = new Attachment();
+        att.host = bone;
+        att.target = target;
+        att.model = wingModel;
+        att.start = DisplayManager.getCurrentTime();
+        att.timeScale = 1.f;
+        att.curKF = 0;
+        attachments.add(att);
+    }
+
+    private RenderNode findSkinNode(RenderNode node) {
+        if (node.getSkin() != null) return node;
+        for (int i = 0, imax = node.getChildren().size(); i < imax; i++) {
+            RenderNode n = findSkinNode(node.getChildren().get(i));
+            if (n != null) return n;
+        }
+        return null;
+    }
+
+    private void setAltContext(RenderNode node, AnimatedModel ctx) {
+        node.setAltAnimatedModel(ctx);
+        for (int i = 0, imax = node.getChildren().size(); i < imax; i++) {
+            setAltContext(node.getChildren().get(i), ctx);
+        }
+    }
+
+
+    private Matrix4f computeBoneWorldTransform(RenderNode bone) {
+        Matrix4f m = new Matrix4f();
+        org.mini.gl.GLMath.mat4x4_dup(m.mat, transform.mat);
+        List<RenderNode> chain = new ArrayList<>();
+        RenderNode cur = bone;
+        while (cur != null && cur != rootRenderNode) {
+            chain.add(cur);
+            cur = cur.getParent();
+        }
+        for (int i = chain.size() - 1; i >= 0; i--) {
+            Matrix4f lm = chain.get(i).getLocalTransform();
+            Matrix4f.mul(m, lm, m);
+        }
+        return m;
+    }
+
+    private void buildAnimationFilter() {
+        animationFilter.clear();
+        for (int i = 0, imax = attachments.size(); i < imax; i++) {
+            RenderNode bone = attachments.get(i).host;
+            RenderNode cur = bone;
+            while (cur != null && cur != rootRenderNode) {
+                boolean exists = false;
+                for (int j = 0, jmax = animationFilter.size(); j < jmax; j++) {
+                    if (animationFilter.get(j) == cur) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    animationFilter.add(cur);
+                }
+                cur = cur.getParent();
+            }
+        }
+    }
 
     /**
      * 找到命名为 slotname的结点
@@ -358,7 +475,7 @@ public class AnimatedModel extends Entity implements Cloneable {
     public int getTextureFrameIndex() {
         return textureFrameIndex;
     }
-    
+
     // 新增：设置纹理帧索引
     public void setTextureFrameIndex(int index) {
         this.textureFrameIndex = index;

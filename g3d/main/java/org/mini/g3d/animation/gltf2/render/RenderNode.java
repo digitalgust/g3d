@@ -36,6 +36,7 @@ public class RenderNode {
     private GLTFNode gltfnode;
     private RenderNode parent;
     AnimatedModel animatedModel;
+    AnimatedModel altAnimatedModel;
 
     //替换装备位,具有相同名字的结点会在渲染时被替换
     RenderNode replacer;//新武器
@@ -145,7 +146,7 @@ public class RenderNode {
         changed = true;
     }
 
-    protected Matrix4f getLocalTransform() {
+    public Matrix4f getLocalTransform() {
         if (changed) {
             localTransform.identity();
             Matrix4f.translationRotateScale(translation, rotation, scale, localTransform);
@@ -225,9 +226,8 @@ public class RenderNode {
 
 
     public AnimatedModel getAnimatedModel() {
-        if (parent != null) {
-            return parent.getAnimatedModel();
-        }
+        if (altAnimatedModel != null) return altAnimatedModel;
+        if (parent != null) return parent.getAnimatedModel();
         return animatedModel;
     }
 
@@ -237,6 +237,12 @@ public class RenderNode {
 
     public GLTFNode getGltfNode() {
         return gltfnode;
+    }
+
+    public void addAttachment(RenderNode child) {
+        if (child == null) return;
+        child.parent = this;
+        this.children.add(child);
     }
 
     public void clearSubstitute() {
@@ -284,6 +290,10 @@ public class RenderNode {
 
     public RenderNode getReplacer() {
         return replacer;
+    }
+
+    public void setAltAnimatedModel(AnimatedModel m) {
+        this.altAnimatedModel = m;
     }
 
 

@@ -74,6 +74,10 @@ public class RenderMaterial {
                 texturesMap.put("u_BaseColorSampler", new RenderTexture(pbr.getBaseColorTexture()));
                 defines.add("HAS_BASE_COLOR_MAP 1");
                 properties.put("u_BaseColorUVSet", pbr.getBaseColorTexture().getTexCoord());
+                RenderTexture rt = texturesMap.get("u_BaseColorSampler");
+                if (rt != null && rt.getPixBytes() == 4) {
+                    material.setAlphaMode("BLEND");
+                }
                 //SysLog.info("G3D|Material base color map set " + material.toString());
             }
 
