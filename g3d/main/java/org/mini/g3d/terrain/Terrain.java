@@ -357,4 +357,16 @@ public class Terrain {
         this.mapScale = mapScale;
     }
 
+    public void cleanUp() {
+        if (loader != null) {
+            loader.cleanUp();
+            loader = null;
+        }
+        model = null;
+        heights = null;
+        texturePack = null;
+        blendMap = null;
+        SysLog.info("G3D|Terrain cleanUp done");
+    }
+
 }

@@ -102,6 +102,7 @@ public class GLDriver {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glBuffer[0]);
 
             accessor2GlBufferMap.put(accessor, glBuffer);
+            SysLog.info("G3D|GLDriver setIndices create new buffer, map size: " + accessor2GlBufferMap.size());
 
             ByteBuffer bbuf = accessor.getData();
             glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -110,6 +111,7 @@ public class GLDriver {
                     bbuf.array(),
                     bbuf.arrayOffset(),
                     GL_STATIC_DRAW);
+            accessor.clearData();
         } else {
             int[] glBuffer = (int[]) accessor2GlBufferMap.get(accessor);
             glBindVertexArray(glBuffer[1]);
@@ -132,6 +134,8 @@ public class GLDriver {
                     bbuf.arrayOffset(),
                     GL_STATIC_DRAW);
             accessor2GlBufferMap.put(accessor, glBuffer);
+            SysLog.info("G3D|GLDriver enableAttribute create new buffer, loc: " + attributeLocation + ", map size: " + accessor2GlBufferMap.size());
+            accessor.clearData();
         } else {
             int[] glBuffer = accessor2GlBufferMap.get(accessor);
             glBindBuffer(GL_ARRAY_BUFFER, glBuffer[0]);
@@ -151,6 +155,7 @@ public class GLDriver {
         int pixBytes = renderTexture.getPixBytes();
         int glType = pixBytes < 4 ? GL_RGB : GL_RGBA;
         glTexImage2D(type, renderTexture.getMipLevel(), glType, width, height, 0, glType, GL_UNSIGNED_BYTE, buffer.array(), buffer.arrayOffset());
+        renderTexture.clearData();
     }
 
     public static int getTexture(RenderTexture renderTexture, Object info) {
@@ -268,5 +273,16 @@ public class GLDriver {
             it.remove();
         }
         SysLog.info("G3D|" + GLDriver.class + " cleanup");
+    }
+
+    public static void cleanUpBuffers() {
+        int count = accessor2GlBufferMap.size();
+        for (Iterator<GLTFAccessor> it = accessor2GlBufferMap.keySet().iterator(); it.hasNext(); ) {
+            GLTFAccessor accessor = it.next();
+            int[] buf = accessor2GlBufferMap.get(accessor);
+            glDeleteBuffers(1, buf, 0);
+            it.remove();
+        }
+        SysLog.info("G3D|" + GLDriver.class + " cleanup buffers, count: " + count);
     }
 }

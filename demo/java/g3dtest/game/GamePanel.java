@@ -248,7 +248,7 @@ public class GamePanel extends GOpenGLPanel {
                     default:
                         showColorChange(player.getPosition());
                 }
-                SysLog.info("G3D|player particles  " + particleIndex);
+                //SysLog.info("G3D|player particles  " + particleIndex);
                 particleIndex++;
             }
         });

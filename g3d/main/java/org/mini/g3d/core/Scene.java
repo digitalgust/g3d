@@ -1,6 +1,7 @@
 package org.mini.g3d.core;
 
 import org.mini.g3d.animation.AnimatedModel;
+import org.mini.g3d.animation.gltf2.GLDriver;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.entity.Entity;
@@ -241,10 +242,17 @@ public class Scene {
             lights.clear();
             entitieMap.clear();
             waters.clear();
+            if (terrain != null) {
+                terrain.cleanUp();
+            }
             setTerrain(null);
             setSkybox(null);
             clearGuis();
             clearAnimatedModels();
+            // Don't clear VBO buffers here — GLTF accessor objects are cached and reused
+            // across map transitions, so their VBO buffers in accessor2GlBufferMap can be
+            // reused directly, avoiding GPU memory churn from delete+recreate cycles.
+            // Full cleanup (including buffers) is still done via GLDriver.cleanUp() on shutdown.
 
             //reset
             addLight(sun);

@@ -356,7 +356,48 @@ public class Loader {
             tmp[0] = textureID;
             glDeleteTextures(1, tmp, 0);
         }
+        vaos.clear();
+        vbos.clear();
+        textures.clear();
+        path2texid.clear();
+        path2tex.clear();
+        path2model.clear();
+        path2texmodel.clear();
         SysLog.info("G3D|loader clean.");
+    }
+
+    public void cleanUpTextures() {
+        int[] tmp = {0};
+        int count = textures.size();
+        for (int i = 0; i < textures.size(); i++) {
+            int textureID = textures.get(i);
+            tmp[0] = textureID;
+            glDeleteTextures(1, tmp, 0);
+        }
+        textures.clear();
+        path2texid.clear();
+        path2tex.clear();
+        SysLog.info("G3D|loader textures cleaned, count: " + count);
+    }
+
+    public void cleanUpTexturesByPrefix(String prefix) {
+        int[] tmp = {0};
+        int count = 0;
+        java.util.Iterator<Map.Entry<String, Integer>> it = path2texid.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Integer> entry = it.next();
+            String path = entry.getKey();
+            if (path != null && path.startsWith(prefix)) {
+                int textureID = entry.getValue();
+                tmp[0] = textureID;
+                glDeleteTextures(1, tmp, 0);
+                textures.remove(textureID);
+                path2tex.remove(path);
+                it.remove();
+                count++;
+            }
+        }
+        SysLog.info("G3D|loader textures cleaned for prefix: " + prefix + ", count: " + count);
     }
 
 

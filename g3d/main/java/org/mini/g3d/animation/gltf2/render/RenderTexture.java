@@ -39,7 +39,7 @@ public class RenderTexture {
         this.info = info;
         this.sampler = info.getTexture().getSampler();
         getData = info.getTexture().getSourceImage()::getDirectByteBuffer;
-        texKey = info;
+        texKey = info.getTexture().getSourceImage().getUri();
         GLDriver.getTexture(this, texKey);
     }
 
@@ -138,5 +138,9 @@ public class RenderTexture {
 
     public int getMipLevel() {
         return mipLevel;
+    }
+
+    public void clearData() {
+        data = null;
     }
 }

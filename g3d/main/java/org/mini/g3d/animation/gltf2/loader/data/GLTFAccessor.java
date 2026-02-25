@@ -272,4 +272,8 @@ public class GLTFAccessor extends GLTFChildOfRootProperty {
             dest[i] = this.getFloat(elementIndex++);
         }
     }
+
+    public void clearData() {
+        data = null;
+    }
 }
