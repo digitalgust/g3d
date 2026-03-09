@@ -15,6 +15,10 @@ import java.util.Map;
 
 
 public class Sound {
+    private static final int MAX_TOTAL_EFFECT_PLAYING = 24;
+    private static final int MAX_SAME_EFFECT_PLAYING = 6;
+    private static final int MAX_POOL_PER_EFFECT = 8;
+
     private boolean soundOpen = true;// 控制声音的开关
     private MaEngine maEngine = new MaEngine();
     private MaSound bgm;
@@ -25,8 +29,19 @@ public class Sound {
     private float maxDistance = 100.0f;//listener 和 声源 最远距离
     private static Sound instance;
 
-    Map<String, byte[]> audios = new HashMap<>();
-    List<MaSound> playing = new ArrayList<>();
+    private static class PlayingItem {
+        final String path;
+        final MaSound sound;
+
+        PlayingItem(String path, MaSound sound) {
+            this.path = path;
+            this.sound = sound;
+        }
+    }
+
+    private final Map<String, byte[]> audios = new HashMap<>();
+    private final Map<String, List<MaSound>> effectPool = new HashMap<>();
+    private final List<PlayingItem> playing = new ArrayList<>();
 
     /**
      * @return
@@ -77,15 +92,20 @@ public class Sound {
         }
     }
 
-    public void play(String audioPath) {
+    public synchronized void play(String audioPath) {
         if (!soundOpen) {
             return;
         }
-        MaSound snd = getMaSound(audioPath);
+        collectEndedSounds();
+        if (playing.size() >= MAX_TOTAL_EFFECT_PLAYING || countPlayingByPath(audioPath) >= MAX_SAME_EFFECT_PLAYING) {
+            return;
+        }
+
+        MaSound snd = obtainEffectSound(audioPath);
         if (snd != null) {
             snd.setSpatialization(false);
             snd.start();
-            addPlayingSound(snd);
+            addPlayingSound(audioPath, snd);
         }
     }
 
@@ -93,11 +113,16 @@ public class Sound {
         play(audioPath, pos.x, pos.y, pos.z);
     }
 
-    public void play(String audioPath, float x, float y, float z) {
+    public synchronized void play(String audioPath, float x, float y, float z) {
         if (!soundOpen) {
             return;
         }
-        MaSound snd = getMaSound(audioPath);
+        collectEndedSounds();
+        if (playing.size() >= MAX_TOTAL_EFFECT_PLAYING || countPlayingByPath(audioPath) >= MAX_SAME_EFFECT_PLAYING) {
+            return;
+        }
+
+        MaSound snd = obtainEffectSound(audioPath);
         if (snd != null) {
             snd.setSpatialization(true);
             snd.setAttenuationModel(MiniAudio.ma_attenuation_model_linear);
@@ -105,35 +130,67 @@ public class Sound {
             snd.setMaxDistance(maxDistance);
             snd.setPosition(x, y, z);
             snd.start();
-            addPlayingSound(snd);
+            addPlayingSound(audioPath, snd);
         }
     }
 
-    private MaSound getMaSound(String audioPath) {
+    private MaSound obtainEffectSound(String audioPath) {
+        List<MaSound> pool = effectPool.get(audioPath);
+        if (pool != null) {
+            for (int i = 0, n = pool.size(); i < n; i++) {
+                MaSound s = pool.get(i);
+                if (!s.isPlaying() && s.isPlayEnd()) {
+                    s.setVolume(effectVolume);
+                    return s;
+                }
+            }
+            if (pool.size() >= MAX_POOL_PER_EFFECT) {
+                return null;
+            }
+        }
+
         byte[] audiobytes = audios.get(audioPath);
         if (audiobytes == null) {
             audiobytes = GToolkit.readFileFromJar(audioPath);
-            if (audiobytes != null) {
-                audios.put(audioPath, audiobytes);
+            if (audiobytes == null) {
+                return null;
             }
+            audios.put(audioPath, audiobytes);
         }
-        if (audiobytes != null) {
-            MaDecoder decoder = new MaDecoder(audiobytes, maEngine.getFormat(), maEngine.getChannels(), maEngine.getRatio());
-            MaSound snd = new MaSound(maEngine, decoder, MiniAudio.MA_SOUND_FLAG_DECODE | MiniAudio.MA_SOUND_FLAG_ASYNC);
-            snd.setVolume(effectVolume);
-            return snd;
+
+        MaDecoder decoder = new MaDecoder(audiobytes, maEngine.getFormat(), maEngine.getChannels(), maEngine.getRatio());
+        MaSound snd = new MaSound(maEngine, decoder, MiniAudio.MA_SOUND_FLAG_DECODE);
+        snd.setVolume(effectVolume);
+        if (pool == null) {
+            pool = new ArrayList<>();
+            effectPool.put(audioPath, pool);
         }
-        return null;
+        pool.add(snd);
+        return snd;
     }
 
-    private synchronized void addPlayingSound(MaSound snd) {
-        if (snd != null) {
-            playing.add(snd);
+    private int countPlayingByPath(String audioPath) {
+        int c = 0;
+        for (int i = 0, n = playing.size(); i < n; i++) {
+            PlayingItem item = playing.get(i);
+            if (audioPath.equals(item.path)) {
+                c++;
+            }
         }
+        return c;
+    }
+
+    private void addPlayingSound(String path, MaSound snd) {
+        if (snd != null) {
+            playing.add(new PlayingItem(path, snd));
+        }
+    }
+
+    private void collectEndedSounds() {
         for (int i = playing.size() - 1; i >= 0; i--) {
-            MaSound p = playing.get(i);
-            if (p.isPlayEnd()) {
-                p.stop();
+            PlayingItem p = playing.get(i);
+            if (p.sound.isPlayEnd()) {
+                p.sound.stop();
                 playing.remove(i);
             }
         }
@@ -141,8 +198,8 @@ public class Sound {
 
     private synchronized void stopAllEffect() {
         for (int i = playing.size() - 1; i >= 0; i--) {
-            MaSound p = playing.get(i);
-            p.stop();
+            PlayingItem p = playing.get(i);
+            p.sound.stop();
         }
         playing.clear();
     }
@@ -165,8 +222,13 @@ public class Sound {
         return effectVolume;
     }
 
-    public void setEffectVolume(float effectVolume) {
+    public synchronized void setEffectVolume(float effectVolume) {
         this.effectVolume = effectVolume;
+        for (List<MaSound> pool : effectPool.values()) {
+            for (int i = 0, n = pool.size(); i < n; i++) {
+                pool.get(i).setVolume(effectVolume);
+            }
+        }
     }
 
     public void setListenerPosition(int listenerIdx, Vector3f pos) {
@@ -202,12 +264,14 @@ public class Sound {
     }
 
 
-    public void stopAll() {
+    public synchronized void stopAll() {
         stopBgm();
         stopAllEffect();
     }
 
-    public void clearCache() {
+    public synchronized void clearCache() {
+        stopAllEffect();
+        effectPool.clear();
         audios.clear();
     }
 }
