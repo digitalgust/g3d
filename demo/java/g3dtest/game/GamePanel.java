@@ -10,6 +10,7 @@ import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.objmodel.ModelData;
 import org.mini.g3d.core.objmodel.OBJFileLoader;
+import org.mini.g3d.core.objmodel.PlyFileLoader;
 import org.mini.g3d.core.textures.Texture;
 import org.mini.g3d.core.util.Loader;
 import org.mini.g3d.core.util.MousePicker;
@@ -378,7 +379,8 @@ public class GamePanel extends GOpenGLPanel {
     }
 
     private static TexturedModel loadTexturedModel(String modelFileName, String textureFileName, int numberOfRows, Loader loader) {
-        final ModelData data = OBJFileLoader.loadOBJ(modelFileName);
+//        final ModelData data = OBJFileLoader.loadOBJ(modelFileName);
+        final ModelData data = PlyFileLoader.loadPLY(modelFileName);
         final RawModel rawModel = loader.loadToVAO(data.getVertices(), data.getTextureCoords(), data.getNormals(), data.getIndices());
         Texture temp = new Texture(loader.loadTexture(textureFileName));
         if (numberOfRows > 1) {

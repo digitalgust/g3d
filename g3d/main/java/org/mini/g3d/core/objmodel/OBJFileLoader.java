@@ -9,8 +9,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class OBJFileLoader {
+
+    static final Pattern SPLIT_SPACE = Pattern.compile("[ ]+");
+    static final Pattern SPLIT_SLASH = Pattern.compile("/");
 
 
     public static ModelData loadOBJ(String objFileName) {
@@ -33,7 +37,7 @@ public class OBJFileLoader {
                     break;
                 }
                 if (line.startsWith("v ")) {
-                    String[] currentLine = line.trim().split("[ ]{1,}");
+                    String[] currentLine = SPLIT_SPACE.split(line.trim());
                     try {
                         Vector3f vertex = new Vector3f(Float.valueOf(currentLine[1]),
                                 Float.valueOf(currentLine[2]),
@@ -48,12 +52,12 @@ public class OBJFileLoader {
                     vertices.add(newVertex);
 
                 } else if (line.startsWith("vt ")) {
-                    String[] currentLine = line.split("[ ]{1,}");
+                    String[] currentLine = SPLIT_SPACE.split(line.trim());
                     Vector2f texture = new Vector2f(Float.valueOf(currentLine[1]),
                             Float.valueOf(currentLine[2]));
                     textures.add(texture);
                 } else if (line.startsWith("vn ")) {
-                    String[] currentLine = line.split("[ ]{1,}");
+                    String[] currentLine = SPLIT_SPACE.split(line.trim());
                     Vector3f normal = new Vector3f(Float.valueOf(currentLine[1]),
                             Float.valueOf(currentLine[2]),
                             Float.valueOf(currentLine[3]));
@@ -63,10 +67,10 @@ public class OBJFileLoader {
                 }
             }
             while (line != null && line.startsWith("f ")) {
-                String[] currentLine = line.split(" ");
-                String[] vertex1 = currentLine[1].split("/");
-                String[] vertex2 = currentLine[2].split("/");
-                String[] vertex3 = currentLine[3].split("/");
+                String[] currentLine = SPLIT_SPACE.split(line.trim());
+                String[] vertex1 = SPLIT_SLASH.split(currentLine[1]);
+                String[] vertex2 = SPLIT_SLASH.split(currentLine[2]);
+                String[] vertex3 = SPLIT_SLASH.split(currentLine[3]);
                 processVertex(vertex1, vertices, indices);
                 processVertex(vertex2, vertices, indices);
                 processVertex(vertex3, vertices, indices);

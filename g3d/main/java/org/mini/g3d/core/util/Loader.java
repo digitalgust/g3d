@@ -4,6 +4,7 @@ import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.objmodel.ModelData;
 import org.mini.g3d.core.objmodel.OBJFileLoader;
+import org.mini.g3d.core.objmodel.PlyFileLoader;
 import org.mini.g3d.core.textures.Texture;
 import org.mini.g3d.core.textures.TextureData;
 import org.mini.gl.GL;
@@ -55,7 +56,8 @@ public class Loader {
         if (tm == null) {
             RawModel rawModel = path2model.get(modelFileName);
             if (rawModel == null) {
-                ModelData data = OBJFileLoader.loadOBJ(modelFileName);
+//                ModelData data = OBJFileLoader.loadOBJ(modelFileName);
+                ModelData data = PlyFileLoader.loadPLY(modelFileName);
                 rawModel = loadToVAO(data.getVertices(), data.getTextureCoords(), data.getNormals(), data.getIndices());
                 path2model.put(modelFileName, rawModel);
             } else {
