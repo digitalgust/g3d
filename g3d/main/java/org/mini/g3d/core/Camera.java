@@ -28,7 +28,7 @@ public class Camera implements ICamera {
 
     //防止屏幕抖动,取最近n次的主角位置,然后求平均值,可防止画面抖动,n越大抖动越小,但反应越迟滞
     //屏幕变得丝般顺滑
-    static final int MAX_POS_BUF = 8;
+    static final int MAX_POS_BUF = 3;
     float[][] camPosBuf = new float[MAX_POS_BUF][3];//x,y,z
     int camPosIndx = 0;
 

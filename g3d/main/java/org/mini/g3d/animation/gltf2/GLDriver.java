@@ -37,7 +37,7 @@ public class GLDriver {
     }
 
     public static int compileShader(String shaderIdentifier, boolean isVert, String shaderSource) {
-        SysLog.info("G3D|gltf shader compile begin: " + shaderIdentifier);
+//        SysLog.info("G3D|gltf shader compile begin: " + shaderIdentifier);
 //    SysLog.info("G3D|" + shaderSource);
         int shader = glCreateShader(isVert ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
 //    glShaderSource(shader, shaderSource);
@@ -54,13 +54,13 @@ public class GLDriver {
             SysLog.error("G3D|gltf shader compile fail :" + new String(szLog, 0, return_val[0]) + "\n" + shaderSource + "\n");
             return 0;
         }
-        SysLog.info("G3D|gltf shader compile finish " + shader + " : " + shaderIdentifier);
+//        SysLog.info("G3D|gltf shader compile finish " + shader + " : " + shaderIdentifier);
         return shader;
     }
 
     public static int linkProgram(int vertex, int fragment) {
         long startAt = System.currentTimeMillis();
-        SysLog.info("G3D|gltf shader link begin vertex = " + vertex + ", fragment = " + fragment);
+//        SysLog.info("G3D|gltf shader link begin vertex = " + vertex + ", fragment = " + fragment);
         int program = glCreateProgram();
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
@@ -102,7 +102,7 @@ public class GLDriver {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glBuffer[0]);
 
             accessor2GlBufferMap.put(accessor, glBuffer);
-            SysLog.info("G3D|GLDriver setIndices create new buffer, map size: " + accessor2GlBufferMap.size());
+//            SysLog.info("G3D|GLDriver setIndices create new buffer, map size: " + accessor2GlBufferMap.size());
 
             ByteBuffer bbuf = accessor.getData();
             glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -134,7 +134,7 @@ public class GLDriver {
                     bbuf.arrayOffset(),
                     GL_STATIC_DRAW);
             accessor2GlBufferMap.put(accessor, glBuffer);
-            SysLog.info("G3D|GLDriver enableAttribute create new buffer, loc: " + attributeLocation + ", map size: " + accessor2GlBufferMap.size());
+//            SysLog.info("G3D|GLDriver enableAttribute create new buffer, loc: " + attributeLocation + ", map size: " + accessor2GlBufferMap.size());
             accessor.clearData();
         } else {
             int[] glBuffer = accessor2GlBufferMap.get(accessor);
@@ -165,7 +165,7 @@ public class GLDriver {
             glGenTextures(1, tex, 0);
             glBindTexture(renderTexture.getType(), tex[0]);
             texInfo2GlTextureMap.put(info, tex);
-            SysLog.info("G3D|Begin init texture " + info);
+//            SysLog.info("G3D|Begin init texture " + info);
 
             GLTFSampler sampler = renderTexture.getSampler();
 //            if (useSampler) {
@@ -186,7 +186,7 @@ public class GLDriver {
                     renderTexture.shouldGenerateMips() && GLTFRenderer.generateMipmaps);
 //            }
 
-            SysLog.info("G3D|End init texture");
+//            SysLog.info("G3D|End init texture");
             return tex[0];
         }
         return tex[0];

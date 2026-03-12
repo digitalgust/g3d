@@ -203,7 +203,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
 //                GLMath.mat4x4_mul(tmp.mat, worldMat.mat, normMat.mat);
 //                shader.load_u_NormalMatrix(tmp);
                 } else {
-                    SysLog.info("G3D|keyframe index out of range:" + curFK + " / " + rmp.getModelMatrics().length);
+                    SysLog.warn("G3D|keyframe index out of range:" + curFK + " / " + rmp.getModelMatrics().length);
                     GLMath.mat4x4_dup(modelMatrics[i].mat, rmp.getWorldTransform().mat);
                 }
             } else {

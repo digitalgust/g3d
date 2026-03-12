@@ -218,7 +218,7 @@ public abstract class ShaderProgram {
             loadMatrix(location, (Matrix4f) value);
             return;
         }
-        SysLog.info("G3D|Unhandled type in setUniform: " + value.getClass());
+        SysLog.warn("G3D|Unhandled type in setUniform: " + value.getClass());
         assert false;
     }
 

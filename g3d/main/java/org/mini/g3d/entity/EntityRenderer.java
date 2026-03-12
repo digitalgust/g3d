@@ -43,10 +43,10 @@ public class EntityRenderer extends AbstractRenderer {
         shader.loadProjectionMatrix(projectionMatrix);
         shader.loadTransparencyDistance(scene.getCamera().getDistanceFromTarget() - 1f);
 
-        Map<TexturedModel, List<Entity>> entities = scene.getEntitieMap();
+        Map<TexturedModel, List<Entity>> entities = scene.getVisibleEntitieMap(scene.getCamera());
         entities.forEach((texturedModel, batch) -> {
             //multithread , if scene.clear() may batch is null
-            if (texturedModel == null || batch == null) {
+            if (texturedModel == null || batch == null || batch.isEmpty()) {
                 return;
             }
             if (texturedModel.getTexture() != null) {

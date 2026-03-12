@@ -1,8 +1,8 @@
 package org.mini.g3d.core;
 
 import org.mini.g3d.animation.AnimatedModel;
-import org.mini.g3d.animation.gltf2.GLDriver;
 import org.mini.g3d.core.models.TexturedModel;
+import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.entity.Entity;
 import org.mini.g3d.entity.EntityShader;
@@ -34,6 +34,16 @@ public class Scene {
 
     List<Light> lights = new CopyOnWriteArrayList<>();
     Map<TexturedModel, List<Entity>> entitieMap = new ConcurrentHashMap<>();
+    final Map<TexturedModel, List<Entity>> visibleEntitieMap = new HashMap<>();
+    final Map<TexturedModel, List<Entity>> visibleBatchCache = new HashMap<>();
+    final Vector3f cameraForward = new Vector3f();
+    final Vector3f cameraRight = new Vector3f();
+    final Vector3f cameraUp = new Vector3f();
+
+    float tanHalfFovX = 1.0f;
+    float tanHalfFovY = 1.0f;
+    float nearPlane = 0.1f;
+    float farPlane = 500f;
 
     //            Collections.synchronizedMap(new HashMap<TexturedModel, List<Entity>>() {
 //                @Override
@@ -241,6 +251,8 @@ public class Scene {
         synchronized (lock) {
             lights.clear();
             entitieMap.clear();
+            visibleEntitieMap.clear();
+            visibleBatchCache.clear();
             waters.clear();
             if (terrain != null) {
                 terrain.cleanUp();
@@ -292,6 +304,11 @@ public class Scene {
 
                 if (batch != null) {
                     batch.remove(entity);
+                    if (batch.isEmpty()) {
+                        entitieMap.remove(entityModel);
+                        visibleEntitieMap.remove(entityModel);
+                        visibleBatchCache.remove(entityModel);
+                    }
                 }
             }
         }
@@ -300,6 +317,126 @@ public class Scene {
 
     public Map<TexturedModel, List<Entity>> getEntitieMap() {
         return entitieMap;
+    }
+
+    public Map<TexturedModel, List<Entity>> getVisibleEntitieMap(Camera cam) {
+        if (cam == null) {
+            return entitieMap;
+        }
+        synchronized (lock) {
+            prepareCameraCullingData(cam);
+            Vector3f camPos = cam.getPosition();
+            visibleEntitieMap.clear();
+
+            for (Map.Entry<TexturedModel, List<Entity>> entry : entitieMap.entrySet()) {
+                TexturedModel tm = entry.getKey();
+                List<Entity> entities = entry.getValue();
+                if (tm == null || entities == null || entities.isEmpty()) {
+                    continue;
+                }
+                List<Entity> visibleBatch = visibleBatchCache.get(tm);
+                if (visibleBatch == null) {
+                    visibleBatch = new ArrayList<>(Math.min(entities.size(), 64));
+                    visibleBatchCache.put(tm, visibleBatch);
+                } else {
+                    visibleBatch.clear();
+                }
+
+                float modelRadius = 1.0f;
+                if (tm.getRawModel() != null) {
+                    modelRadius = tm.getRawModel().getBoundingRadius();
+                }
+
+                for (int i = 0, imax = entities.size(); i < imax; i++) {
+                    Entity e = entities.get(i);
+                    if (e == null || e.getPosition() == null) {
+                        continue;
+                    }
+                    if (isEntityVisible(e, camPos, modelRadius)) {
+
+                        visibleBatch.add(e);
+                    }
+                }
+
+                if (!visibleBatch.isEmpty()) {
+                    visibleEntitieMap.put(tm, visibleBatch);
+                }
+            }
+            return visibleEntitieMap;
+        }
+    }
+
+    private void prepareCameraCullingData(Camera cam) {
+        fillCameraBasis(cam, cameraForward, cameraRight, cameraUp);
+
+        Matrix4f proj = cam.getProjectionMatrix();
+        float m00 = proj.mat[Matrix4f.M00];
+        float m11 = proj.mat[Matrix4f.M11];
+        tanHalfFovX = m00 != 0f ? 1.0f / Math.abs(m00) : 1.0f;
+        tanHalfFovY = m11 != 0f ? 1.0f / Math.abs(m11) : 1.0f;
+        nearPlane = cam.getNear();
+        farPlane = cam.getFar();
+    }
+
+    private boolean isEntityVisible(Entity entity, Vector3f camPos, float modelRadius) {
+        Vector3f p = entity.getPosition();
+        float dx = p.x - camPos.x;
+        float dy = p.y - camPos.y;
+        float dz = p.z - camPos.z;
+
+        float radius = Math.abs(entity.getScale()) * modelRadius;
+
+        float zCam = dx * cameraForward.x + dy * cameraForward.y + dz * cameraForward.z;
+        if (zCam + radius < nearPlane || zCam - radius > farPlane) {
+            return false;
+        }
+
+        float xCam = dx * cameraRight.x + dy * cameraRight.y + dz * cameraRight.z;
+        float xLimit = zCam * tanHalfFovX + radius;
+        if (xCam > xLimit || xCam < -xLimit) {
+            return false;
+        }
+
+        float yCam = dx * cameraUp.x + dy * cameraUp.y + dz * cameraUp.z;
+        float yLimit = zCam * tanHalfFovY + radius;
+        return !(yCam > yLimit || yCam < -yLimit);
+    }
+
+    private void fillCameraBasis(Camera cam, Vector3f forward, Vector3f right, Vector3f up) {
+        float pitchRad = (float) Math.toRadians(cam.getPitch());
+        float yawRad = (float) Math.toRadians(cam.getYaw());
+        float cosPitch = (float) Math.cos(pitchRad);
+
+        forward.x = (float) (Math.sin(yawRad) * cosPitch);
+        forward.y = (float) (-Math.sin(pitchRad));
+        forward.z = (float) (-Math.cos(yawRad) * cosPitch);
+        normalize(forward);
+
+        right.x = forward.z;
+        right.y = 0f;
+        right.z = -forward.x;
+        if (!normalize(right)) {
+            right.x = 1f;
+            right.y = 0f;
+            right.z = 0f;
+        }
+
+        up.x = right.y * forward.z - right.z * forward.y;
+        up.y = right.z * forward.x - right.x * forward.z;
+        up.z = right.x * forward.y - right.y * forward.x;
+        normalize(up);
+    }
+
+    private boolean normalize(Vector3f v) {
+        float len2 = v.x * v.x + v.y * v.y + v.z * v.z;
+        if (len2 < 1e-8f) {
+            return false;
+        }
+        float invLen = 1.0f / (float) Math.sqrt(len2);
+        v.x *= invLen;
+        v.y *= invLen;
+        v.z *= invLen;
+        return true;
     }
 
     public Vector3f getFogColor() {

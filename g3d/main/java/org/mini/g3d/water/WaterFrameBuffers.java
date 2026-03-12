@@ -32,9 +32,9 @@ public class WaterFrameBuffers {
             initialiseReflectionFrameBuffer();
             initialiseRefractionFrameBuffer();
             isInitialized = true;
-            SysLog.info("G3D|WaterFrameBuffers initialized successfully");
+//            SysLog.info("G3D|WaterFrameBuffers initialized successfully");
         } catch (Exception e) {
-            SysLog.error("G3D|Failed to initialize WaterFrameBuffers: " + e.getMessage());
+            SysLog.warn("G3D|Failed to initialize WaterFrameBuffers: " + e.getMessage());
             cleanUp(); // 清理已分配的资源
             isInitialized = false;
         }

@@ -358,7 +358,7 @@ public class GLTF extends GLTFProperty {
             return (ByteBuffer) bb;
         } catch (Exception e) { //Thrown by .map on a JarFileSystem entry
             //e.printStackTrace();
-            SysLog.info("G3D|Data load fail " + path);
+            SysLog.warn("G3D|Data load fail " + path);
         }
         return null;
     }

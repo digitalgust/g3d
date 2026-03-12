@@ -87,7 +87,7 @@ public class Loader {
         storeDataInAttributeList(1, 2, textureCoords);
         storeDataInAttributeList(2, 3, normals);
         unbindVAO();
-        return new RawModel(vaoID, indices.length);
+        return new RawModel(vaoID, indices.length, calcBoundingRadius(positions, 3));
     }
 
     public RawModel loadToVAO(int[] indices, float[] positions, int... lengths) {
@@ -96,14 +96,14 @@ public class Loader {
         storeInterleavedData(positions, lengths);
         bindIndicesBuffer(indices);
         unbindVAO();
-        return new RawModel(vaoID, indices.length);
+        return new RawModel(vaoID, indices.length, calcBoundingRadiusInterleaved(positions, lengths));
     }
 
     public RawModel loadToVAO(float[] positions, int dimensions) {
         int vaoID = createVAO();
         this.storeDataInAttributeList(0, dimensions, positions);
         unbindVAO();
-        return new RawModel(vaoID, positions.length / dimensions);
+        return new RawModel(vaoID, positions.length / dimensions, calcBoundingRadius(positions, dimensions));
     }
 
     public RawModel loadAnimatedModelToVAO(float[] positions, float[] textureCoords, float[] normals, int[] indices, int[] jointIds,
@@ -115,7 +115,7 @@ public class Loader {
         storeDataInAttributeList(2, 3, normals);
         storeIntDataInAttributeList(3, 3, jointIds);
         storeDataInAttributeList(4, 3, vertexWeights);
-        return new RawModel(vaoID, positions.length / 2);
+        return new RawModel(vaoID, positions.length / 2, calcBoundingRadius(positions, 3));
     }
 
     /**
@@ -473,7 +473,53 @@ public class Loader {
         storeDataInAttributeList(0, 3, positions);
         storeDataInAttributeList(1, 2, textureCoords);
         unbindVAO();
-        return new RawModel(vaoID, indices.length);
+        return new RawModel(vaoID, indices.length, calcBoundingRadius(positions, 3));
+    }
+
+    private float calcBoundingRadius(float[] positions, int dimensions) {
+        if (positions == null || positions.length == 0 || dimensions <= 0) {
+            return 1.0f;
+        }
+        float maxLen2 = 0.0f;
+        for (int i = 0; i + dimensions - 1 < positions.length; i += dimensions) {
+            float x = positions[i];
+            float y = dimensions > 1 ? positions[i + 1] : 0.0f;
+            float z = dimensions > 2 ? positions[i + 2] : 0.0f;
+            float len2 = x * x + y * y + z * z;
+            if (len2 > maxLen2) {
+                maxLen2 = len2;
+            }
+        }
+        return (float) Math.sqrt(maxLen2);
+    }
+
+    private float calcBoundingRadiusInterleaved(float[] interleaved, int... lengths) {
+        if (interleaved == null || interleaved.length == 0 || lengths == null || lengths.length == 0) {
+            return 1.0f;
+        }
+        int positionDims = lengths[0];
+        if (positionDims <= 0) {
+            return 1.0f;
+        }
+        int stride = 0;
+        for (int i = 0; i < lengths.length; i++) {
+            stride += lengths[i];
+        }
+        if (stride <= 0) {
+            return 1.0f;
+        }
+
+        float maxLen2 = 0.0f;
+        for (int i = 0; i + positionDims - 1 < interleaved.length; i += stride) {
+            float x = interleaved[i];
+            float y = positionDims > 1 ? interleaved[i + 1] : 0.0f;
+            float z = positionDims > 2 ? interleaved[i + 2] : 0.0f;
+            float len2 = x * x + y * y + z * z;
+            if (len2 > maxLen2) {
+                maxLen2 = len2;
+            }
+        }
+        return (float) Math.sqrt(maxLen2);
     }
 
     /**

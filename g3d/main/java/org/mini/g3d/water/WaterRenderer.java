@@ -59,9 +59,9 @@ public class WaterRenderer extends AbstractRenderer {
             shader.stop();
 
             isInitialized = true;
-            SysLog.info("G3D|WaterRenderer initialized successfully");
+//            SysLog.info("G3D|WaterRenderer initialized successfully");
         } catch (Exception e) {
-            SysLog.error("G3D|Failed to initialize WaterRenderer: " + e.getMessage());
+            SysLog.warn("G3D|Failed to initialize WaterRenderer: " + e.getMessage());
             cleanUp(); // 清理部分初始化的资源
             isInitialized = false;
         }
