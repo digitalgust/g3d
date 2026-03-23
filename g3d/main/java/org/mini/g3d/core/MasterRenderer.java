@@ -58,13 +58,13 @@ public class MasterRenderer extends AbstractRenderer {
 
     public void render(Scene scene) {
         renderShadowPass(scene);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderShadowPass");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderShadowPass");
 
         glEnable(GL_CLIP_DISTANCE0);
         renderWaterRefractionPass(scene);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderWaterRefractionPass");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderWaterRefractionPass");
         renderWaterReflectionPass(scene);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderWaterReflectionPass");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderWaterReflectionPass");
         glDisable(GL_CLIP_DISTANCE0);
 
         renderMainPass(scene);
@@ -77,25 +77,25 @@ public class MasterRenderer extends AbstractRenderer {
 
         // 先渲染背景与不透明基础内容
         terrainRenderer.render(scene);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass terrainRenderer");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass terrainRenderer");
 
         skyboxRenderer.render(scene);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass skyboxRenderer");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass skyboxRenderer");
 
         waterRenderer.render(scene.getWaters(), scene.getCamera(), scene.getSun().getDirection());
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass waterRenderer");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass waterRenderer");
 
         // 再渲染实体（含可能的加法混合），此时已有背景色，发光可见
         enitiyRenderer.render(scene);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass enitiyRenderer");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass enitiyRenderer");
 
         // 渲染动画模型
         animatedModelRenderer.render(scene.getCamera(), scene.getAnimatedModelsIterator());
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass animatedModelRenderer");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass animatedModelRenderer");
 
         // 粒子（本身包含混合控制）
         particleRenderer.render(ParticleMaster.getParticles(), scene);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass particleRenderer");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass particleRenderer");
 
         if (scene.isVolumetricFog()) {
             // 在主帧缓冲结束后渲染体积雾效
@@ -104,10 +104,10 @@ public class MasterRenderer extends AbstractRenderer {
             }
             // 启用混合
             fogRenderer.render(scene, mainFbo.getColorTexture(), mainFbo.getDepthTexture());
-            GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass fogRenderer");
+//            GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass fogRenderer");
         }
         guiRenderer.render(scene.getGuis());
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass guiRenderer");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass guiRenderer");
 
         mainFbo.end();
     }

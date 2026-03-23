@@ -8,6 +8,7 @@ package org.mini.g3d.animation.gltf2.loader.data;
 
 import org.mini.util.SysLog;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -349,8 +350,10 @@ public class GLTF extends GLTFProperty {
             if (path.charAt(0) != '/') path = "/" + path;
             InputStream is = GLTF.class.getResourceAsStream(path);
             byte[] fb = new byte[is.available()];
-            int read = 0;
-            while ((read += is.read(fb, read, fb.length - read)) >= 0) {
+            int read = 0, cur = 0;
+            while ((cur = is.read(fb, read, fb.length - read)) >= 0) {
+                read += cur;
+                if (read == fb.length) break;
             }
             ByteBuffer bb = ByteBuffer.wrap(fb);
             bb.position(bb.limit());

@@ -1,7 +1,5 @@
 package org.mini.g3d.particles.controler;
 
-import org.mini.g3d.core.vector.Vector3f;
-import org.mini.g3d.particles.Effect;
 import org.mini.g3d.particles.Emitter;
 import org.mini.g3d.particles.EmitterControler;
 import org.mini.gui.GImage;
@@ -60,5 +58,12 @@ public class EmitterImageControler extends EmitterControler {
 
     public int getFrameIndex() {
         return frameIndex;
+    }
+
+    @Override
+    public EmitterControler deepClone() {
+        EmitterImageControler cloned = new EmitterImageControler(texture, additive, depthTest, rows, frameIndex, emitterName);
+        copyTo(cloned);
+        return cloned;
     }
 }

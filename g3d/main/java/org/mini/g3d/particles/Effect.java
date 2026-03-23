@@ -3,9 +3,7 @@ package org.mini.g3d.particles;
 import org.mini.g3d.core.DisplayManager;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -86,6 +84,27 @@ public class Effect {
     public void addControler(EmitterControler modifier) {
         if (controlers == null) controlers = new ArrayList<>();
         controlers.add(modifier);
+    }
+
+    public Effect deepClone() {
+        Effect cloned = new Effect();
+        if (emitters != null) {
+            List<Emitter> emitterCopies = new ArrayList<>(emitters.size());
+            for (int i = 0; i < emitters.size(); i++) {
+                Emitter emitter = emitters.get(i);
+                emitterCopies.add(emitter == null ? null : emitter.deepClone());
+            }
+            cloned.setEmitters(emitterCopies);
+        }
+        if (controlers != null) {
+            List<EmitterControler> controlerCopies = new ArrayList<>(controlers.size());
+            for (int i = 0; i < controlers.size(); i++) {
+                EmitterControler controler = controlers.get(i);
+                controlerCopies.add(controler == null ? null : controler.deepClone());
+            }
+            cloned.setControlers(controlerCopies);
+        }
+        return cloned;
     }
 
     public boolean isTerminated() {

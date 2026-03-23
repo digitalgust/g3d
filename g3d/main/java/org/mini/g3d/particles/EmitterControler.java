@@ -63,6 +63,12 @@ public abstract class EmitterControler implements JsonParser.Polymorphic {
         throw new RuntimeException("Controler type not found:" + controlerType);
     }
 
+    public abstract EmitterControler deepClone();
+
+    protected void copyTo(EmitterControler target) {
+        target.controlerType = controlerType;
+    }
+
 
     /**
      * ======================================================

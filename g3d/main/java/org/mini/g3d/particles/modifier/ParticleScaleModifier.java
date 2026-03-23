@@ -45,4 +45,15 @@ public class ParticleScaleModifier extends ParticleModifier {
         this.endScale = endScale;
     }
 
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleScaleModifier cloned = new ParticleScaleModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.startScale = startScale;
+        cloned.endScale = endScale;
+        copyTo(cloned);
+        return cloned;
+    }
+
 }

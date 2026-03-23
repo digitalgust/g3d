@@ -120,7 +120,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
 
     public static void drawRenderObject(ICamera camera, List<RenderMeshPrimitive> rmps) {
         if (rmps.isEmpty()) return;
-        GLUtil.checkGlError("drawRenderObject 0");
+//        GLUtil.checkGlError("drawRenderObject 0");
         RenderMeshPrimitive rmp = rmps.get(0);
         if (rmp.isSkip()) {
             return;

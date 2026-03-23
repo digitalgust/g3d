@@ -119,6 +119,45 @@ public class Emitter {
         modifiers.add(modifier);
     }
 
+    public Emitter deepClone() {
+        Emitter cloned = new Emitter();
+        cloned.startAt = startAt;
+        cloned.emitterLife = emitterLife;
+        cloned.name = name;
+        cloned.imagePath = imagePath;
+        cloned.imageGrids = imageGrids;
+        cloned.audioPath = audioPath;
+        cloned.additive = additive;
+        cloned.depthTest = depthTest;
+        cloned.location = location == null ? null : new Vector3f(location);
+        cloned.locationError = locationError == null ? null : new Vector3f(locationError);
+        cloned.direction = direction == null ? null : new Vector3f(direction);
+        cloned.directionDeviation = directionDeviation;
+        cloned.pps = pps;
+        cloned.min = min;
+        cloned.max = max;
+        cloned.fps = fps;
+        cloned.speed = speed;
+        cloned.speedError = speedError;
+        cloned.gravity = gravity;
+        cloned.particleLife = particleLife;
+        cloned.particleLifeError = particleLifeError;
+        cloned.scale = scale;
+        cloned.scaleError = scaleError;
+        cloned.color = color == null ? null : new Vector4f(color);
+        cloned.randomRotation = randomRotation;
+        cloned.frameIndex = frameIndex;
+        if (modifiers != null) {
+            List<ParticleModifier> modifierCopies = new ArrayList<>(modifiers.size());
+            for (int i = 0; i < modifiers.size(); i++) {
+                ParticleModifier modifier = modifiers.get(i);
+                modifierCopies.add(modifier == null ? null : modifier.deepClone());
+            }
+            cloned.modifiers = modifierCopies;
+        }
+        return cloned;
+    }
+
 
     /**
      * 每秒调用一次

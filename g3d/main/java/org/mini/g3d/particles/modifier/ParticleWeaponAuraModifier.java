@@ -106,4 +106,21 @@ public class ParticleWeaponAuraModifier extends ParticleModifier {
     public void setParticleOffset(float particleOffset) {
         this.particleOffset = particleOffset;
     }
+
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleWeaponAuraModifier cloned = new ParticleWeaponAuraModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.radius = radius;
+        cloned.radiusVariation = radiusVariation;
+        cloned.height = height;
+        cloned.spiralSpeed = spiralSpeed;
+        cloned.verticalSpeed = verticalSpeed;
+        cloned.weaponCenter = weaponCenter == null ? null : new Vector3f(weaponCenter);
+        cloned.spiralLayers = spiralLayers;
+        cloned.particleOffset = particleOffset;
+        copyTo(cloned);
+        return cloned;
+    }
 }

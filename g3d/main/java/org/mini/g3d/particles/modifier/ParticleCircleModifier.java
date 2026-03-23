@@ -101,5 +101,18 @@ public class ParticleCircleModifier extends ParticleModifier {
         this.radiusChange = radiusChange;
     }
 
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleCircleModifier cloned = new ParticleCircleModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.radius = radius;
+        cloned.radiusChange = radiusChange;
+        cloned.normal = normal == null ? null : new Vector3f(normal);
+        cloned.angularVelocity = angularVelocity;
+        cloned.initAngular = initAngular;
+        copyTo(cloned);
+        return cloned;
+    }
 
 }

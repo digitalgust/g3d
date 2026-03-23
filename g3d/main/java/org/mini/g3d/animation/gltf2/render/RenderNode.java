@@ -96,7 +96,8 @@ public class RenderNode {
         if (node == gltfnode) {
             return this;
         }
-        for (RenderNode child : children) {
+        for (int i = 0, imax = children.size(); i < imax; i++) {
+            RenderNode child = children.get(i);
             RenderNode rn = child.findRenderNode(node);
             if (rn != null) return rn;
         }

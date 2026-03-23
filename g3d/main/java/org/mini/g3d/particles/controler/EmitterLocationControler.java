@@ -48,5 +48,12 @@ public class EmitterLocationControler extends EmitterControler {
         this.emitterName = emitterName;
     }
 
+    @Override
+    public EmitterControler deepClone() {
+        EmitterLocationControler cloned = new EmitterLocationControler(new Vector3f(), emitterName);
+        cloned.location = location == null ? null : new Vector3f(location);
+        copyTo(cloned);
+        return cloned;
+    }
 
 }

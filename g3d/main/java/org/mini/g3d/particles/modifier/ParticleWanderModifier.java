@@ -58,4 +58,15 @@ public class ParticleWanderModifier extends ParticleModifier {
         this.damping = damping;
     }
 
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleWanderModifier cloned = new ParticleWanderModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.fluctuation = fluctuation;
+        cloned.damping = damping;
+        copyTo(cloned);
+        return cloned;
+    }
+
 }

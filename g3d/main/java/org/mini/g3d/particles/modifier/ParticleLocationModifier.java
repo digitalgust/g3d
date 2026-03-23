@@ -1,7 +1,6 @@
 package org.mini.g3d.particles.modifier;
 
 import org.mini.g3d.core.DisplayManager;
-import org.mini.g3d.core.vector.Vector;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.particles.Emitter;
 import org.mini.g3d.particles.MutableLocation;
@@ -70,5 +69,15 @@ public class ParticleLocationModifier extends ParticleModifier {
 
     public void setMutableLocation(MutableLocation mutableLocation) {
         this.mutableLocation = mutableLocation;
+    }
+
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleLocationModifier cloned = new ParticleLocationModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.mutableLocation = mutableLocation;
+        copyTo(cloned);
+        return cloned;
     }
 }

@@ -2,7 +2,6 @@ package org.mini.g3d.particles.modifier;
 
 import org.mini.g3d.core.DisplayManager;
 import org.mini.g3d.core.vector.Vector3f;
-import org.mini.g3d.particles.Emitter;
 import org.mini.g3d.particles.MutableLocation;
 import org.mini.g3d.particles.Particle;
 import org.mini.g3d.particles.ParticleModifier;
@@ -109,5 +108,16 @@ public class ParticleSoftLocationModifier extends ParticleModifier {
     
     public void setResponsiveness(float responsiveness) {
         this.responsiveness = responsiveness;
+    }
+
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleSoftLocationModifier cloned = new ParticleSoftLocationModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.mutableLocation = mutableLocation;
+        cloned.responsiveness = responsiveness;
+        copyTo(cloned);
+        return cloned;
     }
 }

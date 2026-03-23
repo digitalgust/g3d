@@ -53,7 +53,7 @@ public abstract class ShaderProgram {
             int fragmentShaderID = loadShaderContents(fragmentFile, "fragmentfile", GL_FRAGMENT_SHADER);
             link(vertexShaderID, fragmentShaderID);
         }
-        SysLog.info("G3D|init shader " + programID + " time:" + (System.currentTimeMillis() - start));
+//        SysLog.info("G3D|init shader " + programID + " time:" + (System.currentTimeMillis() - start));
     }
 
     /**

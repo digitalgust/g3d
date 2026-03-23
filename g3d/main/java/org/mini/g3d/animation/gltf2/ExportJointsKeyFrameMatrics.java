@@ -168,7 +168,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
                 }
                 fis.close();
             }
-            SysLog.info("G3D|GLTF joints keyframe and model matrics load success :" + gltf.getSource());
+            //SysLog.info("G3D|GLTF joints keyframe and model matrics load success :" + gltf.getSource());
         } catch (IOException e) {
             e.printStackTrace();
         }

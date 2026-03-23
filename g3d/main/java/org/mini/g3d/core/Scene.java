@@ -166,7 +166,7 @@ public class Scene {
     public void addLight(Light light) {
         lights.add(light);
         if (lights.size() > EntityShader.MAX_LIGHTS) {
-            SysLog.info("G3D|max light num is " + EntityShader.MAX_LIGHTS + ", exceeded " + lights.size());
+            SysLog.warn("G3D|max light num is " + EntityShader.MAX_LIGHTS + ", exceeded " + lights.size());
         }
     }
 

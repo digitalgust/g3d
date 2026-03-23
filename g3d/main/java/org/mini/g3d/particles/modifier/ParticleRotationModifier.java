@@ -58,4 +58,15 @@ public class ParticleRotationModifier extends ParticleModifier {
         this.endPitchYawRoll = endPitchYawRoll;
     }
 
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleRotationModifier cloned = new ParticleRotationModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.startPitchYawRoll = startPitchYawRoll == null ? null : new Vector3f(startPitchYawRoll);
+        cloned.endPitchYawRoll = endPitchYawRoll == null ? null : new Vector3f(endPitchYawRoll);
+        copyTo(cloned);
+        return cloned;
+    }
+
 }

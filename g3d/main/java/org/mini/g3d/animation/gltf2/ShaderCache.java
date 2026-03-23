@@ -145,11 +145,11 @@ public class ShaderCache {
 
     public static AnimatedShader getShaderProgram(String vertIdentifier, List<String> vertDefines, String fragIdentifier, List<String> fragDefines) {
         int vertexHash = ShaderCache.selectShader(vertIdentifier, vertDefines);
-        GLUtil.checkGlError("drawRenderObject 0.1");
+//        GLUtil.checkGlError("drawRenderObject 0.1");
         int fragmentHash = ShaderCache.selectShader(fragIdentifier, fragDefines);
-        GLUtil.checkGlError("drawRenderObject 0.2");
+//        GLUtil.checkGlError("drawRenderObject 0.2");
         AnimatedShader program = getShaderProgram(vertexHash, fragmentHash);
-        GLUtil.checkGlError("drawRenderObject 0.3");
+//        GLUtil.checkGlError("drawRenderObject 0.3");
         return program;
     }
 

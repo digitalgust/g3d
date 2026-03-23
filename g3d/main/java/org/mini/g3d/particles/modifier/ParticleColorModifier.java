@@ -52,4 +52,15 @@ public class ParticleColorModifier extends ParticleModifier {
         this.endColor = endColor;
     }
 
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleColorModifier cloned = new ParticleColorModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.startColor = startColor == null ? null : new Vector4f(startColor);
+        cloned.endColor = endColor == null ? null : new Vector4f(endColor);
+        copyTo(cloned);
+        return cloned;
+    }
+
 }

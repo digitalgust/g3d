@@ -55,5 +55,11 @@ public class EmitterMutableLocationControler extends EmitterControler {
         this.emitterName = emitterName;
     }
 
+    @Override
+    public EmitterControler deepClone() {
+        EmitterMutableLocationControler cloned = new EmitterMutableLocationControler(mutablePosition, emitterName);
+        copyTo(cloned);
+        return cloned;
+    }
 
 }

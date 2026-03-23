@@ -76,4 +76,15 @@ public class ParticleFrameModifier extends ParticleModifier {
         }
     }
 
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleFrameModifier cloned = new ParticleFrameModifier();
+        cloned.frameIndese = frameIndese == null ? null : frameIndese.clone();
+        cloned.timeInMs = timeInMs == null ? null : timeInMs.clone();
+        cloned.endAt = endAt;
+        cloned.startAt = startAt;
+        copyTo(cloned);
+        return cloned;
+    }
+
 }

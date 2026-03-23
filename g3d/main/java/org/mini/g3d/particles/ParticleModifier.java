@@ -44,6 +44,16 @@ public class ParticleModifier implements JsonParser.Polymorphic {
         throw new RuntimeException("Modifier type not found:" + modifierType);
     }
 
+    public ParticleModifier deepClone() {
+        ParticleModifier cloned = new ParticleModifier();
+        copyTo(cloned);
+        return cloned;
+    }
+
+    protected void copyTo(ParticleModifier target) {
+        target.modifierType = modifierType;
+    }
+
     /**
      * ======================================================
      * getter

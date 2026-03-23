@@ -61,7 +61,7 @@ public class Loader {
                 rawModel = loadToVAO(data.getVertices(), data.getTextureCoords(), data.getNormals(), data.getIndices());
                 path2model.put(modelFileName, rawModel);
             } else {
-                SysLog.info("G3D|found cached model:" + modelFileName);
+                //SysLog.info("G3D|found cached model:" + modelFileName);
             }
 
 
@@ -76,7 +76,7 @@ public class Loader {
             tm = new TexturedModel(rawModel, tex);
             path2texmodel.put(key, tm);
         } else {
-            SysLog.info("G3D|found cached TexturedModel:" + key);
+            //SysLog.info("G3D|found cached TexturedModel:" + key);
         }
         return tm;
     }
@@ -168,10 +168,10 @@ public class Loader {
         String key = fileName + mipmap + nearest + clamp2edge;
         Integer loadedtex = path2texid.get(key);
         if (loadedtex != null) {
-            SysLog.info("G3D|found cached tex:" + fileName);
+            //SysLog.info("G3D|found cached tex:" + fileName);
             return loadedtex.intValue();
         }
-        SysLog.info("G3D|" + fileName);
+        //SysLog.info("G3D|" + fileName);
         byte[] filecont = loadFileFromJar(fileName);
         if (filecont == null) {
             throw new RuntimeException("[G3D][WARN]file not found: " + fileName);

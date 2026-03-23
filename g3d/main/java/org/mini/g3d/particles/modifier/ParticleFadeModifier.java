@@ -45,4 +45,15 @@ public class ParticleFadeModifier extends ParticleModifier {
         this.endAlpha = endAlpha;
     }
 
+    @Override
+    public ParticleModifier deepClone() {
+        ParticleFadeModifier cloned = new ParticleFadeModifier();
+        cloned.startAt = startAt;
+        cloned.endAt = endAt;
+        cloned.startAlpha = startAlpha;
+        cloned.endAlpha = endAlpha;
+        copyTo(cloned);
+        return cloned;
+    }
+
 }

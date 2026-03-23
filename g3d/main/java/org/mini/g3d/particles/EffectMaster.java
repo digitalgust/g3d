@@ -34,6 +34,11 @@ public class EffectMaster {
         return parser.deserial(effectJsonStr, Effect.class);
     }
 
+    public static Effect cloneEffect(Effect template) {
+        if (template == null) return null;
+        return template.deepClone();
+    }
+
 
 //    public static void main(String[] args) {
 //        String s = "" ;

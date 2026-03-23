@@ -92,6 +92,6 @@ public class VolumetricFogShader extends ShaderProgram {
         super.loadInt(super.getUniformLocation("sceneTexture"), 0);  // 场景纹理对应单元0
         super.loadInt(super.getUniformLocation("depthTexture"), 1);  // 深度纹理对应单元1
         super.loadInt(super.getUniformLocation("perlinNoise"), 2);
-        GLUtil.checkGlError(this.getClass().getCanonicalName());
+//        GLUtil.checkGlError(this.getClass().getCanonicalName());
     }
 }

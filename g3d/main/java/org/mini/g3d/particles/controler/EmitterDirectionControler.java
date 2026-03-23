@@ -1,7 +1,6 @@
 package org.mini.g3d.particles.controler;
 
 import org.mini.g3d.core.vector.Vector3f;
-import org.mini.g3d.particles.Effect;
 import org.mini.g3d.particles.Emitter;
 import org.mini.g3d.particles.EmitterControler;
 
@@ -41,6 +40,14 @@ public class EmitterDirectionControler extends EmitterControler {
 
     public void setDirection(Vector3f direction) {
         this.direction = direction;
+    }
+
+    @Override
+    public EmitterControler deepClone() {
+        EmitterDirectionControler cloned = new EmitterDirectionControler(new Vector3f(0, 0, 1), emitterName);
+        cloned.direction = direction == null ? null : new Vector3f(direction);
+        copyTo(cloned);
+        return cloned;
     }
 
 }

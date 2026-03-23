@@ -1,11 +1,8 @@
 package org.mini.g3d.particles.controler;
 
-import org.mini.g3d.core.DisplayManager;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.g3d.particles.Emitter;
 import org.mini.g3d.particles.EmitterControler;
-import org.mini.g3d.particles.Particle;
-import org.mini.g3d.particles.ParticleModifier;
 
 
 /**
@@ -61,6 +58,17 @@ public class EmitterRotationControler extends EmitterControler {
 
     public void setEndPitchYawRoll(Vector3f endPitchYawRoll) {
         this.endPitchYawRoll = endPitchYawRoll;
+    }
+
+    @Override
+    public EmitterControler deepClone() {
+        EmitterRotationControler cloned = new EmitterRotationControler();
+        cloned.startPitchYawRoll = startPitchYawRoll == null ? null : new Vector3f(startPitchYawRoll);
+        cloned.endPitchYawRoll = endPitchYawRoll == null ? null : new Vector3f(endPitchYawRoll);
+        cloned.emitterName = emitterName;
+        cloned.rotation = rotation == null ? null : new Vector3f(rotation);
+        copyTo(cloned);
+        return cloned;
     }
 
 }

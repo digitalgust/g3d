@@ -88,8 +88,8 @@ public class GLDriver {
         }
         glDeleteShader(vertex);
         glDeleteShader(fragment);
-        SysLog.info("G3D|gltf shader link finish, vertex = " + vertex + ", fragment = " + fragment + ", program = "
-                + program + " time = " + (System.currentTimeMillis() - startAt));
+//        SysLog.info("G3D|gltf shader link finish, vertex = " + vertex + ", fragment = " + fragment + ", program = "
+//                + program + " time = " + (System.currentTimeMillis() - startAt));
         return program;
     }
 
