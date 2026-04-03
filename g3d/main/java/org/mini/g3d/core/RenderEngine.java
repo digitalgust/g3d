@@ -5,6 +5,8 @@ import org.mini.g3d.particles.ParticleMaster;
 import org.mini.g3d.shadowmap.ShadowMappingFrameBuffer;
 import org.mini.g3d.water.WaterFrameBuffers;
 import org.mini.glwrap.GLUtil;
+import org.mini.gui.GForm;
+import org.mini.gui.callback.GCmd;
 
 import static org.mini.gl.GL.*;
 import static org.mini.gl.GL.glClearColor;
@@ -64,8 +66,14 @@ public class RenderEngine {
         mainFbo.gl_init();
     }
 
+    @Override
+    protected void finalize() {
+        GForm.addCmd(new GCmd(() -> {
+            cleanUp();
+        }));
 
-    public void cleanup() {
+    }
+    public void cleanUp() {
         if (masterRenderer != null) {
             masterRenderer.cleanUp();
         }

@@ -6,11 +6,14 @@ import org.mini.g3d.core.util.G3dUtil;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 public class ParticleMaster {
 
-    private static Map<ParticleTexture, List<Particle>> particles = new HashMap<ParticleTexture, List<Particle>>();
+    private static Map<ParticleTexture, List<Particle>> particles = new ConcurrentHashMap<ParticleTexture, List<Particle>>();
 
+    private static List<Predicate> predicateRemoveList = new ArrayList<Predicate>();
 
     public static void update(ICamera camera) {
         //update particle
@@ -26,9 +29,13 @@ public class ParticleMaster {
                     boolean stillAlive = p.update(camera);
                     if (!stillAlive) {
                         iterator.remove();
-                        if (list.isEmpty()) {
-                            mapIterator.remove();
-                            G3dUtil.putCachedList(list);
+                    } else if (predicateRemoveList.size() > 0) {
+                        for (int i = 0; i < predicateRemoveList.size(); i++) {
+                            Predicate predicate = predicateRemoveList.get(i);
+                            if (predicate.test(p)) {
+                                iterator.remove();
+                                break;
+                            }
                         }
                     }
                 }
@@ -37,7 +44,9 @@ public class ParticleMaster {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
         }
+        predicateRemoveList.clear();
     }
 
     public static void cleanUp() {
@@ -55,5 +64,22 @@ public class ParticleMaster {
             particles.put(particle.getTexture(), list);
         }
         list.add(particle);
+    }
+
+    public static void removeParticle(Particle particle) {
+        List<Particle> list = particles.get(particle.getTexture());
+        if (list != null) {
+            list.remove(particle);
+            if (list.isEmpty()) {
+                particles.remove(particle.getTexture());
+                G3dUtil.putCachedList(list);
+            }
+        }
+    }
+
+    public static void removeParticleIf(Predicate<Particle> predicate) {
+        if (predicate != null) {
+            predicateRemoveList.add(predicate);
+        }
     }
 }

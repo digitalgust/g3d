@@ -359,7 +359,6 @@ public class Terrain {
 
     public void cleanUp() {
         if (loader != null) {
-            loader.cleanUp();
             loader = null;
         }
         model = null;

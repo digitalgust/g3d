@@ -65,6 +65,7 @@ public class DisplayManager {
 
         long currentFrameTime = System.currentTimeMillis();
         delta = (currentFrameTime - lastFrameTime) / 1000.0f;
+        //System.out.println("G3D|delta ms: " + (currentFrameTime - lastFrameTime));
         totalTime += delta;
         lastFrameTime = currentFrameTime;
         frameCount++;

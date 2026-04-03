@@ -121,7 +121,7 @@ public class AnimatedModel extends Entity implements Cloneable {
         return rootRenderNode;
     }
 
-    //    public void update() {
+//    public void update() {
 //        long start = System.currentTimeMillis();
 //        animateNode();
 //        transform_backend.setZero();
@@ -130,6 +130,7 @@ public class AnimatedModel extends Entity implements Cloneable {
 //        rootRenderNode.applyTransform(transform_backend);
 //        rootRenderNode.updateSkin();
 //    }
+
     public void update() {
         long curMill = DisplayManager.getCurrentTime();
         transform.setZero();

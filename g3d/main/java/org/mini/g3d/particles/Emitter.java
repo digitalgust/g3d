@@ -444,7 +444,7 @@ public class Emitter {
         this.img = img;
         imageGrids = rows;
         if (img != null) {
-            texture = new ParticleTexture(img.getGLTextureId(), imageGrids, additivePara, depthTestPara);
+            texture = new ParticleTexture(img, imageGrids, additivePara, depthTestPara);
         } else {
             SysLog.error("G3D|load image error " + imagePath);
         }
