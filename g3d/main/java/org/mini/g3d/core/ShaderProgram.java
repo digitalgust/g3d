@@ -133,6 +133,7 @@ public abstract class ShaderProgram {
     public void cleanUp() {
         stop();
         glDeleteProgram(programID);
+        programID = 0;
     }
 
     public int getProgramId() {
@@ -143,6 +144,7 @@ public abstract class ShaderProgram {
         GForm.addCmd(new GCmd(() -> {
             cleanUp();
             SysLog.info("G3D|" + this.getClass() + "shader program clean success");
+            GLUtil.checkGlError("error 10.00");
         }));
     }
 

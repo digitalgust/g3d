@@ -259,20 +259,25 @@ public class GLDriver {
     }
 
     public static void cleanUp() {
+        GLUtil.checkGlError("error 0.00");
         for (Iterator<Object> it = texInfo2GlTextureMap.keySet().iterator(); it.hasNext(); ) {
             Object info = it.next();
             int[] tex = texInfo2GlTextureMap.get(info);
             glDeleteTextures(1, tex, 0);
             it.remove();
+            GLUtil.checkGlError("error tex: " + tex[0]);
         }
 
+        GLUtil.checkGlError("error 5.00");
         for (Iterator<GLTFAccessor> it = accessor2GlBufferMap.keySet().iterator(); it.hasNext(); ) {
             GLTFAccessor accessor = it.next();
             int[] buf = accessor2GlBufferMap.get(accessor);
             glDeleteBuffers(1, buf, 0);
             it.remove();
+            GLUtil.checkGlError("error buf: " + buf[0]);
         }
         SysLog.info("G3D|" + GLDriver.class + " cleanup");
+        GLUtil.checkGlError("error 10.00");
     }
 
     public static void cleanUpBuffers() {

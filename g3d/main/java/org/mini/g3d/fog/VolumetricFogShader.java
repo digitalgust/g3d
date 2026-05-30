@@ -31,17 +31,17 @@ public class VolumetricFogShader extends ShaderProgram {
     protected void getAllUniformLocations() {
         location_projectionMatrix = super.getUniformLocation("projectionMatrix");
         location_viewMatrix = super.getUniformLocation("viewMatrix");
-        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        //GLUtil.checkGlError(this.getClass().getCanonicalName());
         location_fogColor = super.getUniformLocation("fogColor");
         location_fogDensity = super.getUniformLocation("fogDensity");
         location_fogGradient = super.getUniformLocation("fogGradient");
         location_nearPlane = super.getUniformLocation("nearPlane");
-        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        //GLUtil.checkGlError(this.getClass().getCanonicalName());
         location_farPlane = super.getUniformLocation("farPlane");
         location_time = super.getUniformLocation("time");
         location_cameraPosition = super.getUniformLocation("cameraPosition");
         location_noiseTextureSize = super.getUniformLocation("noiseTextureSize");
-        GLUtil.checkGlError(this.getClass().getCanonicalName());
+        //GLUtil.checkGlError(this.getClass().getCanonicalName());
     }
 
     @Override

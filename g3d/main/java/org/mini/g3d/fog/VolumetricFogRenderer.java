@@ -66,53 +66,53 @@ public class VolumetricFogRenderer {
         shader.start();
         shader.loadProjectionMatrix(camera.getProjectionMatrix());
         shader.loadViewMatrix(camera.getViewMatrix());
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadViewMatrix");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadViewMatrix");
         shader.loadFogColor(fogColor);
         shader.loadFogDensity(fogDensity);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadFogDensity");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadFogDensity");
         shader.loadFogGradient(fogGradient);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadFogGradient");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadFogGradient");
         shader.loadPlanes(camera.getNear(), camera.getFar());
         shader.loadTime(time);
         shader.loadCameraPosition(camera.getPosition());
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadCameraPosition");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadCameraPosition");
         shader.loadNoiseTextureSize(noiseTextureSize);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadNoiseTextureSize");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " loadNoiseTextureSize");
 
         // 启用混合
         glEnable(GL_BLEND);
         // 使用标准alpha混合模式
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " blendFunc");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " blendFunc");
         
         // 禁用深度测试
         glDisable(GL_DEPTH_TEST);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " disableDepthTest");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " disableDepthTest");
 
         // 绑定场景纹理和深度纹理
         loader.bindTexture(sceneTexture, 0);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " bindTextures0");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " bindTextures0");
         loader.bindTexture(depthTexture, 1);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " bindTextures1");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " bindTextures1");
         loader.bindTexture3D(perlinNoiseTexture, 2);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " bindTextures2");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " bindTextures2");
 
         // 渲染全屏四边形
         loader.bindVAO(quad.getVaoID());
         loader.enableVertexAttribArray(0);
         loader.enableVertexAttribArray(1);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " enableAttribArrays");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " enableAttribArrays");
         glDrawElements(GL_TRIANGLES, quad.getVertexCount(), GL_UNSIGNED_INT, null, 0);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " drawElements");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " drawElements");
         loader.disableVertexAttribArray(0);
         loader.disableVertexAttribArray(1);
         loader.unbindVAO();
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " unbindVAO");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " unbindVAO");
 
         // 恢复状态
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
-        GLUtil.checkGlError(this.getClass().getCanonicalName() + " restoreState");
+        //GLUtil.checkGlError(this.getClass().getCanonicalName() + " restoreState");
 
         shader.stop();
     }

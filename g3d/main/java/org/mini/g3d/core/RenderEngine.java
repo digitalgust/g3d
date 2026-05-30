@@ -42,8 +42,10 @@ public class RenderEngine {
     public void gl_init(float w, float h) {
 
         DisplayManager.createDisplay((int) w, (int) h);
+        GLUtil.checkGlError("Game glinit 0.0");
         int smSize = 2048;
         shadowMappingFbo = new ShadowMappingFrameBuffer(smSize, smSize);
+        GLUtil.checkGlError("Game glinit 0.1");
         shadowMappingFbo.gl_init();
         GLUtil.checkGlError("Game glinit 0.3");
 
@@ -73,22 +75,31 @@ public class RenderEngine {
         }));
 
     }
+
     public void cleanUp() {
+        GLUtil.checkGlError("0");
         if (masterRenderer != null) {
             masterRenderer.cleanUp();
         }
+        GLUtil.checkGlError("0");
         if (waterFbos != null) {
             waterFbos.cleanUp();
         }
+        GLUtil.checkGlError("0");
         if (mainFbo != null) {
             mainFbo.delete();
         }
+        GLUtil.checkGlError("0");
         if (shadowMappingFbo != null) {
             shadowMappingFbo.delete();
         }
+        GLUtil.checkGlError("0");
         ParticleMaster.cleanUp();
+        GLUtil.checkGlError("0");
         GLDriver.cleanUp();
+        GLUtil.checkGlError("0");
         DisplayManager.closeDisplay();
+        GLUtil.checkGlError("0");
     }
 
 

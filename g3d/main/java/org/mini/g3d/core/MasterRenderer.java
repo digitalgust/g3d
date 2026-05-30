@@ -146,16 +146,26 @@ public class MasterRenderer extends AbstractRenderer {
     }
 
     public void cleanUp() {
+        GLUtil.checkGlError("err");
         shadowMappingRenderer.cleanUp();
+        GLUtil.checkGlError("err");
         enitiyRenderer.cleanUp();
+        GLUtil.checkGlError("err");
         terrainRenderer.cleanUp();
+        GLUtil.checkGlError("err");
         animatedModelRenderer.cleanUp();
+        GLUtil.checkGlError("err");
         skyboxRenderer.cleanUp();
+        GLUtil.checkGlError("err");
         waterRenderer.cleanUp();
+        GLUtil.checkGlError("err");
         guiRenderer.cleanUp();
+        GLUtil.checkGlError("err");
         particleRenderer.cleanUp();
+        GLUtil.checkGlError("err");
         if (fogRenderer != null) {
             fogRenderer.cleanUp();
+            GLUtil.checkGlError("err");
         }
     }
 

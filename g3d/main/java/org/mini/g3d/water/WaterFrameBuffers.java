@@ -71,6 +71,7 @@ public class WaterFrameBuffers {
         GForm.addCmd(new GCmd(() -> {
             cleanUp();
             SysLog.info("G3D|WaterFrameBuffers clean success");
+            GLUtil.checkGlError("error 10.00");
         }));
     }
 
@@ -158,7 +159,7 @@ public class WaterFrameBuffers {
         glBindTexture(GL_TEXTURE_2D, 0); // 绑定前解绑所有纹理
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         glViewport(0, 0, width, height);
-        GLUtil.checkGlError("Binding framebuffer " + frameBuffer);
+        //GLUtil.checkGlError("Binding framebuffer " + frameBuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 清除帧缓冲区
     }
 
