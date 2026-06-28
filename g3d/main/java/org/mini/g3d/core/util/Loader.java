@@ -349,6 +349,7 @@ public class Loader {
         if (cleanedUp) {
             return;
         }
+        cleanedUp = true;
         //System.out.println("loader clean " + this);
         int[] tmp = {0};
         for (int i = 0; i < vaos.size(); i++) {
