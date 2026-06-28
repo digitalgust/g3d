@@ -132,6 +132,11 @@ public abstract class ShaderProgram {
 
     public void cleanUp() {
         stop();
+        // 已清理则跳过，避免显式 cleanUp 与 GC 触发的 finalize 重复执行 glDeleteProgram；
+        // GL 驱动会回收被删除的 program id，重复删除会误删复用了该 id 的新 program。
+        if (programID == 0) {
+            return;
+        }
         glDeleteProgram(programID);
         programID = 0;
     }

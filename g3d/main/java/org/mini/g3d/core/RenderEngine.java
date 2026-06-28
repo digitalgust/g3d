@@ -42,10 +42,8 @@ public class RenderEngine {
     public void gl_init(float w, float h) {
 
         DisplayManager.createDisplay((int) w, (int) h);
-        GLUtil.checkGlError("Game glinit 0.0");
         int smSize = 2048;
         shadowMappingFbo = new ShadowMappingFrameBuffer(smSize, smSize);
-        GLUtil.checkGlError("Game glinit 0.1");
         shadowMappingFbo.gl_init();
         GLUtil.checkGlError("Game glinit 0.3");
 
@@ -64,9 +62,16 @@ public class RenderEngine {
             return;
         }
         DisplayManager.createDisplay((int) w, (int) h);
+        // 显式释放旧 FBO 的 GL 句柄，避免依赖 finalize()。
+        // 若不在这里 delete()，旧对象只能靠 GC 触发 finalize() 回收，
+        // 而新 MainFrameBuffer 分配时 GL 驱动可能复用刚被 GC 删除的 id，
+        // 造成新旧 FBO 句柄冲突。
+        mainFbo.delete();
         mainFbo = new MainFrameBuffer(w, h);
         mainFbo.gl_init();
     }
+
+    private boolean cleanedUp = false;
 
     @Override
     protected void finalize() {
@@ -75,31 +80,28 @@ public class RenderEngine {
         }));
 
     }
-
     public void cleanUp() {
-        GLUtil.checkGlError("0");
+        // 防止显式 cleanUp 与 GC 触发的 finalize 重复执行，
+        // 否则会重复 delete 子对象的 GL 句柄（含已被驱动复用的 id）。
+        if (cleanedUp) {
+            return;
+        }
+        cleanedUp = true;
         if (masterRenderer != null) {
             masterRenderer.cleanUp();
         }
-        GLUtil.checkGlError("0");
         if (waterFbos != null) {
             waterFbos.cleanUp();
         }
-        GLUtil.checkGlError("0");
         if (mainFbo != null) {
             mainFbo.delete();
         }
-        GLUtil.checkGlError("0");
         if (shadowMappingFbo != null) {
             shadowMappingFbo.delete();
         }
-        GLUtil.checkGlError("0");
         ParticleMaster.cleanUp();
-        GLUtil.checkGlError("0");
         GLDriver.cleanUp();
-        GLUtil.checkGlError("0");
         DisplayManager.closeDisplay();
-        GLUtil.checkGlError("0");
     }
 
 

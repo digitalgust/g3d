@@ -341,8 +341,14 @@ public class Loader {
     }
 
 
+    private boolean cleanedUp = false;
+
     public void cleanUp() {
-        GLUtil.checkGlError("error 0.00");
+        // 防止显式 cleanUp 与 GC 触发的 finalize 重复执行，
+        // 否则会重复 delete 子对象的 GL 句柄（含已被驱动复用的 id）。
+        if (cleanedUp) {
+            return;
+        }
         //System.out.println("loader clean " + this);
         int[] tmp = {0};
         for (int i = 0; i < vaos.size(); i++) {
@@ -368,7 +374,6 @@ public class Loader {
         path2model.clear();
         path2texmodel.clear();
         SysLog.info("G3D|loader clean.");
-        GLUtil.checkGlError("error 10.00");
     }
 
     public void cleanUpTextures() {
