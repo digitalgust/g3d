@@ -124,5 +124,5 @@ void main(void) {
         distanceToCam = 0.0;
     }
     visibility = exp(-pow((distance * density), gradient));
-    visibility = clamp(visibility, 0.5, 1.0);
+    visibility = clamp(visibility, 0.7, 1.0);
 }

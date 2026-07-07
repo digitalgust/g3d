@@ -156,11 +156,16 @@ public class WaterFrameBuffers {
     }
 
     private void bindFrameBuffer(int frameBuffer, int width, int height) {
+        // #region debug-point A/C: inspect refraction/reflection framebuffer binding path on device
         glBindTexture(GL_TEXTURE_2D, 0); // 绑定前解绑所有纹理
+//        GLUtil.checkGlError("WaterFrameBuffers.bindFrameBuffer after glBindTexture0");
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+//        GLUtil.checkGlError("WaterFrameBuffers.bindFrameBuffer after glBindFramebuffer");
         glViewport(0, 0, width, height);
-        //GLUtil.checkGlError("Binding framebuffer " + frameBuffer);
+//        GLUtil.checkGlError("WaterFrameBuffers.bindFrameBuffer after glViewport");
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 清除帧缓冲区
+//        GLUtil.checkGlError("WaterFrameBuffers.bindFrameBuffer after glClear");
+        // #endregion
     }
 
 

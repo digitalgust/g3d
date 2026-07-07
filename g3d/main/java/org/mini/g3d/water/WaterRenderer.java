@@ -71,7 +71,7 @@ public class WaterRenderer extends AbstractRenderer {
         if (!isInitialized || tiles.isEmpty() || !fbos.isInitialized()) {
             return;
         }
-
+        //GLUtil.checkGlError("G3D|WaterRenderer render start");
         try {
             prepareRender(camera, lightDir);
 

@@ -18,7 +18,7 @@ void main(void){
     vec4 finalColour = mix(texture1, texture2, blendFactor);
 
     float factor = (textureCoords.y - lowerLimit) / (upperLimit - lowerLimit);
-    factor = clamp(factor, 0.5, 1.0);
+    factor = clamp(factor, 0.7, 1.0);
     out_Color = mix(vec4(fogColour, 1.0), finalColour, factor);
 
 }

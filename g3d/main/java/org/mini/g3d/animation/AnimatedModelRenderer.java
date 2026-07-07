@@ -10,8 +10,11 @@ import org.mini.g3d.animation.gltf2.loader.data.GLTFSkin;
 import org.mini.g3d.animation.gltf2.render.*;
 import org.mini.g3d.core.AbstractRenderer;
 import org.mini.g3d.core.ICamera;
+import org.mini.g3d.core.Scene;
 import org.mini.g3d.core.util.G3dUtil;
 import org.mini.g3d.core.vector.Matrix4f;
+import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.skybox.DayAndNight;
 import org.mini.gl.GLMath;
 import org.mini.glwrap.GLUtil;
 import org.mini.util.SysLog;
@@ -37,6 +40,12 @@ public class AnimatedModelRenderer extends AbstractRenderer {
     static int[] keyFrames = new int[AnimatedShader.MAX_INSTANCED_SIZE];
     static int[] textureFrameIndices = new int[AnimatedShader.MAX_INSTANCED_SIZE];
 
+    private static final float EXPOSURE_NIGHT = 0.55f;
+    private static final float EXPOSURE_DAY = 1.0f;
+
+    private final UniformLight[] punctualLights = new UniformLight[]{new UniformLight()};
+    private final Vector3f cachedSunColor = new Vector3f();
+
 
 
     // 合批 RenderMeshPrimitive 时，
@@ -55,6 +64,47 @@ public class AnimatedModelRenderer extends AbstractRenderer {
         for (int i = 0; i < 100; i++) {
             modelMatrics[i] = new Matrix4f();
         }
+    }
+
+    public void render(Scene scene) {
+        if (scene == null) return;
+        render(scene, scene.getAnimatedModelsIterator());
+    }
+
+    public void render(Scene scene, Iterator<? extends AnimatedModel> animatedPlayersIterator) {
+        if (scene == null) return;
+
+        ICamera camera = scene.getCamera();
+        float exposure = computeExposure(scene);
+        updateSunLight(scene);
+
+        for (; animatedPlayersIterator.hasNext(); ) {
+            AnimatedModel p = animatedPlayersIterator.next();
+            renderer.draw(camera, p.getRootRenderNode(), -1);
+        }
+
+        List<RenderMeshPrimitive> batch = G3dUtil.getCachedList();
+
+        for (GLTFSkin gltfSkin : pendingRenders.keySet()) {
+            Map<GLTFMeshPrimitive, List<RenderMeshPrimitive>> primitiveListMap = pendingRenders.get(gltfSkin);
+            for (GLTFMeshPrimitive gmp : primitiveListMap.keySet()) {
+                List<RenderMeshPrimitive> list = primitiveListMap.get(gmp);
+                if (list.isEmpty()) continue;
+                while (!list.isEmpty()) {
+                    int cnt = 0;
+                    for (int i = list.size() - 1; i >= 0; i--) {
+                        batch.add(list.get(i));
+                        list.remove(i);
+                        cnt++;
+                        if (cnt >= AnimatedShader.MAX_INSTANCED_SIZE) break;
+                    }
+                    drawRenderObject(camera, batch, exposure, punctualLights);
+                    batch.clear();
+                }
+            }
+        }
+
+        G3dUtil.putCachedList(batch);
     }
 
 
@@ -89,13 +139,48 @@ public class AnimatedModelRenderer extends AbstractRenderer {
                         cnt++;
                         if (cnt >= AnimatedShader.MAX_INSTANCED_SIZE) break;
                     }
-                    drawRenderObject(camera, batch);
+                    drawRenderObject(camera, batch, 1.0f, null);
                     batch.clear();
                 }
             }
         }
 
         G3dUtil.putCachedList(batch);
+    }
+
+    private void updateSunLight(Scene scene) {
+        UniformLight ul = punctualLights[0];
+        ul.type = 0;
+        ul.direction.set(scene.getSun().getDirection());
+        computeSunColor(scene, cachedSunColor);
+        ul.color.set(cachedSunColor);
+        ul.intensity = 1.0f;
+        ul.range = -1;
+        ul.position.set(0, 0, 0);
+        ul.innerConeCos = 0;
+        ul.outerConeCos = (float) (Math.PI / 4);
+    }
+
+    private static float computeExposure(Scene scene) {
+        float t = getDayNightFactor(scene);
+        return EXPOSURE_NIGHT + (EXPOSURE_DAY - EXPOSURE_NIGHT) * t;
+    }
+
+    private static void computeSunColor(Scene scene, Vector3f out) {
+        float t = getDayNightFactor(scene);
+        out.x = Scene.SUN_COLOR_NIGHT.x + (Scene.SUN_COLOR_DAY.x - Scene.SUN_COLOR_NIGHT.x) * t;
+        out.y = Scene.SUN_COLOR_NIGHT.y + (Scene.SUN_COLOR_DAY.y - Scene.SUN_COLOR_NIGHT.y) * t;
+        out.z = Scene.SUN_COLOR_NIGHT.z + (Scene.SUN_COLOR_DAY.z - Scene.SUN_COLOR_NIGHT.z) * t;
+    }
+
+    private static float getDayNightFactor(Scene scene) {
+        int seg = scene.getDayAndNight().getSegment();
+        float p = scene.getDayAndNight().getPercentInSeg();
+        if (seg == DayAndNight.NIGHT) return 0f;
+        if (seg == DayAndNight.DAY) return 1f;
+        if (seg == DayAndNight.NIGHT_TO_DAY) return p;
+        if (seg == DayAndNight.DAY_TO_NIGHT) return 1f - p;
+        return 1f;
     }
 
 
@@ -118,7 +203,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
     }
 
 
-    public static void drawRenderObject(ICamera camera, List<RenderMeshPrimitive> rmps) {
+    public static void drawRenderObject(ICamera camera, List<RenderMeshPrimitive> rmps, float exposure, UniformLight[] lights) {
         if (rmps.isEmpty()) return;
 //        GLUtil.checkGlError("drawRenderObject 0");
         RenderMeshPrimitive rmp = rmps.get(0);
@@ -137,6 +222,11 @@ public class AnimatedModelRenderer extends AbstractRenderer {
             List<String> fragDefines = G3dUtil.getCachedList();
             fragDefines.addAll(vertDefines);//Add all the vert defines, some are needed
             fragDefines.addAll(material.getDefines());
+            int lightCount = lights == null ? 0 : lights.length;
+            if (lightCount > 0) {
+                fragDefines.add("USE_PUNCTUAL 1");
+                fragDefines.add("LIGHT_COUNT " + lightCount);
+            }
 //            if (usePunctualLighting) {
 //                fragDefines.add("USE_PUNCTUAL 1");
 //                fragDefines.add("LIGHT_COUNT " + visibleLights.size());
@@ -163,7 +253,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
             shader = ShaderCache.getShaderProgram(rmp.getShaderIdentifier(), vertDefines, material.getShaderIdentifier(), fragDefines);
 //            GLUtil.checkGlError("drawRenderObject 0.3");
 
-            shader.getAllUniformLocations(rmp, 0);
+            shader.getAllUniformLocations(rmp, lights == null ? 0 : lights.length);
 //            GLUtil.checkGlError("drawRenderObject 0.4");
             rmp.setShader(shader);
 //            GLUtil.checkGlError("drawRenderObject 1");
@@ -214,8 +304,11 @@ public class AnimatedModelRenderer extends AbstractRenderer {
         }
         shader.load_u_ModelMatrix(modelMatrics);
 
-        shader.load_u_Exposure(1.0f);
+        shader.load_u_Exposure(exposure);
         shader.load_u_Camera(camera.getPosition());
+        if (lights != null && lights.length > 0) {
+            shader.load_u_Lights(lights, lights.length);
+        }
 
 //        GLUtil.checkGlError("drawRenderObject 1.4");
 
