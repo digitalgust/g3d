@@ -420,32 +420,19 @@ AngularInfo getAngularInfo(vec3 pointToLight, vec3 normal, vec3 view)
 }
 
 
-// KHR_lights_punctual extension.
-// see https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
-
-struct Light
-{
-    vec3 direction;
-    float range;
-
-    vec3 color;
-    float intensity;
-
-    vec3 position;
-    float innerConeCos;
-
-    float outerConeCos;
-    int type;
-
-    vec2 padding;
-};
-
 const int LightType_Directional = 0;
 const int LightType_Point = 1;
 const int LightType_Spot = 2;
 
 #ifdef USE_PUNCTUAL
-uniform Light u_Lights[LIGHT_COUNT];
+uniform vec3 u_LightDirection[LIGHT_COUNT];
+uniform float u_LightRange[LIGHT_COUNT];
+uniform vec3 u_LightColor[LIGHT_COUNT];
+uniform float u_LightIntensity[LIGHT_COUNT];
+uniform vec3 u_LightPosition[LIGHT_COUNT];
+uniform float u_LightInnerConeCos[LIGHT_COUNT];
+uniform float u_LightOuterConeCos[LIGHT_COUNT];
+uniform int u_LightType[LIGHT_COUNT];
 #endif
 
 #if defined(MATERIAL_SPECULARGLOSSINESS) || defined(MATERIAL_METALLICROUGHNESS)
@@ -618,30 +605,30 @@ float getSpotAttenuation(vec3 pointToLight, vec3 spotDirection, float outerConeC
     return 0.0;
 }
 
-vec3 applyDirectionalLight(Light light, MaterialInfo materialInfo, vec3 normal, vec3 view)
+vec3 applyDirectionalLight(int lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
 {
-    vec3 pointToLight = -light.direction;
+    vec3 pointToLight = -u_LightDirection[lightIndex];
     vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
-    return light.intensity * light.color * shade;
+    return u_LightIntensity[lightIndex] * u_LightColor[lightIndex] * shade;
 }
 
-vec3 applyPointLight(Light light, MaterialInfo materialInfo, vec3 normal, vec3 view)
+vec3 applyPointLight(int lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
 {
-    vec3 pointToLight = light.position - v_Position;
+    vec3 pointToLight = u_LightPosition[lightIndex] - v_Position;
     float distance = length(pointToLight);
-    float attenuation = getRangeAttenuation(light.range, distance);
+    float attenuation = getRangeAttenuation(u_LightRange[lightIndex], distance);
     vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
-    return attenuation * light.intensity * light.color * shade;
+    return attenuation * u_LightIntensity[lightIndex] * u_LightColor[lightIndex] * shade;
 }
 
-vec3 applySpotLight(Light light, MaterialInfo materialInfo, vec3 normal, vec3 view)
+vec3 applySpotLight(int lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
 {
-    vec3 pointToLight = light.position - v_Position;
+    vec3 pointToLight = u_LightPosition[lightIndex] - v_Position;
     float distance = length(pointToLight);
-    float rangeAttenuation = getRangeAttenuation(light.range, distance);
-    float spotAttenuation = getSpotAttenuation(pointToLight, light.direction, light.outerConeCos, light.innerConeCos);
+    float rangeAttenuation = getRangeAttenuation(u_LightRange[lightIndex], distance);
+    float spotAttenuation = getSpotAttenuation(pointToLight, u_LightDirection[lightIndex], u_LightOuterConeCos[lightIndex], u_LightInnerConeCos[lightIndex]);
     vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
-    return rangeAttenuation * spotAttenuation * light.intensity * light.color * shade;
+    return rangeAttenuation * spotAttenuation * u_LightIntensity[lightIndex] * u_LightColor[lightIndex] * shade;
 }
 
 void main()
@@ -764,18 +751,17 @@ void main()
     #ifdef USE_PUNCTUAL
     for (int i = 0; i < LIGHT_COUNT; ++i)
     {
-        Light light = u_Lights[i];
-        if (light.type == LightType_Directional)
+        if (u_LightType[i] == LightType_Directional)
         {
-            color += applyDirectionalLight(light, materialInfo, normal, view);
+            color += applyDirectionalLight(i, materialInfo, normal, view);
         }
-        else if (light.type == LightType_Point)
+        else if (u_LightType[i] == LightType_Point)
         {
-            color += applyPointLight(light, materialInfo, normal, view);
+            color += applyPointLight(i, materialInfo, normal, view);
         }
-        else if (light.type == LightType_Spot)
+        else if (u_LightType[i] == LightType_Spot)
         {
-            color += applySpotLight(light, materialInfo, normal, view);
+            color += applySpotLight(i, materialInfo, normal, view);
         }
     }
         #endif

@@ -151,15 +151,14 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
         location_u_Light_outerConeCos = new int[lightCount];
         location_u_Light_type = new int[lightCount];
         for (int i = 0; i < lightCount; i++) {
-            String p = "u_Lights[" + i + "].";
-            location_u_Light_direction[i] = getUniformLocation(p + "direction");
-            location_u_Light_range[i] = getUniformLocation(p + "range");
-            location_u_Light_color[i] = getUniformLocation(p + "color");
-            location_u_Light_intensity[i] = getUniformLocation(p + "intensity");
-            location_u_Light_position[i] = getUniformLocation(p + "position");
-            location_u_Light_innerConeCos[i] = getUniformLocation(p + "innerConeCos");
-            location_u_Light_outerConeCos[i] = getUniformLocation(p + "outerConeCos");
-            location_u_Light_type[i] = getUniformLocation(p + "type");
+            location_u_Light_direction[i] = getUniformLocation("u_LightDirection[" + i + "]");
+            location_u_Light_range[i] = getUniformLocation("u_LightRange[" + i + "]");
+            location_u_Light_color[i] = getUniformLocation("u_LightColor[" + i + "]");
+            location_u_Light_intensity[i] = getUniformLocation("u_LightIntensity[" + i + "]");
+            location_u_Light_position[i] = getUniformLocation("u_LightPosition[" + i + "]");
+            location_u_Light_innerConeCos[i] = getUniformLocation("u_LightInnerConeCos[" + i + "]");
+            location_u_Light_outerConeCos[i] = getUniformLocation("u_LightOuterConeCos[" + i + "]");
+            location_u_Light_type[i] = getUniformLocation("u_LightType[" + i + "]");
         }
 
         location_a_Position = glGetAttribLocation(getProgramId(), GLUtil.toCstyleBytes("a_Position"));
