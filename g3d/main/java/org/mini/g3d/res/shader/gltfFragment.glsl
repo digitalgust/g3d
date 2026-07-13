@@ -176,19 +176,19 @@ vec2 adjustUVForTextureGrid(vec2 uv, int frameIndex) {
     if (u_TextureGridSize <= 1) {
         return uv; // 不需要调整
     }
-    
+
     float gridSize = float(u_TextureGridSize);
     float cellSize = 1.0 / gridSize;
-    
+
     // 计算在网格中的行列位置
     int col = frameIndex % u_TextureGridSize;
     int row = frameIndex / u_TextureGridSize;
-    
+
     // 调整UV坐标
     vec2 adjustedUV;
     adjustedUV.x = uv.x + cellSize * float(col);
     adjustedUV.y = uv.y + cellSize * float(row);
-    
+
     return adjustedUV;
 }
 
@@ -420,19 +420,32 @@ AngularInfo getAngularInfo(vec3 pointToLight, vec3 normal, vec3 view)
 }
 
 
+// KHR_lights_punctual extension.
+// see https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual
+
+struct Light
+{
+    vec3 direction;
+    float range;
+
+    vec3 color;
+    float intensity;
+
+    vec3 position;
+    float innerConeCos;
+
+    float outerConeCos;
+    int type;
+
+    vec2 padding;
+};
+
 const int LightType_Directional = 0;
 const int LightType_Point = 1;
 const int LightType_Spot = 2;
 
 #ifdef USE_PUNCTUAL
-uniform vec3 u_LightDirection[LIGHT_COUNT];
-uniform float u_LightRange[LIGHT_COUNT];
-uniform vec3 u_LightColor[LIGHT_COUNT];
-uniform float u_LightIntensity[LIGHT_COUNT];
-uniform vec3 u_LightPosition[LIGHT_COUNT];
-uniform float u_LightInnerConeCos[LIGHT_COUNT];
-uniform float u_LightOuterConeCos[LIGHT_COUNT];
-uniform int u_LightType[LIGHT_COUNT];
+uniform Light u_Lights[LIGHT_COUNT];
 #endif
 
 #if defined(MATERIAL_SPECULARGLOSSINESS) || defined(MATERIAL_METALLICROUGHNESS)
@@ -509,7 +522,7 @@ vec3 getIBLContribution(MaterialInfo materialInfo, vec3 n, vec3 v)
 
     return diffuse + specular;
 }
-    #endif
+#endif
 
 // Lambert lighting
 // see https://seblagarde.wordpress.com/2012/01/08/pi-or-not-to-pi-in-game-lighting-equation/
@@ -605,30 +618,30 @@ float getSpotAttenuation(vec3 pointToLight, vec3 spotDirection, float outerConeC
     return 0.0;
 }
 
-vec3 applyDirectionalLight(int lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
+vec3 applyDirectionalLight(Light light, MaterialInfo materialInfo, vec3 normal, vec3 view)
 {
-    vec3 pointToLight = -u_LightDirection[lightIndex];
+    vec3 pointToLight = -light.direction;
     vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
-    return u_LightIntensity[lightIndex] * u_LightColor[lightIndex] * shade;
+    return light.intensity * light.color * shade;
 }
 
-vec3 applyPointLight(int lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
+vec3 applyPointLight(Light light, MaterialInfo materialInfo, vec3 normal, vec3 view)
 {
-    vec3 pointToLight = u_LightPosition[lightIndex] - v_Position;
+    vec3 pointToLight = light.position - v_Position;
     float distance = length(pointToLight);
-    float attenuation = getRangeAttenuation(u_LightRange[lightIndex], distance);
+    float attenuation = getRangeAttenuation(light.range, distance);
     vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
-    return attenuation * u_LightIntensity[lightIndex] * u_LightColor[lightIndex] * shade;
+    return attenuation * light.intensity * light.color * shade;
 }
 
-vec3 applySpotLight(int lightIndex, MaterialInfo materialInfo, vec3 normal, vec3 view)
+vec3 applySpotLight(Light light, MaterialInfo materialInfo, vec3 normal, vec3 view)
 {
-    vec3 pointToLight = u_LightPosition[lightIndex] - v_Position;
+    vec3 pointToLight = light.position - v_Position;
     float distance = length(pointToLight);
-    float rangeAttenuation = getRangeAttenuation(u_LightRange[lightIndex], distance);
-    float spotAttenuation = getSpotAttenuation(pointToLight, u_LightDirection[lightIndex], u_LightOuterConeCos[lightIndex], u_LightInnerConeCos[lightIndex]);
+    float rangeAttenuation = getRangeAttenuation(light.range, distance);
+    float spotAttenuation = getSpotAttenuation(pointToLight, light.direction, light.outerConeCos, light.innerConeCos);
     vec3 shade = getPointShade(pointToLight, materialInfo, normal, view);
-    return rangeAttenuation * spotAttenuation * u_LightIntensity[lightIndex] * u_LightColor[lightIndex] * shade;
+    return rangeAttenuation * spotAttenuation * light.intensity * light.color * shade;
 }
 
 void main()
@@ -751,23 +764,24 @@ void main()
     #ifdef USE_PUNCTUAL
     for (int i = 0; i < LIGHT_COUNT; ++i)
     {
-        if (u_LightType[i] == LightType_Directional)
+        Light light = u_Lights[i];
+        if (light.type == LightType_Directional)
         {
-            color += applyDirectionalLight(i, materialInfo, normal, view);
+            color += applyDirectionalLight(light, materialInfo, normal, view);
         }
-        else if (u_LightType[i] == LightType_Point)
+        else if (light.type == LightType_Point)
         {
-            color += applyPointLight(i, materialInfo, normal, view);
+            color += applyPointLight(light, materialInfo, normal, view);
         }
-        else if (u_LightType[i] == LightType_Spot)
+        else if (light.type == LightType_Spot)
         {
-            color += applySpotLight(i, materialInfo, normal, view);
+            color += applySpotLight(light, materialInfo, normal, view);
         }
     }
-        #endif
+    #endif
 
-        // Calculate lighting contribution from image based lighting source (IBL)
-        #ifdef USE_IBL
+    // Calculate lighting contribution from image based lighting source (IBL)
+    #ifdef USE_IBL
     color += getIBLContribution(materialInfo, normal, view);
     #else
     color += materialInfo.diffuseColor;

@@ -101,7 +101,7 @@ public class MasterRenderer extends AbstractRenderer {
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass enitiyRenderer");
 
         // 渲染动画模型
-        animatedModelRenderer.render(scene);
+        animatedModelRenderer.render(scene.getCamera(), scene.getAnimatedModelsIterator());
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass animatedModelRenderer");
 
         // 粒子（本身包含混合控制）

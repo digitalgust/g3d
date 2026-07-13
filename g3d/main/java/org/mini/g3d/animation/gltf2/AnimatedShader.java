@@ -13,6 +13,7 @@ import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 import org.mini.glwrap.GLUtil;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
@@ -42,14 +43,7 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
     int location_u_jointMatrixTexWidth;
     int location_u_frameIndex;
     int location_u_morphWeights;
-    int[] location_u_Light_direction;
-    int[] location_u_Light_range;
-    int[] location_u_Light_color;
-    int[] location_u_Light_intensity;
-    int[] location_u_Light_position;
-    int[] location_u_Light_innerConeCos;
-    int[] location_u_Light_outerConeCos;
-    int[] location_u_Light_type;
+    int[] location_u_Lights;
     int[] location_u_MaterialProperties;
     int[] location_u_MaterialTextures;
     // 新增贴图拆分相关变量
@@ -142,23 +136,9 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
             }
         }
         //
-        location_u_Light_direction = new int[lightCount];
-        location_u_Light_range = new int[lightCount];
-        location_u_Light_color = new int[lightCount];
-        location_u_Light_intensity = new int[lightCount];
-        location_u_Light_position = new int[lightCount];
-        location_u_Light_innerConeCos = new int[lightCount];
-        location_u_Light_outerConeCos = new int[lightCount];
-        location_u_Light_type = new int[lightCount];
+        location_u_Lights = new int[lightCount];
         for (int i = 0; i < lightCount; i++) {
-            location_u_Light_direction[i] = getUniformLocation("u_LightDirection[" + i + "]");
-            location_u_Light_range[i] = getUniformLocation("u_LightRange[" + i + "]");
-            location_u_Light_color[i] = getUniformLocation("u_LightColor[" + i + "]");
-            location_u_Light_intensity[i] = getUniformLocation("u_LightIntensity[" + i + "]");
-            location_u_Light_position[i] = getUniformLocation("u_LightPosition[" + i + "]");
-            location_u_Light_innerConeCos[i] = getUniformLocation("u_LightInnerConeCos[" + i + "]");
-            location_u_Light_outerConeCos[i] = getUniformLocation("u_LightOuterConeCos[" + i + "]");
-            location_u_Light_type[i] = getUniformLocation("u_LightType[" + i + "]");
+            location_u_Lights[i] = getUniformLocation("u_Lights[" + i + "]");
         }
 
         location_a_Position = glGetAttribLocation(getProgramId(), GLUtil.toCstyleBytes("a_Position"));
@@ -261,22 +241,21 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
         }
     }
 
-    public void load_u_Lights(UniformLight[] lights, int count) {
-        if (lights == null || count <= 0) return;
-        int n = count;
-        if (location_u_Light_type == null) return;
-        if (n > location_u_Light_type.length) n = location_u_Light_type.length;
-        if (n > lights.length) n = lights.length;
-        for (int i = 0; i < n; i++) {
-            UniformLight l = lights[i];
-            if (location_u_Light_direction[i] >= 0) loadVector(location_u_Light_direction[i], l.direction);
-            if (location_u_Light_range[i] >= 0) loadFloat(location_u_Light_range[i], l.range);
-            if (location_u_Light_color[i] >= 0) loadVector(location_u_Light_color[i], l.color);
-            if (location_u_Light_intensity[i] >= 0) loadFloat(location_u_Light_intensity[i], l.intensity);
-            if (location_u_Light_position[i] >= 0) loadVector(location_u_Light_position[i], l.position);
-            if (location_u_Light_innerConeCos[i] >= 0) loadFloat(location_u_Light_innerConeCos[i], l.innerConeCos);
-            if (location_u_Light_outerConeCos[i] >= 0) loadFloat(location_u_Light_outerConeCos[i], l.outerConeCos);
-            if (location_u_Light_type[i] >= 0) loadInt(location_u_Light_type[i], l.type);
+    public void load_u_Lights(List<RenderLight> list) {
+        Field[] fields = UniformLight.class.getDeclaredFields();
+
+        for (int i = 0; i < list.size(); ) {
+            RenderLight rlight = list.get(i);
+            for (int j = 0; j < fields.length; j++) {
+                Field field = fields[j];
+                String uniformName = "u_Lights[" + i + "]." + field.getName();
+                try {
+                    //setUniform(uniformName, field.get(rlight.getUniformLight()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            i++;
         }
     }
 

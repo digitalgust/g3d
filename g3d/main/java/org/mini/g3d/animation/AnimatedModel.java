@@ -140,7 +140,7 @@ public class AnimatedModel extends Entity implements Cloneable {
         if (aniGroup != null) {
             AniClip clip = aniGroup.getAniClips().get(clipIndex);
             elapsedTime = (elapsedTime % (clip.endAt - clip.beginAt));
-            int curKF = clip.begin + (int) (elapsedTime / aniGroup.getFpt());
+            int curKF = clip.begin + Math.round(elapsedTime / aniGroup.getFpt());
             if (curKF < clip.begin) {
                 curKF = clip.begin;
             }
@@ -167,7 +167,7 @@ public class AnimatedModel extends Entity implements Cloneable {
                 if (att.model.aniGroup != null) {
                     AniClip clip = att.model.aniGroup.getAniClips().get(att.model.clipIndex);
                     e = (e % (clip.endAt - clip.beginAt));
-                    int kf = clip.begin + (int) (e / att.model.aniGroup.getFpt());
+                    int kf = clip.begin + Math.round(e / att.model.aniGroup.getFpt());
                     if (kf < clip.begin) kf = clip.begin;
                     if (kf >= att.model.aniGroup.getKeyFrameMax()) kf = clip.begin;
                     att.curKF = kf;

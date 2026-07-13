@@ -64,7 +64,7 @@ public class ExportJointsKeyFrameMatrics extends GApplication {
 
         String gltffn = gltf.getSource();
         gltffn = fixFileName(gltffn);
-        String jointfn = gltffn + ".jointmat";
+        String jointfn = gltffn + EXT_JOINT_MAT;
         String appRoot = GCallBack.getInstance().getApplication().getSaveRoot();
         File file = new File(appRoot + "/" + jointfn);
 
