@@ -8,6 +8,7 @@ import org.mini.nanovg.Nanovg;
 public class WButton extends Widget {
 
     static final float[] RED = {1.f, 0.1f, 0.1f, .8f};
+    static final float FULL_TURN_RADIANS = (float) (Math.PI * 2.0);
 
     GImage icon;
     String text;
@@ -17,6 +18,9 @@ public class WButton extends Widget {
     int redPoint = 0;
     boolean border = false;
     boolean hideText = false;
+    float rotationTurnsPerSecond = 0.0f;
+    float rotationRadians = 0f;
+    long lastRotationTime = System.nanoTime();
 
 
     public WButton(String iconPath, String text, float left, float top, float w, float h) {
@@ -34,7 +38,8 @@ public class WButton extends Widget {
     @Override
     public boolean paint(long vg) {
         if (icon != null) {
-            GToolkit.drawImage(vg, icon, getX(), getY(), w, h, isBorder(), imgAlpha);
+            updateRotationAngle(System.nanoTime());
+            drawRotatedImage(vg);
         }
         if (text != null && !hideText) {
             GToolkit.drawTextLineWithShadow(vg, getX() + w / 2, getY() + h, text, 14, color, Nanovg.NVG_ALIGN_CENTER | Nanovg.NVG_ALIGN_TOP, GToolkit.getStyle().getTextShadowColor(), 3f);
@@ -124,6 +129,45 @@ public class WButton extends Widget {
 
     public boolean isHideText() {
         return hideText;
+    }
+
+    public void setRotationTurnsPerSecond(float rotationTurnsPerSecond) {
+        updateRotationAngle(System.nanoTime());
+        this.rotationTurnsPerSecond = rotationTurnsPerSecond;
+    }
+
+    public float getRotationTurnsPerSecond() {
+        return rotationTurnsPerSecond;
+    }
+
+    public void setRotationDegreesPerSecond(float rotationDegreesPerSecond) {
+        setRotationTurnsPerSecond(rotationDegreesPerSecond / 360f);
+    }
+
+    public float getRotationDegreesPerSecond() {
+        return rotationTurnsPerSecond * 360f;
+    }
+
+    private void drawRotatedImage(long vg) {
+        float centerX = getX() + w * 0.5f;
+        float centerY = getY() + h * 0.5f;
+        Nanovg.nvgSave(vg);
+        Nanovg.nvgTranslate(vg, centerX, centerY);
+        Nanovg.nvgRotate(vg, rotationRadians);
+        GToolkit.drawImage(vg, icon, -w * 0.5f, -h * 0.5f, w, h, isBorder(), imgAlpha);
+        Nanovg.nvgRestore(vg);
+    }
+
+    private void updateRotationAngle(long now) {
+        float deltaSeconds = (now - lastRotationTime) / 1000000000f;
+        lastRotationTime = now;
+        if (deltaSeconds <= 0f || rotationTurnsPerSecond == 0f) {
+            return;
+        }
+        rotationRadians += deltaSeconds * rotationTurnsPerSecond * FULL_TURN_RADIANS;
+        if (rotationRadians >= FULL_TURN_RADIANS || rotationRadians <= -FULL_TURN_RADIANS) {
+            rotationRadians %= FULL_TURN_RADIANS;
+        }
     }
 
 }
