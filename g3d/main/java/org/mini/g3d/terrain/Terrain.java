@@ -10,6 +10,8 @@ import org.mini.g3d.core.vector.Vector3f;
 import org.mini.glwrap.GLUtil;
 import org.mini.util.SysLog;
 
+import java.util.Arrays;
+
 public class Terrain {
     public static final float DEFAULT_MAP_SCALE = 2;
 
@@ -26,6 +28,8 @@ public class Terrain {
     private float mapScale = DEFAULT_MAP_SCALE;
 
     private float[][] heights;
+    //索引缓冲中渐隐带(四面最底格)的起始下标, 之前为不透明部分
+    private int fadeIndexStart;
 
     private Vector3f min, max;
     Loader loader;
@@ -82,6 +86,10 @@ public class Terrain {
         return blendMap;
     }
 
+    public int getFadeIndexStart() {
+        return fadeIndexStart;
+    }
+
 
     /**
      * 根据地图数据,生成一个网格地图
@@ -120,6 +128,9 @@ public class Terrain {
         float[] vertices = new float[count * 3];
         float[] normals = new float[count * 3];
         float[] textureCoords = new float[count * 2];
+        //每顶点alpha, 默认不透明, 侧面最底行为0, 使最底格自上而下渐变透明
+        float[] alphas = new float[count];
+        Arrays.fill(alphas, 1f);
         int[] indices = new int[6 * (cols) * (rows) + 6 * (cols + rows) * 4];
 
         int vertexPointer = 0;
@@ -161,6 +172,8 @@ public class Terrain {
                 //uv
                 textureCoords[vertexPointer * 2] = (float) (k) / ((float) cols);
                 textureCoords[vertexPointer * 2 + 1] = (float) zIdx / ((float) rows);
+                //最底行alpha=0, 与上一行之间即最底格渐隐带
+                alphas[vertexPointer] = yIdx == -SIDE_FACE_GRIDS ? 0f : 1f;
                 vertexPointer++;
             }
             //SysLog.info("G3D|" + vertexPointer);
@@ -187,6 +200,8 @@ public class Terrain {
                 //uv
                 textureCoords[vertexPointer * 2] = (float) (xIdx) / ((float) cols);
                 textureCoords[vertexPointer * 2 + 1] = (float) k / ((float) rows);
+                //最底行alpha=0, 与上一行之间即最底格渐隐带
+                alphas[vertexPointer] = yIdx == -SIDE_FACE_GRIDS ? 0f : 1f;
                 vertexPointer++;
             }
             //SysLog.info("G3D|" + vertexPointer);
@@ -209,53 +224,19 @@ public class Terrain {
             }
         }
 
-        int[] eastAndWest = {0, 1, 3, 4};//见前面注释
-        for (int k = 0; k < eastAndWest.length; k++) {
-            int idx = eastAndWest[k];
-            for (int zIdx = 0; zIdx < rows; zIdx++) {
-                int topLeft = (((idx + 1) * (rows + 1)) + zIdx);
-                int bottomLeft = topLeft + 1;
-                int topRight = (((idx) * (rows + 1)) + zIdx);
-                int bottomRight = topRight + 1;
-                indices[pointer++] = vertCnt1 + topLeft;
-                indices[pointer++] = vertCnt1 + bottomLeft;
-                indices[pointer++] = vertCnt1 + topRight;
-                indices[pointer++] = vertCnt1 + topRight;
-                indices[pointer++] = vertCnt1 + bottomLeft;
-                indices[pointer++] = vertCnt1 + bottomRight;
-//                Vector3f p1 = new Vector3f(vertices[(vertCnt1 + topLeft) * 3], vertices[(vertCnt1 + topLeft) * 3 + 1], vertices[(vertCnt1 + topLeft) * 3 + 2]);
-//                Vector3f p2 = new Vector3f(vertices[(vertCnt1 + bottomLeft) * 3], vertices[(vertCnt1 + bottomLeft) * 3 + 1], vertices[(vertCnt1 + bottomLeft) * 3 + 2]);
-//                Vector3f p3 = new Vector3f(vertices[(vertCnt1 + topRight) * 3], vertices[(vertCnt1 + topRight) * 3 + 1], vertices[(vertCnt1 + topRight) * 3 + 2]);
-//                Vector3f p4 = new Vector3f(vertices[(vertCnt1 + bottomRight) * 3], vertices[(vertCnt1 + bottomRight) * 3 + 1], vertices[(vertCnt1 + bottomRight) * 3 + 2]);
-//                SysLog.info("G3D|" + (vertCnt1 + topLeft) + "      " + p1 + " , " + p2 + " , " + p3 + "                     " + p3 + " , " + p2 + " , " + p4);
-            }
-            //SysLog.info("G3D|" + );
-        }
-        //SysLog.info("G3D|======================");
-
-        int[] northAndSouth = {0, 1, 3, 4};//因为两行格子需要三条线,所以跳过边上那条
-        for (int k = 0; k < northAndSouth.length; k++) {
-            int idx = northAndSouth[k];
-            for (int xIdx = 0; xIdx < cols; xIdx++) {
-                int topLeft = (((idx + 1) * (cols + 1)) + xIdx);
-                int topRight = topLeft + 1;
-                int bottomLeft = (((idx) * (cols + 1)) + xIdx);
-                int bottomRight = bottomLeft + 1;
-                indices[pointer++] = vectCnt2 + topLeft;
-                indices[pointer++] = vectCnt2 + bottomLeft;
-                indices[pointer++] = vectCnt2 + topRight;
-                indices[pointer++] = vectCnt2 + topRight;
-                indices[pointer++] = vectCnt2 + bottomLeft;
-                indices[pointer++] = vectCnt2 + bottomRight;
-//                Vector3f p1 = new Vector3f(vertices[(vertCnt1 + topLeft) * 3], vertices[(vertCnt1 + topLeft) * 3 + 1], vertices[(vertCnt1 + topLeft) * 3 + 2]);
-//                Vector3f p2 = new Vector3f(vertices[(vertCnt1 + bottomLeft) * 3], vertices[(vertCnt1 + bottomLeft) * 3 + 1], vertices[(vertCnt1 + bottomLeft) * 3 + 2]);
-//                Vector3f p3 = new Vector3f(vertices[(vertCnt1 + topRight) * 3], vertices[(vertCnt1 + topRight) * 3 + 1], vertices[(vertCnt1 + topRight) * 3 + 2]);
-//                Vector3f p4 = new Vector3f(vertices[(vertCnt1 + bottomRight) * 3], vertices[(vertCnt1 + bottomRight) * 3 + 1], vertices[(vertCnt1 + bottomRight) * 3 + 2]);
-//                SysLog.info("G3D|" + (vectCnt2 + topLeft) + "      " + p1 + " , " + p2 + " , " + p3 + "                     " + p3 + " , " + p2 + " , " + p4);
-
-            }
-            //SysLog.info("G3D|" + );
-        }
+        //东西侧条带: 每条连接相邻两行顶点, idx 0与4为上面一格, 1与3为最底格(渐隐带)
+        //南北侧同构
+        //先发射全部不透明部分
+        pointer = emitEastWestStrip(indices, pointer, 0, vertCnt1);
+        pointer = emitEastWestStrip(indices, pointer, 4, vertCnt1);
+        pointer = emitNorthSouthStrip(indices, pointer, 0, vectCnt2);
+        pointer = emitNorthSouthStrip(indices, pointer, 4, vectCnt2);
+        //最底格渐隐带放在索引缓冲末尾连续存放, 便于渲染时单独一次带混合绘制
+        fadeIndexStart = pointer;
+        pointer = emitEastWestStrip(indices, pointer, 1, vertCnt1);
+        pointer = emitEastWestStrip(indices, pointer, 3, vertCnt1);
+        pointer = emitNorthSouthStrip(indices, pointer, 1, vectCnt2);
+        pointer = emitNorthSouthStrip(indices, pointer, 3, vectCnt2);
 
         min = new Vector3f(0.f, getHeightOfTerrain(0, 0), 0.f);
 
@@ -264,7 +245,49 @@ public class Terrain {
         float maxY = getHeightOfTerrain(maxX, maxZ);
         max = new Vector3f(maxX, maxY, maxZ);
 
-        return loader.loadToVAO(vertices, textureCoords, normals, indices);
+        return loader.loadToVAO(vertices, textureCoords, normals, alphas, indices);
+    }
+
+    /**
+     * 发射东西侧一条竖向条带的索引, 连接顶点行 idx 与 idx+1
+     *
+     * @param vertBase 东西侧顶点在顶点缓冲中的起始序号(vertCnt1)
+     */
+    private int emitEastWestStrip(int[] indices, int pointer, int idx, int vertBase) {
+        for (int zIdx = 0; zIdx < rows; zIdx++) {
+            int topLeft = (((idx + 1) * (rows + 1)) + zIdx);
+            int bottomLeft = topLeft + 1;
+            int topRight = (((idx) * (rows + 1)) + zIdx);
+            int bottomRight = topRight + 1;
+            indices[pointer++] = vertBase + topLeft;
+            indices[pointer++] = vertBase + bottomLeft;
+            indices[pointer++] = vertBase + topRight;
+            indices[pointer++] = vertBase + topRight;
+            indices[pointer++] = vertBase + bottomLeft;
+            indices[pointer++] = vertBase + bottomRight;
+        }
+        return pointer;
+    }
+
+    /**
+     * 发射南北侧一条竖向条带的索引, 连接顶点行 idx 与 idx+1
+     *
+     * @param vertBase 南北侧顶点在顶点缓冲中的起始序号(vectCnt2)
+     */
+    private int emitNorthSouthStrip(int[] indices, int pointer, int idx, int vertBase) {
+        for (int xIdx = 0; xIdx < cols; xIdx++) {
+            int topLeft = (((idx + 1) * (cols + 1)) + xIdx);
+            int topRight = topLeft + 1;
+            int bottomLeft = (((idx) * (cols + 1)) + xIdx);
+            int bottomRight = bottomLeft + 1;
+            indices[pointer++] = vertBase + topLeft;
+            indices[pointer++] = vertBase + bottomLeft;
+            indices[pointer++] = vertBase + topRight;
+            indices[pointer++] = vertBase + topRight;
+            indices[pointer++] = vertBase + bottomLeft;
+            indices[pointer++] = vertBase + bottomRight;
+        }
+        return pointer;
     }
 
 

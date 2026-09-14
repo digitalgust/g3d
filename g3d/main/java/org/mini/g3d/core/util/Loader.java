@@ -92,6 +92,20 @@ public class Loader {
         return new RawModel(vaoID, indices.length, calcBoundingRadius(positions, 3));
     }
 
+    /**
+     * 同上, 额外携带每顶点alpha(属性3), 供地形侧边渐隐带做混合
+     */
+    public RawModel loadToVAO(float[] positions, float[] textureCoords, float[] normals, float[] alphas, int[] indices) {
+        int vaoID = createVAO();
+        bindIndicesBuffer(indices);
+        storeDataInAttributeList(0, 3, positions);
+        storeDataInAttributeList(1, 2, textureCoords);
+        storeDataInAttributeList(2, 3, normals);
+        storeDataInAttributeList(3, 1, alphas);
+        unbindVAO();
+        return new RawModel(vaoID, indices.length, calcBoundingRadius(positions, 3));
+    }
+
     public RawModel loadToVAO(int[] indices, float[] positions, int... lengths) {
         //SysLog.info("G3D|pos,texture,normals,indices: "+positions.length+",\t"+textureCoords.length+",\t"+normals.length+",\t"+indices.length+",\t");
         int vaoID = createVAO();

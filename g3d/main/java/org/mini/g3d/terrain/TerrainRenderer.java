@@ -62,8 +62,23 @@ public class TerrainRenderer extends AbstractRenderer {
         loadModelMatrix(terrain);
         loadDepthBiasMPVMatrix(terrain);
 
-        glDrawElements(GL_TRIANGLES, terrain.getModel().getVertexCount(), GL_UNSIGNED_INT, null, 0);//gust
-        MainFrameBuffer.triangles += terrain.getModel().getVertexCount();
+        RawModel model = terrain.getModel();
+        int fadeStart = terrain.getFadeIndexStart();
+        //不透明部分: 顶面网格与四面侧边的上面一格
+        glDrawElements(GL_TRIANGLES, fadeStart, GL_UNSIGNED_INT, null, 0);
+        MainFrameBuffer.triangles += fadeStart;
+        if (model.getVertexCount() > fadeStart) {
+            //最底格渐隐带: 开混合实现自上而下渐进透明
+            //alpha通道用ONE,ONE让主FBO的alpha保持1, 避免最终nanovg合成时透出UI背景
+            //不写深度, 免得半透明带挡住其后绘制的水面与实体
+            glEnable(GL_BLEND);
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
+            glDepthMask(GL_FALSE);
+            glDrawElements(GL_TRIANGLES, model.getVertexCount() - fadeStart, GL_UNSIGNED_INT, null, fadeStart * 4);
+            glDepthMask(GL_TRUE);
+            glDisable(GL_BLEND);
+            MainFrameBuffer.triangles += model.getVertexCount() - fadeStart;
+        }
         unbindTexturedModel();
         //}
 
@@ -77,6 +92,7 @@ public class TerrainRenderer extends AbstractRenderer {
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
         glEnableVertexAttribArray(2);
+        glEnableVertexAttribArray(3);
 
         bindTextures(terrain);
         shader.loadShineVariables(1, 0);
@@ -106,6 +122,7 @@ public class TerrainRenderer extends AbstractRenderer {
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
+        glDisableVertexAttribArray(3);
         glBindVertexArray(0);
     }
 

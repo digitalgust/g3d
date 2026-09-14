@@ -84,14 +84,15 @@ public class MasterRenderer extends AbstractRenderer {
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "after renderMainPass enableCulling");
 
         // 先渲染背景与不透明基础内容
+        // 天空盒必须先于地形: 地形侧边渐隐带靠alpha混合溶入天空, 后画会混到清屏色上
         // #region debug-point E: detect whether an earlier pass already left a pending GL error
-//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "before renderMainPass terrainRenderer");
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "before renderMainPass skyboxRenderer");
         // #endregion
-        terrainRenderer.render(scene);
-//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass terrainRenderer");
-
         skyboxRenderer.render(scene);
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass skyboxRenderer");
+
+        terrainRenderer.render(scene);
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass terrainRenderer");
 
         waterRenderer.render(scene.getWaters(), scene.getCamera(), scene.getSun().getDirection());
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass waterRenderer");
@@ -162,9 +163,10 @@ public class MasterRenderer extends AbstractRenderer {
         waterFbos.bindReflectionFrameBuffer();
         prepare();
         scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
+        //天空盒先画, 地形侧边渐隐带在反射中也要混合到天空上
+        skyboxRenderer.render(scene);
         enitiyRenderer.render(scene);
         terrainRenderer.render(scene);
-        skyboxRenderer.render(scene);
         waterFbos.unbindCurrentFrameBuffer();
         scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
     }

@@ -86,7 +86,7 @@ public class GamePanel extends GOpenGLPanel {
 
         picker = new MousePicker(scene);
 
-        shodowModel = loader.loadTexturedModel("/res/models/sball.obj", "/res/textures/sball.png", 1);
+        shodowModel = loader.loadTexturedModel("/res/models/sball.ply", "/res/textures/sball.png", 1);
         Random random = new Random();
 
 
@@ -109,16 +109,16 @@ public class GamePanel extends GOpenGLPanel {
 
         // Models
         // Environment Models
-        TexturedModel tree = loadTexturedModel("/res/models/pine.obj", "/res/textures/pine.png", 1, loader);
-        TexturedModel fern = loadTexturedModel("/res/models/fern.obj", "/res/textures/fern_atlas_texture.png", 2, loader);
+        TexturedModel tree = loadTexturedModel("/res/models/pine.ply", "/res/textures/pine.png", 1, loader);
+        TexturedModel fern = loadTexturedModel("/res/models/fern.ply", "/res/textures/fern_atlas_texture.png", 2, loader);
         fern.getTexture().setHasTransparency(true);
-        TexturedModel grass = loadTexturedModel("/res/models/grassModel.obj", "/res/textures/diffuse.png", 3, loader);
+        TexturedModel grass = loadTexturedModel("/res/models/grassModel.ply", "/res/textures/diffuse.png", 3, loader);
         grass.getTexture().setHasTransparency(true);
         grass.getTexture().setUseFakeLighting(true);
-        TexturedModel flower = loadTexturedModel("/res/models/grassModel.obj", "/res/textures/flower.png", 1, loader);
+        TexturedModel flower = loadTexturedModel("/res/models/grassModel.ply", "/res/textures/flower.png", 1, loader);
         flower.getTexture().setHasTransparency(true);
         flower.getTexture().setUseFakeLighting(true);
-        TexturedModel lamp = loadTexturedModel("/res/models/lamp.obj", "/res/textures/lamp.png", 1, loader);
+        TexturedModel lamp = loadTexturedModel("/res/models/lamp.ply", "/res/textures/lamp.png", 1, loader);
         float mapSize = terrain.getMapScale();
         float tx, ty, tz;
         for (int i = 0; i < 30; i++) {

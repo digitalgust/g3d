@@ -10,6 +10,7 @@
 in vec3 position;
 in vec2 textureCoordinates;
 in vec3 normal;
+in float alphaValue;
 
 out vec2 pass_textureCoordinates;
 out vec3 surfaceNormal;
@@ -20,6 +21,7 @@ out vec4 shadowMapCoord;
 out vec3 pass_pos;
 out float distanceToCam;
 out float angleToXZ;
+out float pass_alpha;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
@@ -42,6 +44,7 @@ void main(void) {
     vec4 positionRelativeToCam = viewMatrix * worldPosition;
     gl_Position = projectionMatrix * positionRelativeToCam;
     pass_textureCoordinates = textureCoordinates;
+    pass_alpha = alphaValue;
 
     shadowMapCoord = depthBiasMVPMatrix * vec4(position, 1.0);
 

@@ -15,6 +15,7 @@ in float visibility;
 in vec4 shadowMapCoord;
 in float distanceToCam;
 in float angleToXZ;
+in float pass_alpha;
 
 out vec4 out_Color;
 
@@ -177,6 +178,8 @@ void main(void) {
 
     out_Color = vec4(totalDiffuse, 1.0) * totalColour + vec4(totalSpecular, 1.0);
     out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
+    //侧边最底格渐隐带: alpha自上而下1->0, 由渲染器对该段单独开启混合
+    out_Color.a *= pass_alpha;
 
     //    vec3 worldPos = pass_pos;// 想办法弄到当前片元的世界坐标，可以是深度重建或者读坐标纹理
     //    vec4 cloud = getCloud(noisetex, worldPos, cameraPos, lightPos);// 云颜色
