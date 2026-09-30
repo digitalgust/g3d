@@ -25,6 +25,9 @@ public class SkyboxRenderer extends AbstractRenderer {
         Matrix4f projectionMatrix = scene.getCamera().getSkyBoxProjectionMatrix();
         shader.loadProjectionMatrix(projectionMatrix);
         shader.loadFogColour(scene.getFogColor());
+        // 天空盒不写深度: 天空像素保持清除值1.0, 后处理(体积雾)靠深度区分天空/场景才稳定
+        // 天空盒永远第一个画, 也没有物体会被它遮住, 不写深度无副作用
+        glDepthMask(0);
         glBindVertexArray(box.getVaoID());
         glEnableVertexAttribArray(0);
         glActiveTexture(GL_TEXTURE0);
@@ -32,6 +35,7 @@ public class SkyboxRenderer extends AbstractRenderer {
         glDrawArrays(GL_TRIANGLES, 0, box.getVertexCount());
         glDisableVertexAttribArray(0);
         glBindVertexArray(0);
+        glDepthMask(1);
         shader.stop();
     }
 

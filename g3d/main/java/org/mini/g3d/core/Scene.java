@@ -91,7 +91,18 @@ public class Scene {
     public Light sun;
     DayAndNight dayAndNight;
 
+    //体积雾的用户总开关(设置界面), 与mapVolumetricFog相与后生效
     boolean volumetricFog = false;
+    //每张地图自己的雾开关(地图json配置)
+    boolean mapVolumetricFog = false;
+    //云海式体积雾: 地图矩形fogArea(minX,minZ,maxX,maxZ)之外是云海,
+    //出界fogEdgeFade单位内增浓到fogDensity, 天空视线与fogHeight平面的交点用于判定,
+    //场景像素低于fogHeight时在fogDepthFade深度内溶入云中(云的厚度感)
+    float fogDensity = 0.95f;
+    float[] fogArea = new float[]{0f, 0f, 100f, 100f};
+    float fogEdgeFade = 25f;
+    float fogHeight = 0f;
+    float fogDepthFade = 20f;
 
 
     //用于标志当前是否是在进行阴影渲染
@@ -504,5 +515,56 @@ public class Scene {
 
     public void setVolumetricFog(boolean volumetricFog) {
         this.volumetricFog = volumetricFog;
+    }
+
+    public boolean isMapVolumetricFog() {
+        return mapVolumetricFog;
+    }
+
+    public void setMapVolumetricFog(boolean mapVolumetricFog) {
+        this.mapVolumetricFog = mapVolumetricFog;
+    }
+
+    public float getFogDensity() {
+        return fogDensity;
+    }
+
+    public void setFogDensity(float fogDensity) {
+        this.fogDensity = fogDensity;
+    }
+
+    public float[] getFogArea() {
+        return fogArea;
+    }
+
+    public void setFogArea(float minX, float minZ, float maxX, float maxZ) {
+        this.fogArea[0] = minX;
+        this.fogArea[1] = minZ;
+        this.fogArea[2] = maxX;
+        this.fogArea[3] = maxZ;
+    }
+
+    public float getFogEdgeFade() {
+        return fogEdgeFade;
+    }
+
+    public void setFogEdgeFade(float fogEdgeFade) {
+        this.fogEdgeFade = fogEdgeFade;
+    }
+
+    public float getFogHeight() {
+        return fogHeight;
+    }
+
+    public void setFogHeight(float fogHeight) {
+        this.fogHeight = fogHeight;
+    }
+
+    public float getFogDepthFade() {
+        return fogDepthFade;
+    }
+
+    public void setFogDepthFade(float fogDepthFade) {
+        this.fogDepthFade = fogDepthFade;
     }
 }

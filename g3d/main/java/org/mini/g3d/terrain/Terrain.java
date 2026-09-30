@@ -172,7 +172,8 @@ public class Terrain {
                 //uv
                 textureCoords[vertexPointer * 2] = (float) (k) / ((float) cols);
                 textureCoords[vertexPointer * 2 + 1] = (float) zIdx / ((float) rows);
-                //最底行alpha=0, 与上一行之间即最底格渐隐带
+                //最底行alpha=0, 与上一行之间即最底格渐隐带,
+                //渐隐在shader里用多级点透实现(见terrainFragment.glsl), 保留片元不透明且写深度
                 alphas[vertexPointer] = yIdx == -SIDE_FACE_GRIDS ? 0f : 1f;
                 vertexPointer++;
             }
@@ -200,7 +201,8 @@ public class Terrain {
                 //uv
                 textureCoords[vertexPointer * 2] = (float) (xIdx) / ((float) cols);
                 textureCoords[vertexPointer * 2 + 1] = (float) k / ((float) rows);
-                //最底行alpha=0, 与上一行之间即最底格渐隐带
+                //最底行alpha=0, 与上一行之间即最底格渐隐带,
+                //渐隐在shader里用多级点透实现(见terrainFragment.glsl), 保留片元不透明且写深度
                 alphas[vertexPointer] = yIdx == -SIDE_FACE_GRIDS ? 0f : 1f;
                 vertexPointer++;
             }

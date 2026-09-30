@@ -7,6 +7,12 @@
 
 #define PI 3.1415926535897932384626433832795
 
+//2x2 Bayer阈值(棋盘), 与4x4级联可得到16级有序抖动
+float bayer2(vec2 a) {
+    a = floor(a);
+    return fract(a.x / 2.0 + a.y * a.y * 0.75);
+}
+
 in vec2 pass_textureCoordinates;
 in vec3 surfaceNormal;
 in vec3 toLightVector[MAX_LIGHT];
@@ -178,22 +184,34 @@ void main(void) {
 
     out_Color = vec4(totalDiffuse, 1.0) * totalColour + vec4(totalSpecular, 1.0);
     out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
-    //侧边最底格渐隐带: alpha自上而下1->0, 由渲染器对该段单独开启混合
-    out_Color.a *= pass_alpha;
+    //裙边渐隐带改为多级点透(有序抖动): 保留的片元完全不透明且写深度,
+    //丢弃的片元不碰帧缓冲, 不产生alpha混合不写深度的深度缓冲问题,
+    //FBO的alpha也保持1(避免nanovg合成透出UI背景), 坐标先mod 4防止大坐标下浮点精度破坏图案
+    if (pass_alpha < 1.0) {
+        vec2 fp = mod(gl_FragCoord.xy, 4.0);
+        float threshold = bayer2(0.5 * fp) * 0.25 + bayer2(fp); // 4x4 Bayer, 16级
+        if (pass_alpha <= threshold) {
+            discard;
+        }
+    }
 
     //    vec3 worldPos = pass_pos;// 想办法弄到当前片元的世界坐标，可以是深度重建或者读坐标纹理
     //    vec4 cloud = getCloud(noisetex, worldPos, cameraPos, lightPos);// 云颜色
     //    out_Color.rgb = out_Color.rgb*(1.0 - cloud.a) + cloud.rgb;// 混色
 
-    //如果这个面在xz平面30度以上，并且距离相机小于透明距离阈值，则使用棋盘格透明效果
+    //陡峭的地表网格(法线与Y轴夹角大于75度)且靠近相机时, 用棋盘格点透, 避免挡住角色
     //注意：angleToXZ实际上是法线与Y轴的夹角
-    if (angleToXZ > PI / 6.0) {  // PI/6.0 = 30度
+    //裙边(侧面)例外: 裙边法线纯水平(y恒为0), 而地表法线y分量恒为正(calculateNormal固定y=2),
+    //用normal.y是否为0判别, 裙边不需要也不应该点透
+    if (angleToXZ > PI * 5.0 / 12.0) {  // 75度
         if (distanceToCam < transparencyDistance) {
-            // 创建棋盘格图案
-            float mx = mod(gl_FragCoord.x, 2.0);
-            float my = mod(gl_FragCoord.y, 2.0);
-            if ((mx < 1.0 && my < 1.0) || (mx >= 1.0 && my >= 1.0)) {
-                discard; // 丢弃片段，形成透明效果
+            if (abs(surfaceNormal.y) > 1e-5) {
+                // 创建棋盘格图案
+                float mx = mod(gl_FragCoord.x, 2.0);
+                float my = mod(gl_FragCoord.y, 2.0);
+                if ((mx < 1.0 && my < 1.0) || (mx >= 1.0 && my >= 1.0)) {
+                    discard; // 丢弃片段，形成透明效果
+                }
             }
         }
     }

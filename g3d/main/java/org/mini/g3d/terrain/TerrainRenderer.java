@@ -63,22 +63,10 @@ public class TerrainRenderer extends AbstractRenderer {
         loadDepthBiasMPVMatrix(terrain);
 
         RawModel model = terrain.getModel();
-        int fadeStart = terrain.getFadeIndexStart();
-        //不透明部分: 顶面网格与四面侧边的上面一格
-        glDrawElements(GL_TRIANGLES, fadeStart, GL_UNSIGNED_INT, null, 0);
-        MainFrameBuffer.triangles += fadeStart;
-        if (model.getVertexCount() > fadeStart) {
-            //最底格渐隐带: 开混合实现自上而下渐进透明
-            //alpha通道用ONE,ONE让主FBO的alpha保持1, 避免最终nanovg合成时透出UI背景
-            //不写深度, 免得半透明带挡住其后绘制的水面与实体
-            glEnable(GL_BLEND);
-            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
-            glDepthMask(GL_FALSE);
-            glDrawElements(GL_TRIANGLES, model.getVertexCount() - fadeStart, GL_UNSIGNED_INT, null, fadeStart * 4);
-            glDepthMask(GL_TRUE);
-            glDisable(GL_BLEND);
-            MainFrameBuffer.triangles += model.getVertexCount() - fadeStart;
-        }
+        //整块不透明绘制, 裙边的渐隐带在shader里用多级点透(discard)实现:
+        //保留的片元不透明且写深度, 不再需要alpha混合与关深度写, 避免深度缓冲被半透明带污染
+        glDrawElements(GL_TRIANGLES, model.getVertexCount(), GL_UNSIGNED_INT, null, 0);
+        MainFrameBuffer.triangles += model.getVertexCount();
         unbindTexturedModel();
         //}
 

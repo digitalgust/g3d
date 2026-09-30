@@ -3,9 +3,7 @@ package org.mini.g3d.fog;
 import org.mini.g3d.core.ShaderProgram;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
-import org.mini.glwrap.GLUtil;
-
-import static org.mini.gl.GL.*;
+import org.mini.g3d.core.vector.Vector4f;
 
 public class VolumetricFogShader extends ShaderProgram {
 
@@ -16,12 +14,12 @@ public class VolumetricFogShader extends ShaderProgram {
     private int location_viewMatrix;
     private int location_fogColor;
     private int location_fogDensity;
-    private int location_fogGradient;
-    private int location_nearPlane;
-    private int location_farPlane;
+    private int location_fogArea;
+    private int location_fogEdgeFade;
+    private int location_fogHeight;
+    private int location_fogDepthFade;
     private int location_time;
     private int location_cameraPosition;
-    private int location_noiseTextureSize;
 
     public VolumetricFogShader() {
         super(VERTEX_FILE, FRAGMENT_FILE);
@@ -31,17 +29,14 @@ public class VolumetricFogShader extends ShaderProgram {
     protected void getAllUniformLocations() {
         location_projectionMatrix = super.getUniformLocation("projectionMatrix");
         location_viewMatrix = super.getUniformLocation("viewMatrix");
-        //GLUtil.checkGlError(this.getClass().getCanonicalName());
         location_fogColor = super.getUniformLocation("fogColor");
         location_fogDensity = super.getUniformLocation("fogDensity");
-        location_fogGradient = super.getUniformLocation("fogGradient");
-        location_nearPlane = super.getUniformLocation("nearPlane");
-        //GLUtil.checkGlError(this.getClass().getCanonicalName());
-        location_farPlane = super.getUniformLocation("farPlane");
+        location_fogArea = super.getUniformLocation("fogArea");
+        location_fogEdgeFade = super.getUniformLocation("fogEdgeFade");
+        location_fogHeight = super.getUniformLocation("fogHeight");
+        location_fogDepthFade = super.getUniformLocation("fogDepthFade");
         location_time = super.getUniformLocation("time");
         location_cameraPosition = super.getUniformLocation("cameraPosition");
-        location_noiseTextureSize = super.getUniformLocation("noiseTextureSize");
-        //GLUtil.checkGlError(this.getClass().getCanonicalName());
     }
 
     @Override
@@ -66,13 +61,20 @@ public class VolumetricFogShader extends ShaderProgram {
         super.loadFloat(location_fogDensity, density);
     }
 
-    public void loadFogGradient(float gradient) {
-        super.loadFloat(location_fogGradient, gradient);
+    public void loadFogArea(Vector4f area) {
+        super.loadVector4f(location_fogArea, area);
     }
 
-    public void loadPlanes(float nearPlane, float farPlane) {
-        super.loadFloat(location_nearPlane, nearPlane);
-        super.loadFloat(location_farPlane, farPlane);
+    public void loadFogEdgeFade(float edgeFade) {
+        super.loadFloat(location_fogEdgeFade, edgeFade);
+    }
+
+    public void loadFogHeight(float height) {
+        super.loadFloat(location_fogHeight, height);
+    }
+
+    public void loadFogDepthFade(float depthFade) {
+        super.loadFloat(location_fogDepthFade, depthFade);
     }
 
     public void loadTime(float time) {
@@ -83,15 +85,10 @@ public class VolumetricFogShader extends ShaderProgram {
         super.loadVector(location_cameraPosition, position);
     }
 
-    public void loadNoiseTextureSize(float size) {
-        super.loadFloat(location_noiseTextureSize, size);
-    }
-
     public void connectTextureUnits() {
         // 交换depthTexture和sceneTexture的绑定单元，与渲染时的绑定顺序一致
         super.loadInt(super.getUniformLocation("sceneTexture"), 0);  // 场景纹理对应单元0
         super.loadInt(super.getUniformLocation("depthTexture"), 1);  // 深度纹理对应单元1
         super.loadInt(super.getUniformLocation("perlinNoise"), 2);
-//        GLUtil.checkGlError(this.getClass().getCanonicalName());
     }
 }

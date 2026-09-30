@@ -53,7 +53,7 @@ public class Sound {
         return instance;
     }
 
-    public void startBgm(String pathInJar) {
+    public synchronized void startBgm(String pathInJar) {
         if (pathInJar.equals(bgmName)) {
             return;
         }
@@ -72,9 +72,16 @@ public class Sound {
         }
     }
 
-    public void stopBgm() {
+    /**
+     * Stops the BGM and releases it: the native sound is uninitialized and
+     * removed from the engine registry, so its decoder and the full audio
+     * bytes become collectible. BGM data is the largest per-switch
+     * allocation, keep it only while it plays.
+     */
+    public synchronized void stopBgm() {
         if (bgm != null) {
             bgm.stop();
+            bgm.close();
             bgm = null;
             bgmName = null;
         }
@@ -194,6 +201,49 @@ public class Sound {
                 playing.remove(i);
             }
         }
+        releaseOrphanSounds();
+    }
+
+    /**
+     * Auto-release: closes engine-registered sounds this object no longer
+     * references (not bgm, not in a pool, not playing). They are sounds whose
+     * owner was dropped without close() - each one pins its decoder and the
+     * full decoded/file bytes. Runs on every play(); the keep-set is small
+     * compared to the registry. Only Sound creates sounds on its engine, so
+     * anything outside the keep-set is by definition garbage.
+     */
+    private void releaseOrphanSounds() {
+        if (maEngine == null) {
+            return;
+        }
+        for (MaSound s : maEngine.snapshotSounds()) {
+            if (s == bgm || playingContains(s)) {
+                continue;
+            }
+            if (!inEffectPool(s)) {
+                s.close();
+            }
+        }
+    }
+
+    private boolean playingContains(MaSound s) {
+        for (int i = 0, n = playing.size(); i < n; i++) {
+            if (playing.get(i).sound == s) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean inEffectPool(MaSound s) {
+        for (List<MaSound> pool : effectPool.values()) {
+            for (int i = 0, n = pool.size(); i < n; i++) {
+                if (pool.get(i) == s) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private synchronized void stopAllEffect() {
@@ -271,6 +321,11 @@ public class Sound {
 
     public synchronized void clearCache() {
         stopAllEffect();
+        for (List<MaSound> pool : effectPool.values()) {
+            for (int i = 0, n = pool.size(); i < n; i++) {
+                pool.get(i).close();
+            }
+        }
         effectPool.clear();
         audios.clear();
     }

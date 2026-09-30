@@ -109,14 +109,21 @@ public class MasterRenderer extends AbstractRenderer {
         particleRenderer.render(ParticleMaster.getParticles(), scene);
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass particleRenderer");
 
-        if (scene.isVolumetricFog()) {
+        if (scene.isVolumetricFog() && scene.isMapVolumetricFog()) {
             // 在主帧缓冲结束后渲染体积雾效
             if (fogRenderer == null) {
                 fogRenderer = new VolumetricFogRenderer(scene.getCamera().getProjectionMatrix());
 //                GLUtil.checkGlError(this.getClass().getCanonicalName() + "after create fogRenderer");
             }
-            // 启用混合
-            fogRenderer.render(scene, mainFbo.getColorTexture(), mainFbo.getDepthTexture());
+            // 雾色跟随场景雾色(昼夜系统每帧在更新它), 云海范围和浓度来自地图配置
+            fogRenderer.setFogColor(scene.getFogColor());
+            fogRenderer.setFogDensity(scene.getFogDensity());
+            float[] area = scene.getFogArea();
+            fogRenderer.setFogArea(area[0], area[1], area[2], area[3]);
+            fogRenderer.setFogEdgeFade(scene.getFogEdgeFade());
+            fogRenderer.setFogHeight(scene.getFogHeight());
+            fogRenderer.setFogDepthFade(scene.getFogDepthFade());
+            fogRenderer.render(scene, mainFbo);
 //            GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass fogRenderer");
         }
         guiRenderer.render(scene.getGuis());
