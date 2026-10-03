@@ -7,7 +7,7 @@ import org.mini.g3d.core.vector.*;
 import org.mini.g3d.core.DisplayManager;
 import org.mini.g3d.core.Camera;
 import org.mini.glwrap.GLFrameBuffer;
-import org.mini.glwrap.GLUtil;
+import org.mini.util.SysLog;
 
 import static org.mini.gl.GL.*;
 
@@ -46,6 +46,7 @@ public class VolumetricFogRenderer {
 
     // 雾的着色结果先画到这里, 再拷回主FBO
     private GLFrameBuffer fogFbo;
+    private boolean available;
 
     private final Vector3f fogColor = new Vector3f(0.8f, 0.85f, 0.9f);
     private final Vector4f fogArea = new Vector4f(0f, 0f, 100f, 100f); //地图矩形minX,minZ,maxX,maxZ, 矩形外是云海
@@ -92,6 +93,17 @@ public class VolumetricFogRenderer {
         copyShader = new ScreenCopyShader();
 
         noiseTextureSize = 64.0f;
+        // 编译/链接失败时不能继续雾化并拷回，否则会用空纹理覆盖正常场景。
+        int[] linkStatus = new int[1];
+        glGetProgramiv(shader.getProgramId(), GL_LINK_STATUS, linkStatus, 0);
+        boolean fogLinked = linkStatus[0] != GL_FALSE;
+        glGetProgramiv(copyShader.getProgramId(), GL_LINK_STATUS, linkStatus, 0);
+        available = fogLinked && linkStatus[0] != GL_FALSE;
+        if (!available) {
+            perlinNoiseTexture = 0;
+            SysLog.warn("G3D|Volumetric fog disabled: shader link failed; keeping original scene.");
+            return;
+        }
         perlinNoiseTexture = loader.loadTexture3D("/org/mini/g3d/res/perlinnoise64.dat", (int) noiseTextureSize, (int) noiseTextureSize, (int) noiseTextureSize);
 
         shader.start();
@@ -109,9 +121,15 @@ public class VolumetricFogRenderer {
      * 在主Fbo的begin..end之间调用
      */
     public void render(Scene scene, GLFrameBuffer mainFbo) {
+        if (!available) {
+            return;
+        }
         time += DisplayManager.getFrameTimeSeconds();
 
         ensureFogFbo(mainFbo.getTexWidth(), mainFbo.getTexHeight());
+        if (!available) {
+            return;
+        }
 
         Camera camera = scene.getCamera();
 
@@ -176,12 +194,28 @@ public class VolumetricFogRenderer {
         if (fogFbo != null && fogFbo.getTexWidth() == w && fogFbo.getTexHeight() == h) {
             return;
         }
-        if (fogFbo != null) {
-            fogFbo.delete();
+        // GLFrameBuffer.gl_init()/delete() 会绑定默认FBO。此处还在mainFbo.begin/end
+        // 之间，必须恢复主FBO，否则第一次渲染或尺寸变化时会把结果拷到屏幕上。
+        int[] previousFbo = new int[1];
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, previousFbo, 0);
+        try {
+            if (fogFbo != null) {
+                fogFbo.delete();
+            }
+            // 无需深度附着, 颜色纹理即可; 尺寸用主Fbo的纹理尺寸
+            fogFbo = new GLFrameBuffer(w, h, 1f, false);
+            fogFbo.gl_init();
+            fogFbo.begin();
+            int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            fogFbo.end();
+            if (status != GL_FRAMEBUFFER_COMPLETE) {
+                available = false;
+                SysLog.warn("G3D|Volumetric fog disabled: framebuffer status=" + status
+                        + "; keeping original scene.");
+            }
+        } finally {
+            glBindFramebuffer(GL_FRAMEBUFFER, previousFbo[0]);
         }
-        // 无需深度附着, 颜色纹理即可; 尺寸用主Fbo的纹理尺寸
-        fogFbo = new GLFrameBuffer(w, h, 1f, false);
-        fogFbo.gl_init();
     }
 
     public void setFogColor(Vector3f color) {

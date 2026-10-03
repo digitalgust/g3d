@@ -263,7 +263,7 @@ public abstract class ShaderProgram {
     public static String adapteOpenGLorES(String shaderBytes) {
         if (DisplayManager.getGlVersion().toLowerCase().contains("opengl es")) {
             shaderBytes = shaderBytes.replace("#version 330",
-                    "#version 300 es\r\nprecision highp float;\r\nprecision highp sampler2DShadow;\r\nprecision highp sampler2D;\r\nprecision highp samplerCube;\r\n");
+                    "#version 300 es\r\nprecision highp float;\r\nprecision highp sampler2DShadow;\r\nprecision highp sampler2D;\r\nprecision highp sampler3D;\r\nprecision highp samplerCube;\r\n");
 
         }
         return shaderBytes;
