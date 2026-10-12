@@ -105,12 +105,12 @@ public class MasterRenderer extends AbstractRenderer {
         animatedModelRenderer.render(scene.getCamera(), scene.getAnimatedModelsIterator());
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass animatedModelRenderer");
 
-        // 粒子（本身包含混合控制）
-        particleRenderer.render(ParticleMaster.getParticles(), scene);
-//        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass particleRenderer");
-
-        if (scene.isVolumetricFog() && scene.isMapVolumetricFog()) {
-            // 在主帧缓冲结束后渲染体积雾效
+        // 体积雾放在粒子之前: 粒子(技能特效/飘血数字)不写深度, 若先画粒子后画雾,
+        // 雾按深度判断会把特效像素背后的天空当云海, 整片云画到特效上, 叠云部分被洗白
+        // 包级总开关优先于用户设置和地图配置。关闭时不创建renderer，
+        // 因而不会编译雾效/拷贝shader、上传3D噪声纹理或分配雾效FBO。
+        if (DisplayManager.isVolumetricFogEnabled() && scene.isVolumetricFog() && scene.isMapVolumetricFog()) {
+            // 在主帧缓冲begin/end之间渲染体积雾效
             if (fogRenderer == null) {
                 fogRenderer = new VolumetricFogRenderer(scene.getCamera().getProjectionMatrix());
 //                GLUtil.checkGlError(this.getClass().getCanonicalName() + "after create fogRenderer");
@@ -126,6 +126,11 @@ public class MasterRenderer extends AbstractRenderer {
             fogRenderer.render(scene, mainFbo);
 //            GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass fogRenderer");
         }
+
+        // 粒子（本身包含混合控制）
+        particleRenderer.render(ParticleMaster.getParticles(), scene);
+//        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass particleRenderer");
+
         guiRenderer.render(scene.getGuis());
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass guiRenderer");
 

@@ -7,22 +7,31 @@ package org.mini.g3d.core;
 
 import org.mini.util.SysLog;
 
+import java.io.InputStream;
 import java.util.Properties;
 
 import static org.mini.gl.GL.*;
 
 public class DisplayManager {
     public static String G3D_VERSION = "1.0.0.0";
+    private static final boolean volumetricFogEnabled;
 
     static {
         Properties prop = new Properties();
-        try {
-            prop.load(
-                    DisplayManager.class.getClassLoader().getResourceAsStream("/org/mini/g3d/res/version.properties"));
-            G3D_VERSION = prop.getProperty("version");
+        boolean fogEnabled = true;
+        try (InputStream input = DisplayManager.class.getResourceAsStream("/org/mini/g3d/res/version.properties")) {
+            prop.load(input);
+            G3D_VERSION = prop.getProperty("version", G3D_VERSION);
+            // 缺少配置时保持旧版行为；false用于完全禁用体积雾的兼容性对照包。
+            fogEnabled = Boolean.parseBoolean(prop.getProperty("volumetricFog.enabled", "true").trim());
         } catch (Exception e) {
             e.printStackTrace();
         }
+        volumetricFogEnabled = fogEnabled;
+    }
+
+    public static boolean isVolumetricFogEnabled() {
+        return volumetricFogEnabled;
     }
 
     static int width = 1024;
@@ -59,6 +68,7 @@ public class DisplayManager {
         SysLog.info("G3D|Renderer : " + glRenderer);
         SysLog.info("G3D|Version : " + glVersion);
         SysLog.info("G3D|g3d : " + G3D_VERSION);
+        SysLog.info("G3D|Volumetric fog enabled (version.properties): " + volumetricFogEnabled);
     }
 
     public static void updateDisplay() {
