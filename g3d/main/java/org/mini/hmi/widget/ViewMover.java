@@ -108,13 +108,18 @@ public class ViewMover extends Widget {
                     return false;
                 }
             }
-        } else if (phase == Glfm.GLFMTouchPhaseEnded) {
+        } else if (phase == Glfm.GLFMTouchPhaseEnded || phase == Glfm.GLFMTouchPhaseCancelled) {
             if (this.touchedId1 == touchid) {
-                touchedId1 = NO_TOUCHEDID;
-            }
-            if (this.touchedId2 == touchid) {
+                touchedId1 = touchedId2;
+                touchedX1 = touchedX2;
+                touchedY1 = touchedY2;
                 touchedId2 = NO_TOUCHEDID;
+            } else if (this.touchedId2 == touchid) {
+                touchedId2 = NO_TOUCHEDID;
+            } else {
+                return false;
             }
+            zoomDirection = 0;
             if (changed) {
                 changed = false;
                 if (listener != null) {
@@ -129,7 +134,7 @@ public class ViewMover extends Widget {
 
     @Override
     public boolean dragEvent(int button, float dx, float dy, float x, float y) {
-
+        if (!isTouchedBy(button)) return false;
         if (camera != null) {
             if (touchedId1 != NO_TOUCHEDID && touchedId2 != NO_TOUCHEDID) {
                 //zoom
@@ -163,6 +168,7 @@ public class ViewMover extends Widget {
                 if (zoomDirection < 0) {//变远
                     setCameraDistance(camera.getDistanceFromTarget() * 1.01f);
                 }
+                return true;
             } else {
                 //rotate
                 if (touchedId1 == button && touchedId2 == NO_TOUCHEDID) {
@@ -189,6 +195,21 @@ public class ViewMover extends Widget {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isTouchedBy(int touchid) {
+        return touchedId1 == touchid || touchedId2 == touchid;
+    }
+
+    @Override
+    public void resetInput() {
+        touchedId1 = touchedId2 = NO_TOUCHEDID;
+        zoomDirection = 0;
+        if (changed) {
+            changed = false;
+            if (listener != null) listener.onChangeEnded();
+        }
     }
 
     public void setCameraNearFar(float cameraDistanceNear, float cameraDistanceFar) {

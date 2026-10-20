@@ -69,6 +69,14 @@ abstract public class Widget {
         return false;
     }
 
+    /** 接收此触点的后续事件；返回值与事件是否允许穿透无关。 */
+    public boolean isTouchedBy(int touchid) {
+        return false;
+    }
+
+    public void resetInput() {
+    }
+
     public void setLocation(float left, float top) {
         this.left = left;
         this.top = top;
@@ -146,6 +154,9 @@ abstract public class Widget {
     }
 
     public void setEnable(boolean enable) {
+        if (this.enable && !enable) {
+            resetInput();
+        }
         this.enable = enable;
     }
 }

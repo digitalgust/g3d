@@ -87,11 +87,9 @@ public class Joystick extends Widget {
     }
 
     private void calcDegree() {
-        if (curX == bigX) return;
-        dirDegree = (float) Math.toDegrees(Math.atan((bigY - curY) / (curX - bigX)));
-        if (curX - bigX < 0) {
-            dirDegree += 180f;
-        }
+        bigX = getX() + w * .5f;
+        bigY = getY() + h * .5f;
+        dirDegree = (float) Math.toDegrees(Math.atan2(bigY - curY, curX - bigX));
     }
 
     private void callListener(int operation, float x, float y, float degree) {
@@ -186,19 +184,19 @@ public class Joystick extends Widget {
     @Override
     public boolean touchEvent(int touchid, int phase, int x, int y) {
         if (phase == Glfm.GLFMTouchPhaseBegan) {
-            if (isInFeelingArea(x, y) && touchedId == NO_TOUCHEDID) {
-                curX = x;
-                curY = y;
-                this.touchedId = touchid;
-                calcDegree();
-                callListener(JoystickListener.OPERATION_PRESS, x, y, dirDegree);
+            if (isInFeelingArea(x, y)) {
+                if (touchedId == NO_TOUCHEDID) {
+                    curX = x;
+                    curY = y;
+                    this.touchedId = touchid;
+                    calcDegree();
+                    callListener(JoystickListener.OPERATION_PRESS, x, y, dirDegree);
+                }
                 return true;
             }
-        } else if (phase == Glfm.GLFMTouchPhaseEnded) {
+        } else if (phase == Glfm.GLFMTouchPhaseEnded || phase == Glfm.GLFMTouchPhaseCancelled) {
             if (touchedId == touchid) {
-                touchedId = NO_TOUCHEDID;
-                dirDegree = 0f;
-                callListener(JoystickListener.OPERATION_RELEASE, x, y, dirDegree);
+                reset();
                 return true;
             }
         }
@@ -213,7 +211,22 @@ public class Joystick extends Widget {
     }
 
     public void reset() {
+        boolean wasTouched = touchedId != NO_TOUCHEDID;
         touchedId = NO_TOUCHEDID;
+        dirDegree = 0f;
+        if (wasTouched) {
+            callListener(JoystickListener.OPERATION_RELEASE, curX, curY, dirDegree);
+        }
+    }
+
+    @Override
+    public boolean isTouchedBy(int touchid) {
+        return touchedId == touchid;
+    }
+
+    @Override
+    public void resetInput() {
+        reset();
     }
 
 

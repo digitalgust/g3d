@@ -15,6 +15,7 @@ public class WButton extends Widget {
     float[] color = new float[]{1.f, 1.f, .8f, .6f};
 
     int touchedId = NO_TOUCHEDID;
+    WidgetListener releaseListener;
     int redPoint = 0;
     boolean border = false;
     boolean hideText = false;
@@ -82,18 +83,41 @@ public class WButton extends Widget {
     @Override
     public boolean touchEvent(int touchid, int phase, int x, int y) {
         if (phase == Glfm.GLFMTouchPhaseBegan) {
-            if (isInArea(x, y) && touchedId == NO_TOUCHEDID) {
-                touchedId = touchid;
-                doAction();
+            if (isInArea(x, y)) {
+                if (touchedId == NO_TOUCHEDID) {
+                    touchedId = touchid;
+                    doAction();
+                }
                 return true;
             }
-        } else if (phase == Glfm.GLFMTouchPhaseEnded) {
+        } else if (phase == Glfm.GLFMTouchPhaseEnded || phase == Glfm.GLFMTouchPhaseCancelled) {
             if (touchedId == touchid) {
-                touchedId = NO_TOUCHEDID;
+                resetInput();
                 return true;
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isTouchedBy(int touchid) {
+        return touchedId == touchid;
+    }
+
+    public boolean isTouched() {
+        return touchedId != NO_TOUCHEDID;
+    }
+
+    /** 触点松开、取消或控件被移除时调用，不重复执行点击动作。 */
+    public void setReleaseListener(WidgetListener listener) {
+        releaseListener = listener;
+    }
+
+    @Override
+    public void resetInput() {
+        boolean wasTouched = isTouched();
+        touchedId = NO_TOUCHEDID;
+        if (wasTouched && releaseListener != null) releaseListener.action(this);
     }
 
     public void setTextColor(float r, float g, float b, float a) {
