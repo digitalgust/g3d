@@ -62,6 +62,8 @@ public class GamePanel extends GOpenGLPanel {
     RenderEngine renderEngine;
 
     Light lightOnHead;
+    // Opt-in, repeatable scene captures; normal interactive demo is unchanged.
+    SceneCapture sceneCapture = SceneCapture.fromSystemProperty();
 
     public GamePanel(GForm gf) {
         super(gf, 0f, 0f, 1f, 1f);
@@ -87,7 +89,7 @@ public class GamePanel extends GOpenGLPanel {
         picker = new MousePicker(scene);
 
         shodowModel = loader.loadTexturedModel("/res/models/sball.ply", "/res/textures/sball.png", 1);
-        Random random = new Random();
+        Random random = sceneCapture == null ? new Random() : new Random(20261024L);
 
 
         //Gutil.checkGlError("Game glinit 2");
@@ -101,8 +103,9 @@ public class GamePanel extends GOpenGLPanel {
         TerrainTexturePack texturePack = new TerrainTexturePack(backgroundTexture, rTexture, bTexture, gTexture);
         // getting the design, pattern of how we are painting the terrain.
         TerrainTexture blendMap = new TerrainTexture(loader.loadTexture("/res/textures/terrain/blendMap1.png"));
-        GImage img = GImage.createImageFromJar("/res/textures/terrain/heightmap1.png");
-        terrain = new Terrain(img.getWidth(), img.getHeight(), texturePack, blendMap, "/res/textures/terrain/heightmap1.png", 1.5f);
+        String heightMap = sceneCapture == null ? "/res/textures/terrain/heightmap1.png" : sceneCapture.heightMap();
+        GImage img = GImage.createImageFromJar(heightMap);
+        terrain = new Terrain(img.getWidth(), img.getHeight(), texturePack, blendMap, heightMap, 1.5f);
         scene.setTerrain(terrain);
         //Gutil.checkGlError("Game glinit 3");
         // Terrain end
@@ -301,6 +304,7 @@ public class GamePanel extends GOpenGLPanel {
         // MainLoop
 
         //Gutil.checkGlError(this.getClass().getName() + " gl_paint 0");
+        if (sceneCapture != null) sceneCapture.prepare(scene, lightOnHead);
         scene.update();
 
         //update
@@ -314,12 +318,14 @@ public class GamePanel extends GOpenGLPanel {
         } else {
             player.moveStop();
         }
-        lightOnHead.setPosition(player.getPosition());
+        Vector3f playerPosition = player.getPosition();
+        lightOnHead.setPosition(playerPosition.x, playerPosition.y + 3f, playerPosition.z);
 
 
         updateAnimatedModel();
 
         renderEngine.renderScene(scene);
+        if (sceneCapture != null) sceneCapture.capture(renderEngine.getMainFbo());
 
         cost = System.currentTimeMillis() - start;
 

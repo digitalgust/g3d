@@ -22,6 +22,7 @@ out vec3 pass_pos;
 out float distanceToCam;
 out float angleToXZ;
 out float pass_alpha;
+out float pass_viewDepth;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
@@ -29,7 +30,7 @@ uniform mat4 viewMatrix;
 uniform mat4 depthBiasMVPMatrix;
 uniform vec3 lightPosition[MAX_LIGHT];
 
-const float density = 0.015;
+const float density = 0.0075;
 const float gradient = 2.0;
 
 float radiansToDegrees(float radians) {
@@ -42,6 +43,7 @@ void main(void) {
     vec4 worldPosition = transformationMatrix * vec4(position, 1.0);
     pass_pos = worldPosition.xyz;
     vec4 positionRelativeToCam = viewMatrix * worldPosition;
+    pass_viewDepth = -positionRelativeToCam.z;
     gl_Position = projectionMatrix * positionRelativeToCam;
     pass_textureCoordinates = textureCoordinates;
     pass_alpha = alphaValue;
@@ -56,14 +58,13 @@ void main(void) {
 
     float distance = length(positionRelativeToCam.xyz);
     visibility = exp(-pow((distance * density), gradient));
-    visibility = clamp(visibility, 0.7, 1.0);
+    visibility = clamp(visibility, 0.50, 1.0);
 
     distanceToCam = distance;
 
     //计算当前面与xz平面的夹角，单位为弧度
     vec3 yAxis = vec3(0.0, 1.0, 0.0);
-    float dotProduct = dot(surfaceNormal, yAxis);
-    float cosTheta = dotProduct;
+    float cosTheta = clamp(dot(normalize(surfaceNormal), yAxis), -1.0, 1.0);
     angleToXZ = acos(cosTheta);
 
 }

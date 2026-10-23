@@ -34,7 +34,7 @@ uniform float numberOfRows;
 uniform vec2 offset;
 uniform float transparency;
 
-const float density = 0.015;
+const float density = 0.0075;
 const float gradient = 2.0;
 
 // 辅助函数：旋转矩阵
@@ -124,5 +124,5 @@ void main(void) {
         distanceToCam = 0.0;
     }
     visibility = exp(-pow((distance * density), gradient));
-    visibility = clamp(visibility, 0.7, 1.0);
+    visibility = clamp(visibility, 0.50, 1.0);
 }

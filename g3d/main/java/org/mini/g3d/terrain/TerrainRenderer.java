@@ -10,6 +10,8 @@ import org.mini.g3d.core.util.G3dUtil;
 import org.mini.g3d.core.util.Loader;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.core.vector.Vector4f;
+import org.mini.g3d.entity.Entity;
 import org.mini.g3d.shadowmap.ShadowMappingFrameBuffer;
 
 import static org.mini.gl.GL.*;
@@ -27,6 +29,9 @@ public class TerrainRenderer extends AbstractRenderer {
 
     Matrix4f defaultDepthBiasMVP = new Matrix4f();
     Matrix4f cachedTransform = new Matrix4f();
+    private final Vector4f cutawayTarget = new Vector4f();
+    private final Vector4f cutawaySettings = new Vector4f();
+    private final Vector4f targetView = new Vector4f();
 
     /**
      * 带阴影渲染, 可以为空
@@ -43,6 +48,10 @@ public class TerrainRenderer extends AbstractRenderer {
     }
 
     public void render(Scene scene) {
+        render(scene, true);
+    }
+
+    public void render(Scene scene, boolean mainPass) {
         if (scene.getTerrain() == null) return;
 
         shader.start();
@@ -55,6 +64,18 @@ public class TerrainRenderer extends AbstractRenderer {
         shader.loadLightPos(scene.getSun().getPosition());
         shader.loadTime(DisplayManager.getTime());
         shader.loadTransparencyDistance(scene.getCamera().getDistanceFromTarget() - 1f);
+        Entity target = scene.getCamera().getLookatTarget();
+        boolean cutaway = mainPass && scene.isTerrainCutaway() && target != null;
+        cutawaySettings.set(cutaway ? 1f : 0f, 0.35f, 1.5f, scene.getTerrainCutawayOpacity());
+        cutawayTarget.set(0f, 0f, 0f, 0f);
+        if (cutaway) {
+            Vector3f feet = target.getPosition();
+            cutawayTarget.set(feet.x, feet.y, feet.z, 1f);
+            Matrix4f.transform(scene.getCamera().getViewMatrix(), cutawayTarget, targetView);
+            // Include a small area beyond the player for nearby enemies, across the whole view.
+            cutawayTarget.w = -targetView.z + scene.getTerrainCutawayRange();
+        }
+        shader.loadCutaway(cutawayTarget, cutawaySettings);
 
         Terrain terrain = scene.getTerrain();
         //for(){

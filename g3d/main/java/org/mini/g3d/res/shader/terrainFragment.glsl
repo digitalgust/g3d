@@ -22,6 +22,8 @@ in vec4 shadowMapCoord;
 in float distanceToCam;
 in float angleToXZ;
 in float pass_alpha;
+in vec3 pass_pos;
+in float pass_viewDepth;
 
 out vec4 out_Color;
 
@@ -38,6 +40,8 @@ uniform float shineDamper;
 uniform float reflectivity;
 uniform vec3 skyColour;
 uniform float transparencyDistance;//离摄像机多远的物体进行透明处理
+uniform vec4 cutawayTarget;   // xyz: followed character's feet; w: foreground depth limit
+uniform vec4 cutawaySettings; // enabled, ground protection height, full fade height, opacity
 
 ////https://blog.csdn.net/weixin_44176696/article/details/113090350
 //in vec3 pass_pos;
@@ -135,62 +139,104 @@ uniform float transparencyDistance;//离摄像机多远的物体进行透明处�
 
 
 
+// Low-frequency world-space variation, stable while the camera moves.
+float terrainNoise(vec2 p) {
+    vec2 cell = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    vec4 seeds = vec4(dot(cell, vec2(127.1, 311.7)),
+                      dot(cell + vec2(1.0, 0.0), vec2(127.1, 311.7)),
+                      dot(cell + vec2(0.0, 1.0), vec2(127.1, 311.7)),
+                      dot(cell + vec2(1.0, 1.0), vec2(127.1, 311.7)));
+    vec4 values = fract(sin(seeds) * 43758.5453);
+    return mix(mix(values.x, values.y, f.x), mix(values.z, values.w, f.x), f.y);
+}
+
+float terrainShadow() {
+    vec3 coord = shadowMapCoord.xyz / shadowMapCoord.w;
+    vec2 texel = 1.0 / vec2(textureSize(shadowMap, 0));
+    if (coord.z <= 0.0 || coord.z >= 1.0 ||
+        any(lessThan(coord.xy, texel)) || any(greaterThan(coord.xy, vec2(1.0) - texel))) return 1.0;
+    vec2 offset = texel * 0.75;
+    float shade = texture(shadowMap, vec3(coord.xy + vec2(-offset.x, -offset.y), coord.z));
+    shade += texture(shadowMap, vec3(coord.xy + vec2(offset.x, -offset.y), coord.z));
+    shade += texture(shadowMap, vec3(coord.xy + vec2(-offset.x, offset.y), coord.z));
+    shade += texture(shadowMap, vec3(coord.xy + vec2(offset.x, offset.y), coord.z));
+    return mix(0.42, 1.0, shade * 0.25);
+}
+
 void main(void) {
 
     vec4 blendMapColour = texture(blendMap, pass_textureCoordinates);
 
-    float backTextureAmount = 1.0 - (blendMapColour.r + blendMapColour.g + blendMapColour.b);
+    // Painted RGB can sum above one at transitions; keep all weights positive.
+    vec3 weights = clamp(blendMapColour.rgb, 0.0, 1.0);
+    float backTextureAmount = max(1.0 - (weights.r + weights.g + weights.b), 0.0);
+    float weightSum = max(backTextureAmount + weights.r + weights.g + weights.b, 0.001);
+    weights /= weightSum;
+    backTextureAmount /= weightSum;
     vec2 tiledCoords = pass_textureCoordinates * 16.0;//tile size
     vec4 backgroundTextureColour = texture(backgroundTexture, tiledCoords) * backTextureAmount;
-    vec4 rTextureColour = texture(rTexture, tiledCoords) * blendMapColour.r;
-    vec4 gTextureColour = texture(gTexture, tiledCoords) * blendMapColour.g;
-    vec4 bTextureColour = texture(bTexture, tiledCoords) * blendMapColour.b;
+    vec4 rTextureColour = texture(rTexture, tiledCoords) * weights.r;
+    vec4 gTextureColour = texture(gTexture, tiledCoords) * weights.g;
+    vec4 bTextureColour = texture(bTexture, tiledCoords) * weights.b;
 
     vec4 totalColour = backgroundTextureColour + rTextureColour + gTextureColour + bTextureColour;
+    float variation = terrainNoise(pass_pos.xz * 0.12);
+    totalColour.rgb *= mix(vec3(0.94, 0.95, 0.93), vec3(1.04, 1.025, 0.99), variation);
 
     //gust
     // in shadow or not
-    float shadow_visibility = 1.0;
-    // calulate shadow
-    shadow_visibility = textureProj(shadowMap, shadowMapCoord);
-    shadow_visibility = shadow_visibility * 0.5 + 0.5;//effect by shadow
+    float shadow_visibility = terrainShadow();
 
     vec3 unitNormal = normalize(surfaceNormal);
     vec3 unitVectorToCamera = normalize(toCameraVector);
 
-    vec3 totalDiffuse = vec3(0.0);
+    float hemisphere = unitNormal.y * 0.5 + 0.5;
+    vec3 ambientTint = mix(vec3(0.86, 0.84, 0.80), vec3(0.90, 0.96, 1.06), hemisphere);
+    vec3 totalDiffuse = ambientTint * (0.26 + 0.10 * hemisphere)
+        * max(lightColour[0], vec3(0.18));
     vec3 totalSpecular = vec3(0.0);
 
     for (int i = 0;i < MAX_LIGHT; i++) {
         float distance = length(toLightVector[i]);
-        float attFactor = attenuation[i].x + (attenuation[i].y * distance) + (attenuation[i].z * distance * distance);
+        float attFactor = max(attenuation[i].x + (attenuation[i].y * distance) + (attenuation[i].z * distance * distance), 0.001);
 
 
         vec3 unitLightVector = normalize(toLightVector[i]);
         float nDotl = dot(unitNormal, unitLightVector);
-        float brightness = max(nDotl, 0.0);
-        brightness = max(brightness, 0.4);//gust
-        brightness = shadow_visibility * brightness;
+        float lightShadow = i == 0 ? shadow_visibility : 1.0;
+        float brightness = max(nDotl, 0.0) * 0.72 * lightShadow;
         vec3 lightDirection = -unitLightVector;
         vec3 reflectedLightDirection = reflect(lightDirection, unitNormal);
         float specularFactor = dot(reflectedLightDirection, unitVectorToCamera);
         specularFactor = max(specularFactor, 0.0);
-        float dampedFactor = pow(specularFactor, shineDamper);
+        float dampedFactor = pow(specularFactor, max(shineDamper, 1.0))
+            * smoothstep(0.0, 0.15, nDotl) * lightShadow;
         totalDiffuse = totalDiffuse + (brightness * lightColour[i]) / attFactor;
         totalSpecular = totalSpecular + (dampedFactor * reflectivity * lightColour[i]) / attFactor;
     }
-    totalDiffuse = max(totalDiffuse, 0.3);
+    totalDiffuse = min(totalDiffuse, vec3(1.25));
     //totalColour = shadow_visibility * totalColour;
 
-    out_Color = vec4(totalDiffuse, 1.0) * totalColour + vec4(totalSpecular, 1.0);
+    out_Color = vec4(totalDiffuse * totalColour.rgb + totalSpecular, 1.0);
     out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
-    //裙边渐隐带改为多级点透(有序抖动): 保留的片元完全不透明且写深度,
+    float terrainOpacity = pass_alpha;
+    if (cutawaySettings.x > 0.5) {
+        // No slope test: raised horizontal platforms can hide an entire combat area too.
+        // Keep terrain at foot level solid, fading all elevated foreground across the view.
+        float aboveGround = smoothstep(cutawaySettings.y, cutawaySettings.z, pass_pos.y - cutawayTarget.y);
+        float foreground = 1.0 - smoothstep(cutawayTarget.w - 2.0, cutawayTarget.w, pass_viewDepth);
+        float amount = aboveGround * foreground;
+        terrainOpacity *= mix(1.0, cutawaySettings.w, amount);
+    }
+    //裙边渐隐带和前景遮挡统一使用多级点透: 保留的片元完全不透明且写深度,
     //丢弃的片元不碰帧缓冲, 不产生alpha混合不写深度的深度缓冲问题,
     //FBO的alpha也保持1(避免nanovg合成透出UI背景), 坐标先mod 4防止大坐标下浮点精度破坏图案
-    if (pass_alpha < 1.0) {
+    if (terrainOpacity < 1.0) {
         vec2 fp = mod(gl_FragCoord.xy, 4.0);
         float threshold = bayer2(0.5 * fp) * 0.25 + bayer2(fp); // 4x4 Bayer, 16级
-        if (pass_alpha <= threshold) {
+        if (terrainOpacity <= threshold) {
             discard;
         }
     }
@@ -199,11 +245,11 @@ void main(void) {
     //    vec4 cloud = getCloud(noisetex, worldPos, cameraPos, lightPos);// 云颜色
     //    out_Color.rgb = out_Color.rgb*(1.0 - cloud.a) + cloud.rgb;// 混色
 
-    //陡峭的地表网格(法线与Y轴夹角大于75度)且靠近相机时, 用棋盘格点透, 避免挡住角色
+    //旧坡度规则作为关闭新模式时的兼容回退；两种点透不能叠加，避免图案冲突。
     //注意：angleToXZ实际上是法线与Y轴的夹角
     //裙边(侧面)例外: 裙边法线纯水平(y恒为0), 而地表法线y分量恒为正(calculateNormal固定y=2),
     //用normal.y是否为0判别, 裙边不需要也不应该点透
-    if (angleToXZ > PI * 5.0 / 12.0) {  // 75度
+    if (cutawaySettings.x < 0.5 && angleToXZ > PI * 5.0 / 12.0) {  // 75度
         if (distanceToCam < transparencyDistance) {
             if (abs(surfaceNormal.y) > 1e-5) {
                 // 创建棋盘格图案

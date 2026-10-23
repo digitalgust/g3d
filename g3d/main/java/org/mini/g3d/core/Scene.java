@@ -95,6 +95,10 @@ public class Scene {
     boolean volumetricFog = false;
     //每张地图自己的雾开关(地图json配置)
     boolean mapVolumetricFog = false;
+    // Broad foreground cutaway reveals the player and nearby combatants together.
+    private boolean terrainCutaway = true;
+    private float terrainCutawayOpacity = 0.375f;
+    private float terrainCutawayRange = 6f;
     //云海式体积雾: 地图矩形fogArea(minX,minZ,maxX,maxZ)之外是云海,
     //出界fogEdgeFade单位内增浓到fogDensity, 天空视线与fogHeight平面的交点用于判定,
     //场景像素低于fogHeight时在fogDepthFade深度内溶入云中(云的厚度感)
@@ -160,6 +164,30 @@ public class Scene {
 
     public Camera getCamera() {
         return camera;
+    }
+
+    public boolean isTerrainCutaway() {
+        return terrainCutaway;
+    }
+
+    public void setTerrainCutaway(boolean enabled) {
+        terrainCutaway = enabled;
+    }
+
+    public float getTerrainCutawayOpacity() {
+        return terrainCutawayOpacity;
+    }
+
+    public void setTerrainCutawayOpacity(float opacity) {
+        terrainCutawayOpacity = Math.max(0f, Math.min(1f, opacity));
+    }
+
+    public float getTerrainCutawayRange() {
+        return terrainCutawayRange;
+    }
+
+    public void setTerrainCutawayRange(float range) {
+        terrainCutawayRange = Math.max(0f, range);
     }
 
     public Iterator<Light> getLightIterator() {

@@ -64,7 +64,7 @@ public class EntityShader extends ShaderProgram {
         location_viewMatrix = super.getUniformLocation("viewMatrix");
         location_shineDamper = super.getUniformLocation("shineDamper");
         location_reflectivity = super.getUniformLocation("reflectivity");
-        location_useFakeLightning = super.getUniformLocation("useFakeLightning");
+        location_useFakeLightning = super.getUniformLocation("useFakeLighting");
         location_skyColour = super.getUniformLocation("skyColour");
         location_numberOfRows = super.getUniformLocation("numberOfRows");
         location_transparencyDistance = getUniformLocation("transparencyDistance");

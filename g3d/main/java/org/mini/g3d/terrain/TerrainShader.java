@@ -5,6 +5,7 @@ import org.mini.g3d.core.Light;
 import org.mini.g3d.core.ShaderProgram;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.core.vector.Vector4f;
 import org.mini.g3d.entity.Entity;
 import org.mini.g3d.entity.EntityShader;
 
@@ -39,6 +40,8 @@ public class TerrainShader extends ShaderProgram {
     private int location_noiseTexture;
     private int location_itime;
     private int location_transparencyDistance;
+    private int location_cutawayTarget;
+    private int location_cutawaySettings;
 
     //
     Vector3f defLightPos = new Vector3f();
@@ -79,6 +82,8 @@ public class TerrainShader extends ShaderProgram {
         location_noiseTexture = getUniformLocation("noisetex");
         location_itime = getUniformLocation("itime");
         location_transparencyDistance = getUniformLocation("transparencyDistance");
+        location_cutawayTarget = getUniformLocation("cutawayTarget");
+        location_cutawaySettings = getUniformLocation("cutawaySettings");
 
         location_lightPosition = new int[MAX_LIGHTS];
         location_lightColour = new int[MAX_LIGHTS];
@@ -107,6 +112,11 @@ public class TerrainShader extends ShaderProgram {
 
     public void loadTransparencyDistance(float transparencyDistance) {
         super.loadFloat(location_transparencyDistance, transparencyDistance);
+    }
+
+    public void loadCutaway(Vector4f target, Vector4f settings) {
+        super.loadVector4f(location_cutawayTarget, target);
+        super.loadVector4f(location_cutawaySettings, settings);
     }
 
     public void loadShineVariables(float shineDamper, float reflectivity) {

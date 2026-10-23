@@ -162,7 +162,7 @@ public class MasterRenderer extends AbstractRenderer {
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "after prepare renderWaterRefractionPass");
         enableCulling();
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "after enableCulling renderWaterRefractionPass");
-        terrainRenderer.render(scene);
+        terrainRenderer.render(scene, false);
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "after terrainRenderer renderWaterRefractionPass");
         waterFbos.unbindCurrentFrameBuffer();
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "after unbindCurrentFrameBuffer");
@@ -178,7 +178,7 @@ public class MasterRenderer extends AbstractRenderer {
         //天空盒先画, 地形侧边渐隐带在反射中也要混合到天空上
         skyboxRenderer.render(scene);
         enitiyRenderer.render(scene);
-        terrainRenderer.render(scene);
+        terrainRenderer.render(scene, false);
         waterFbos.unbindCurrentFrameBuffer();
         scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
     }

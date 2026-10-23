@@ -28,35 +28,37 @@ void main(void){
     vec3 unitNormal = normalize(surfaceNormal);
     vec3 unitVectorToCamera = normalize(toCameraVector);
 
-    vec3 totalDiffuse = vec3(0.0);
+    // One sky/ground fill, independent of the number of local lights.
+    float hemisphere = unitNormal.y * 0.5 + 0.5;
+    vec3 ambientTint = mix(vec3(0.86, 0.84, 0.80), vec3(0.90, 0.96, 1.06), hemisphere);
+    vec3 totalDiffuse = ambientTint * (0.26 + 0.10 * hemisphere)
+        * max(lightColour[0], vec3(0.18));
     vec3 totalSpecular = vec3(0.0);
 
     for (int i=0;i<MAX_LIGHT;i++){
         float distance = length(toLightVector[i]);
-        float attFactor = attenuation[i].x + (attenuation[i].y * distance) + (attenuation[i].z * distance * distance);
+        float attFactor = max(attenuation[i].x + (attenuation[i].y * distance) + (attenuation[i].z * distance * distance), 0.001);
 
         vec3 unitLightVector = normalize(toLightVector[i]);
         float nDotl = dot(unitNormal, unitLightVector);
-        float brightness = max(nDotl, 0.4);//对亮度的最低影响
+        float brightness = max(nDotl, 0.0) * 0.72;
         vec3 lightDirection = -unitLightVector;
         vec3 reflectedLightDirection = reflect(lightDirection, unitNormal);
         float specularFactor = dot(reflectedLightDirection, unitVectorToCamera);
-        specularFactor = max(specularFactor, 0.1);
-        float dampedFactor = pow(specularFactor, shineDamper);
+        specularFactor = max(specularFactor, 0.0);
+        float dampedFactor = pow(specularFactor, max(shineDamper, 1.0)) * smoothstep(0.0, 0.15, nDotl);
 
         totalDiffuse = totalDiffuse + (brightness * lightColour[i]) / attFactor;
         totalSpecular = totalSpecular + (dampedFactor * reflectivity * lightColour[i]) / attFactor;
     }
-    totalDiffuse = max(totalDiffuse, 0.2);
-    totalDiffuse = min(totalDiffuse, 1.2);//防止过亮
+    totalDiffuse = min(totalDiffuse, vec3(1.25));
 
     vec4 textureColour = texture(modelTexture, pass_textureCoordinates);
-    textureColour += 0.1;//本色提亮
     if (textureColour.a < 0.5){
         discard;
     }
 
-    out_Color =  vec4(totalDiffuse, 1.0) * textureColour + vec4(totalSpecular, 1.0);
+    out_Color = vec4(totalDiffuse * textureColour.rgb + totalSpecular, textureColour.a);
     out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
 
     if (distanceToCam < transparencyDistance){
