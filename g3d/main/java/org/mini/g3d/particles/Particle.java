@@ -27,6 +27,7 @@ public class Particle {
     private float lifeLength;
     private Vector3f rotation = new Vector3f();
     private float scale;
+    private float initialScale;
 
     private ParticleTexture texture;
 
@@ -75,6 +76,7 @@ public class Particle {
         this.rotation.zero();
         if (rotation != null) this.rotation.set(rotation);
         this.scale = scale;
+        this.initialScale = scale;
         this.texture = texture;
         elapsedTime = 0f;
         generateAt = DisplayManager.getTime();
@@ -150,6 +152,10 @@ public class Particle {
         offset.x = (float) column / texture.getNumberOfRows();
         offset.y = (float) row / texture.getNumberOfRows();
     }
+
+    public float getElapsedTime() { return elapsedTime; }
+    public float getLifeLength() { return lifeLength; }
+    public float getInitialScale() { return initialScale; }
 
     public float getGravityY() {
         return GRAVITY * this.gravityEffect * (DisplayManager.getTime() - generateAt);

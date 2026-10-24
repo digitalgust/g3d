@@ -72,7 +72,7 @@ public class TerrainRenderer extends AbstractRenderer {
             Vector3f feet = target.getPosition();
             cutawayTarget.set(feet.x, feet.y, feet.z, 1f);
             Matrix4f.transform(scene.getCamera().getViewMatrix(), cutawayTarget, targetView);
-            // Include a small area beyond the player for nearby enemies, across the whole view.
+            // 默认只点透主角前方的地形；正 range 仅用于场景显式配置的后方扩展。
             cutawayTarget.w = -targetView.z + scene.getTerrainCutawayRange();
         }
         shader.loadCutaway(cutawayTarget, cutawaySettings);

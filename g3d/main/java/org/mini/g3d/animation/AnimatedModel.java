@@ -6,6 +6,9 @@ import org.mini.g3d.animation.gltf2.render.RenderMesh;
 import org.mini.g3d.animation.gltf2.render.RenderMeshPrimitive;
 import org.mini.g3d.animation.gltf2.render.RenderNode;
 import org.mini.g3d.core.DisplayManager;
+import org.mini.g3d.core.ICamera;
+import org.mini.g3d.particles.NodeFlameEffect;
+import org.mini.gui.GImage;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.textures.Texture;
@@ -54,6 +57,42 @@ public class AnimatedModel extends Entity implements Cloneable {
     }
 
     private final List<Attachment> attachments = new ArrayList<>();//用于挂载翅膀等
+    private final List<NodeFlameEffect> nodeFlames = new ArrayList<>();
+    private volatile boolean nodeFlameEmissionEnabled = true;
+
+    /** Bind short-lived world-space wisps to the currently rendered rigid equipment slot. */
+    public synchronized boolean setNodeFlame(String slotName, GImage texture,
+                                              float red, float green, float blue, float strength) {
+        RenderNode slot = findRenderNode(slotName, rootRenderNode);
+        if (slot == null) return false;
+        NodeFlameEffect existing = null;
+        for (NodeFlameEffect effect : nodeFlames) if (effect.getSlot() == slot) existing = effect;
+        if (texture == null || strength <= 0f) {
+            if (existing != null) {
+                existing.clear();
+                nodeFlames.remove(existing);
+            }
+        } else {
+            if (existing == null) {
+                existing = new NodeFlameEffect(this, slot, texture);
+                nodeFlames.add(existing);
+            }
+            existing.setColor(red, green, blue, strength);
+        }
+        return true;
+    }
+
+    public void setNodeFlameEmissionEnabled(boolean enabled) { nodeFlameEmissionEnabled = enabled; }
+
+    public synchronized void clearNodeFlames() {
+        for (NodeFlameEffect effect : nodeFlames) effect.clear();
+        nodeFlames.clear();
+    }
+
+    /** Called only for visible models, after animation transforms and before particle rendering. */
+    public synchronized void updateNodeFlames(ICamera camera) {
+        if (nodeFlameEmissionEnabled) for (NodeFlameEffect effect : nodeFlames) effect.update(camera);
+    }
 
     public Entity getShadowNode() {
         return shadowNode;

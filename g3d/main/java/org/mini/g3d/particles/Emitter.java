@@ -256,7 +256,12 @@ public class Emitter {
         }
         p.setModifiers(modifiers);
         p.setEmitter(this);
+        onParticleCreated(p);
         return true;
+    }
+
+    /** Customize a birth without allocating another particle or bypassing admission limits. */
+    protected void onParticleCreated(Particle particle) {
     }
 
     private float generateValue(float average, float errorMargin) {

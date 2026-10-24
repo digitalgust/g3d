@@ -98,7 +98,8 @@ public class Scene {
     // Broad foreground cutaway reveals the player and nearby combatants together.
     private boolean terrainCutaway = true;
     private float terrainCutawayOpacity = 0.375f;
-    private float terrainCutawayRange = 6f;
+    // 默认在主角深度结束，主角后方的地形不参与前景点透。
+    private float terrainCutawayRange = 0f;
     //云海式体积雾: 地图矩形fogArea(minX,minZ,maxX,maxZ)之外是云海,
     //出界fogEdgeFade单位内增浓到fogDensity, 天空视线与fogHeight平面的交点用于判定,
     //场景像素低于fogHeight时在fogDepthFade深度内溶入云中(云的厚度感)
@@ -186,6 +187,7 @@ public class Scene {
         return terrainCutawayRange;
     }
 
+    /** 额外向主角后方延伸的视空间距离；默认 0，仅在显式设置时扩展。 */
     public void setTerrainCutawayRange(float range) {
         terrainCutawayRange = Math.max(0f, range);
     }

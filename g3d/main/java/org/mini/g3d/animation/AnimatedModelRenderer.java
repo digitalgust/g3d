@@ -67,6 +67,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
     public void render(ICamera camera, Iterator<? extends AnimatedModel> animatedPlayersIterator) {
         for (; animatedPlayersIterator.hasNext(); ) {
             AnimatedModel p = animatedPlayersIterator.next();
+            p.updateNodeFlames(camera);
             renderer.draw(camera, p.getRootRenderNode(), -1);
         }
 

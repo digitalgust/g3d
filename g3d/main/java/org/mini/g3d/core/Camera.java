@@ -31,6 +31,7 @@ public class Camera implements ICamera {
     static final int MAX_POS_BUF = 3;
     float[][] camPosBuf = new float[MAX_POS_BUF][3];//x,y,z
     int camPosIndx = 0;
+    private boolean positionSmoothingEnabled = true;
 
 
     private final Matrix4f viewMatrix = new Matrix4f();
@@ -66,12 +67,24 @@ public class Camera implements ICamera {
 
     public void setLookatTarget(Entity target) {
         this.target = target;
+        if (target != null) resetTargetPositionBuffer();
+    }
+
+    /** Disable when the target must stay fixed on screen despite uneven frame intervals. */
+    public void setPositionSmoothingEnabled(boolean enabled) {
+        if (positionSmoothingEnabled == enabled) return;
+        positionSmoothingEnabled = enabled;
+        if (target != null) resetTargetPositionBuffer();
+    }
+
+    private void resetTargetPositionBuffer() {
         //初始化镜头位置 缓冲数组
         for (int i = 0; i < MAX_POS_BUF; i++) {
-            camPosBuf[i][0] = target.getPosition().x;
-            camPosBuf[i][1] = target.getPosition().y;
-            camPosBuf[i][2] = target.getPosition().z;
+            camPosBuf[i][0] = target.getPosition().x + offsetToTarget.x;
+            camPosBuf[i][1] = target.getPosition().y + offsetToTarget.y;
+            camPosBuf[i][2] = target.getPosition().z + offsetToTarget.z;
         }
+        camPosIndx = 0;
     }
 
     public Entity getLookatTarget() {
@@ -110,21 +123,26 @@ public class Camera implements ICamera {
         float offsetX = (float) (horizDistance * Math.sin(Math.toRadians(theta)));
         float offsetZ = (float) (horizDistance * Math.cos(Math.toRadians(theta)));
 
-        //求target位置,最近n次的平均值
-        camPosBuf[camPosIndx][0] = target.getPosition().x + offsetToTarget.x;
-        camPosBuf[camPosIndx][1] = target.getPosition().y + offsetToTarget.y;
-        camPosBuf[camPosIndx][2] = target.getPosition().z + offsetToTarget.z;
-        float dx = 0, dy = 0, dz = 0;
-        for (int i = 0; i < MAX_POS_BUF; i++) {
-            dx += camPosBuf[i][0];
-            dy += camPosBuf[i][1];
-            dz += camPosBuf[i][2];
+        float dx = target.getPosition().x + offsetToTarget.x;
+        float dy = target.getPosition().y + offsetToTarget.y;
+        float dz = target.getPosition().z + offsetToTarget.z;
+        if (positionSmoothingEnabled) {
+            //求target位置,最近n次的平均值
+            camPosBuf[camPosIndx][0] = dx;
+            camPosBuf[camPosIndx][1] = dy;
+            camPosBuf[camPosIndx][2] = dz;
+            dx = dy = dz = 0;
+            for (int i = 0; i < MAX_POS_BUF; i++) {
+                dx += camPosBuf[i][0];
+                dy += camPosBuf[i][1];
+                dz += camPosBuf[i][2];
+            }
+            dx /= MAX_POS_BUF;
+            dy /= MAX_POS_BUF;
+            dz /= MAX_POS_BUF;
+            camPosIndx++;
+            if (camPosIndx >= MAX_POS_BUF) camPosIndx = 0;
         }
-        dx /= MAX_POS_BUF;
-        dy /= MAX_POS_BUF;
-        dz /= MAX_POS_BUF;
-        camPosIndx++;
-        if (camPosIndx >= MAX_POS_BUF) camPosIndx = 0;
 
         //
         position.y = dy + verticDistance + heightOfLand;
