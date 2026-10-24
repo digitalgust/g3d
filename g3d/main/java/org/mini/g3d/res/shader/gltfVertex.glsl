@@ -300,6 +300,8 @@ uniform mat4 u_ModelMatrix[MAX_INSTANCED_SIZE];
 uniform mat4 u_NormalMatrix;
 
 flat out int out_gl_InstanceID;
+in vec4 a_InstanceGlow;
+flat out vec4 v_InstanceGlow;
 
 vec4 getPosition()
 {
@@ -353,6 +355,7 @@ vec4 getTangent()
 void main()
 {
     out_gl_InstanceID = gl_InstanceID;
+    v_InstanceGlow = a_InstanceGlow;
     vec4 pos = u_ModelMatrix[gl_InstanceID] * getPosition();
     v_Position = vec3(pos.xyz) / pos.w;
 

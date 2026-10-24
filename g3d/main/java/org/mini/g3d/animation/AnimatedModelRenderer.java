@@ -242,6 +242,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
 //        GLUtil.checkGlError("drawRenderObject 3");
 
         int vertexCount = shader.bindAttributes(rmp.getGlAttributes());
+        shader.bindInstanceGlow(rmps);
 //        GLUtil.checkGlError("drawRenderObject 4");
 
         shader.load_materialProperties(material);
@@ -259,7 +260,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
             GLTFAccessor indexAccessor = rmp.getGltfMeshPrimitive().getIndicesAccessor();
             glDrawElementsInstanced(rmp.getGltfMeshPrimitive().getMode(), indexAccessor.getCount(), indexAccessor.getGLType(), null, 0, rmps.size());
         } else {
-            glDrawArrays(rmp.getGltfMeshPrimitive().getMode(), 0, vertexCount);
+            glDrawArraysInstanced(rmp.getGltfMeshPrimitive().getMode(), 0, vertexCount, rmps.size());
         }
 //        GLUtil.checkGlError("drawRenderObject 7 " + drawIndexed);
 

@@ -20,6 +20,9 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
+import org.mini.g3d.animation.gltf2.render.RenderMeshPrimitive;
+import org.mini.g3d.core.vector.Vector4f;
 
 import static org.mini.gl.GL.*;
 
@@ -83,6 +86,35 @@ public class GLDriver {
 //        SysLog.info("G3D|gltf shader link finish, vertex = " + vertex + ", fragment = " + fragment + ", program = "
 //                + program + " time = " + (System.currentTimeMillis() - startAt));
         return program;
+    }
+
+    private static int instanceGlowVbo;
+    private static final float[] instanceGlowData = new float[AnimatedShader.MAX_INSTANCED_SIZE * 4];
+
+    public static void bindInstanceGlow(int location, List<RenderMeshPrimitive> instances) {
+        if (location < 0) return;
+        if (instances.size() > AnimatedShader.MAX_INSTANCED_SIZE) {
+            throw new IllegalArgumentException("Instance glow batch exceeds capacity");
+        }
+        for (int i = 0; i < instances.size(); i++) {
+            Vector4f glow = instances.get(i).getInstanceGlow();
+            int offset = i * 4;
+            instanceGlowData[offset] = glow.x;
+            instanceGlowData[offset + 1] = glow.y;
+            instanceGlowData[offset + 2] = glow.z;
+            instanceGlowData[offset + 3] = glow.w;
+        }
+        if (instanceGlowVbo == 0) {
+            int[] buffer = new int[1];
+            glGenBuffers(1, buffer, 0);
+            instanceGlowVbo = buffer[0];
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, instanceGlowVbo);
+        glBufferData(GL_ARRAY_BUFFER, instances.size() * 4 * 4, instanceGlowData, 0, GL_STREAM_DRAW);
+        glEnableVertexAttribArray(location);
+        glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, 4 * 4, null, 0);
+        glVertexAttribDivisor(location, 1);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     public static void setIndices(GLTFAccessor accessor) {
@@ -251,6 +283,10 @@ public class GLDriver {
     }
 
     public static void cleanUp() {
+        if (instanceGlowVbo != 0) {
+            glDeleteBuffers(1, new int[]{instanceGlowVbo}, 0);
+            instanceGlowVbo = 0;
+        }
         ShaderCache.cleanUp();
         GLUtil.checkGlError("error 0.00");
         for (Iterator<Object> it = texInfo2GlTextureMap.keySet().iterator(); it.hasNext(); ) {

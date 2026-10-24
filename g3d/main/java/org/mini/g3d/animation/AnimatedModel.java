@@ -337,6 +337,14 @@ public class AnimatedModel extends Entity implements Cloneable {
      * @param slotName
      * @param gltf
      */
+    /** Set emission on this instance's named slot, including current/future substitutes. */
+    public boolean setNodeGlow(String slotName, float red, float green, float blue, float intensity) {
+        RenderNode slot = findRenderNode(slotName, rootRenderNode);
+        if (slot == null) return false;
+        slot.setInstanceGlow(red, green, blue, intensity);
+        return true;
+    }
+
     public void setSubstitute(String slotName, GLTF gltf) {
         RenderNode source = findRenderNode(slotName, rootRenderNode);
         if (source != null) {

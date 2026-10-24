@@ -13,6 +13,7 @@ import org.mini.g3d.core.vector.AABBf;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Quaternionf;
 import org.mini.g3d.core.vector.Vector3f;
+import org.mini.g3d.core.vector.Vector4f;
 import org.mini.gl.GLMath;
 import org.mini.util.SysLog;
 
@@ -41,6 +42,25 @@ public class RenderNode {
     //替换装备位,具有相同名字的结点会在渲染时被替换
     RenderNode replacer;//新武器
     RenderNode replaced;//老武器， 模型原本的武器
+
+    // Vector4f() inherits Quaternionf's identity (w = 1), which would enable emission.
+    private static final Vector4f NO_GLOW = new Vector4f(0f, 0f, 0f, 0f);
+    private volatile Vector4f instanceGlow;
+
+    /** Instance-local emission; replacement meshes inherit the original slot's setting. */
+    public void setInstanceGlow(float red, float green, float blue, float intensity) {
+        instanceGlow = new Vector4f(Math.max(0f, Math.min(1f, red)),
+                Math.max(0f, Math.min(1f, green)), Math.max(0f, Math.min(1f, blue)),
+                Math.max(0f, intensity));
+    }
+
+    /** Read-only snapshot: RGB base color and linear emission intensity in W. */
+    public Vector4f getInstanceGlow() {
+        if (replaced != null) return replaced.getInstanceGlow();
+        Vector4f glow = instanceGlow;
+        if (glow != null) return glow;
+        return parent == null ? NO_GLOW : parent.getInstanceGlow();
+    }
 
     public RenderNode(AnimatedModel animatedModel) {
         this.animatedModel = animatedModel;

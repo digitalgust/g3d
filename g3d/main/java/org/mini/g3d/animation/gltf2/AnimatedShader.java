@@ -52,6 +52,7 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
     //
     int[] location_attribute;
     public int location_a_Position;
+    private int location_a_InstanceGlow;
 
 
     public AnimatedShader(int programID) {
@@ -142,6 +143,7 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
         }
 
         location_a_Position = glGetAttribLocation(getProgramId(), GLUtil.toCstyleBytes("a_Position"));
+        location_a_InstanceGlow = glGetAttribLocation(getProgramId(), GLUtil.toCstyleBytes("a_InstanceGlow"));
         stop();
     }
 
@@ -262,12 +264,16 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
     protected void bindAttributes() {
     }
 
+    public void bindInstanceGlow(List<RenderMeshPrimitive> instances) {
+        GLDriver.bindInstanceGlow(location_a_InstanceGlow, instances);
+    }
+
     public int bindAttributes(Map<String, GLTFAccessor> getGlAttribute) {
-        int vertCount = 0;
+        int vertCount = getGlAttribute.get("a_Position").getCount();
         int i = 0;
         for (GLTFAccessor accessor : getGlAttribute.values()) {
             int location = location_attribute[i++];
-            vertCount += accessor.getCount();
+
             if (location < 0) {
                 continue;
             }
@@ -278,6 +284,10 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
 
 
     public void unbindAttributes() {
+        if (location_a_InstanceGlow >= 0) {
+            glVertexAttribDivisor(location_a_InstanceGlow, 0);
+            glDisableVertexAttribArray(location_a_InstanceGlow);
+        }
         int i = 0;
         for (; i < location_attribute.length; i++) {
             int location = location_attribute[i];

@@ -28,6 +28,7 @@ precision highp float;
 uniform float u_Exposure;
 const int MAX_INSTANCED_SIZE = 100;
 flat in int out_gl_InstanceID;
+flat in vec4 v_InstanceGlow;
 
 out vec4 fragColor;
 
@@ -799,6 +800,19 @@ void main()
     emissive *= SRGBtoLINEAR(texture(u_EmissiveSampler, getEmissiveUV())).rgb;
     #endif
     color += emissive;
+
+    if (v_InstanceGlow.a > 0.0) {
+        // Keep texture detail while making the instance's VIP hue dominate the weapon.
+        float detail = clamp(dot(baseColor.rgb, vec3(0.2126, 0.7152, 0.0722)), 0.0, 1.0);
+        vec3 faceNormal = cross(dFdx(v_Position), dFdy(v_Position));
+        faceNormal /= max(length(faceNormal), 0.00001);
+        float rim = pow(1.0 - clamp(abs(dot(faceNormal, view)), 0.0, 1.0), 2.0);
+        vec3 tint = mix(vec3(0.18), v_InstanceGlow.rgb, 0.82);
+        color *= mix(vec3(1.0), tint, min(v_InstanceGlow.a, 1.0) * 0.75);
+        vec3 weaponEmission = v_InstanceGlow.rgb * (0.35 + 0.65 * sqrt(detail)) * (1.0 + 0.35 * rim);
+        weaponEmission += vec3(0.045 + 0.075 * detail);
+        color += weaponEmission * v_InstanceGlow.a;
+    }
 
     #ifndef DEBUG_OUTPUT// no debug
 
