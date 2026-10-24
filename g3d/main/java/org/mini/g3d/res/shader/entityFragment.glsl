@@ -25,6 +25,8 @@ uniform vec3 skyColour;
 uniform float transparencyDistance;//离摄像机多远的物体进行透明处理
 uniform float transparentPass;
 
+const float ENTITY_BRIGHTNESS = 1.10;
+
 void main(void){
 
     vec3 unitNormal = normalize(surfaceNormal);
@@ -60,13 +62,14 @@ void main(void){
         discard;
     }
 
-    vec3 surfaceColour = mix(skyColour, totalDiffuse * textureColour.rgb + totalSpecular, visibility);
+    vec3 litColour = (totalDiffuse * textureColour.rgb + totalSpecular) * ENTITY_BRIGHTNESS;
+    vec3 surfaceColour = mix(skyColour, litColour, visibility);
     if (transparentPass > 0.5) {
         float alpha = textureColour.a * pass_opacity;
         if (alpha <= 0.001) discard;
         float rim = pow(1.0 - clamp(abs(dot(unitNormal, unitVectorToCamera)), 0.0, 1.0), 3.0);
         // Premultiplied surface + emission: see through the crystal while its own color stays bright at night.
-        vec3 emission = textureColour.rgb * (1.40 + 0.60 * rim) * visibility;
+        vec3 emission = textureColour.rgb * (1.40 + 0.60 * rim) * visibility * ENTITY_BRIGHTNESS;
         out_Color = vec4((surfaceColour + emission) * alpha, alpha);
     } else {
         out_Color = vec4(surfaceColour, textureColour.a);
