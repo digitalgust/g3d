@@ -127,7 +127,7 @@ public class AnimatedModelRenderer extends AbstractRenderer {
         }
         RenderMaterial material = rmp.getMaterial();
         AnimatedShader shader = rmp.getShader();
-        if (shader == null) {
+        if (shader == null || shader.getProgramId() == 0) {
             //select shader permutation, compile and link program.
             List<String> vertDefines = G3dUtil.getCachedList();
             pushVertParameterDefines(vertDefines, rmp);

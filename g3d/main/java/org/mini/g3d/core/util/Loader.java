@@ -287,9 +287,14 @@ public class Loader {
 
     public void updateVbo(int vbo, float[] data) {
 
+        updateVbo(vbo, data, data.length);
+    }
+
+    public void updateVbo(int vbo, float[] data, int floatCount) {
+        if (floatCount < 0 || floatCount > data.length) throw new IllegalArgumentException("Invalid VBO length");
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, data.length * FLOAT_SIZE, null, 0, GL_STREAM_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, data.length * FLOAT_SIZE, data, 0);
+        glBufferData(GL_ARRAY_BUFFER, floatCount * FLOAT_SIZE, null, 0, GL_STREAM_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, floatCount * FLOAT_SIZE, data, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     }

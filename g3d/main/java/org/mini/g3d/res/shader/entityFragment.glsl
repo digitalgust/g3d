@@ -12,6 +12,7 @@ in vec3 toLightVector[MAX_LIGHT];
 in vec3 toCameraVector;
 in float visibility;
 in float distanceToCam;
+flat in float pass_opacity;
 
 out vec4 out_Color;
 
@@ -22,6 +23,7 @@ uniform float shineDamper;
 uniform float reflectivity;
 uniform vec3 skyColour;
 uniform float transparencyDistance;//离摄像机多远的物体进行透明处理
+uniform float transparentPass;
 
 void main(void){
 
@@ -54,14 +56,23 @@ void main(void){
     totalDiffuse = min(totalDiffuse, vec3(1.25));
 
     vec4 textureColour = texture(modelTexture, pass_textureCoordinates);
-    if (textureColour.a < 0.5){
+    if (textureColour.a < (transparentPass > 0.5 ? 0.01 : 0.5)){
         discard;
     }
 
-    out_Color = vec4(totalDiffuse * textureColour.rgb + totalSpecular, textureColour.a);
-    out_Color = mix(vec4(skyColour, 1.0), out_Color, visibility);
+    vec3 surfaceColour = mix(skyColour, totalDiffuse * textureColour.rgb + totalSpecular, visibility);
+    if (transparentPass > 0.5) {
+        float alpha = textureColour.a * pass_opacity;
+        if (alpha <= 0.001) discard;
+        float rim = pow(1.0 - clamp(abs(dot(unitNormal, unitVectorToCamera)), 0.0, 1.0), 3.0);
+        // Premultiplied surface + emission: see through the crystal while its own color stays bright at night.
+        vec3 emission = textureColour.rgb * (1.40 + 0.60 * rim) * visibility;
+        out_Color = vec4((surfaceColour + emission) * alpha, alpha);
+    } else {
+        out_Color = vec4(surfaceColour, textureColour.a);
+    }
 
-    if (distanceToCam < transparencyDistance){
+    if (transparentPass < 0.5 && distanceToCam < transparencyDistance){
         int mx = int(mod(gl_FragCoord.x, 2.0));
         int my = int(mod(gl_FragCoord.y, 2.0));
         if (mx+my!=1){//网格状透明

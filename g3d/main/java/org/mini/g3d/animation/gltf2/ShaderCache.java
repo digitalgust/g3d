@@ -12,6 +12,7 @@ import org.mini.glwrap.GLUtil;
 import org.mini.gui.GToolkit;
 
 import java.util.*;
+import static org.mini.gl.GL.*;
 import java.util.Map.Entry;
 
 //Inspiration from shader_cache.js
@@ -151,6 +152,15 @@ public class ShaderCache {
         AnimatedShader program = getShaderProgram(vertexHash, fragmentHash);
 //        GLUtil.checkGlError("drawRenderObject 0.3");
         return program;
+    }
+
+    public static void cleanUp() {
+        for (AnimatedShader shader : programs.values()) shader.cleanUp();
+        programs.clear();
+        for (ShaderVars shader : vertShaders.values()) if (shader.glRef > 0) glDeleteShader(shader.glRef);
+        for (ShaderVars shader : fragShaders.values()) if (shader.glRef > 0) glDeleteShader(shader.glRef);
+        vertShaders.clear();
+        fragShaders.clear();
     }
 
     public static AnimatedShader getDebugShaderProgram() {

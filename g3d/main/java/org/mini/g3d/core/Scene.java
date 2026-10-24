@@ -288,6 +288,8 @@ public class Scene {
      */
     public void clear() {
         synchronized (lock) {
+            EffectMaster.cleanUp();
+            ParticleMaster.clear();
             lights.clear();
             entitieMap.clear();
             visibleEntitieMap.clear();

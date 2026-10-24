@@ -13,36 +13,19 @@ public class ParticleFrameModifier extends ParticleModifier {
     float endAt;
     float startAt;
 
-    //
-    int curIndex = 0;
-
     @Override
     public void update(Particle particle) {
-        float cur = DisplayManager.getTime();
-        float t = cur - particle.getGenerateAt();//in second
-        if (t >= startAt && t <= endAt) {
-            float e = t - startAt;
-
-            int tms = (int) (e * 1000);
-            tms = tms % timeInMs[timeInMs.length - 1];
-            if (tms < timeInMs[0]) {
-                curIndex = frameIndese[0];
-            } else {
-                for (int i = 0, imax = timeInMs.length; i < imax - 1; i++) {
-                    if (tms > timeInMs[i] && tms < timeInMs[i + 1]) {
-                        curIndex = frameIndese[i + 1];
-                        break;
-                    }
-                }
-            }
+        float t = DisplayManager.getTime() - particle.getGenerateAt();
+        if (t >= startAt && t <= endAt && timeInMs != null && timeInMs.length > 0) {
+            int tms = (int) ((t - startAt) * 1000) % timeInMs[timeInMs.length - 1];
+            int index = 0;
+            while (index < timeInMs.length - 1 && tms >= timeInMs[index]) index++;
             particle.setFrameChgByModifier(true);
-            particle.setFrameIndex(curIndex);
-            //SysLog.info("G3D|===="+curIndex);
+            particle.setFrameIndex(frameIndese[index]);
         } else {
             particle.setFrameChgByModifier(false);
         }
     }
-
 
     /**
      * ======================================================
@@ -59,21 +42,25 @@ public class ParticleFrameModifier extends ParticleModifier {
     }
 
     public void setFrameInfo(List<Integer> frameInfo) {
-        //this.frameIndex_and_millSecond = frameIndex_and_millSecond;
-        int size = frameInfo.size();
-        if (size % 2 != 0) {
-            System.err.println("[G3D][ERROR]frameModifier need pair of frameIndex and timeLenth");
-            return;
+        if (frameInfo == null || frameInfo.isEmpty() || frameInfo.size() % 2 != 0) {
+            throw new IllegalArgumentException("frameInfo requires frame/duration pairs");
         }
-        int len = size / 2;
-        frameIndese = new int[len];
-        timeInMs = new int[len];
-        int sum = 0;
+        int len = frameInfo.size() / 2;
+        int[] frames = new int[len];
+        int[] times = new int[len];
+        long sum = 0;
         for (int i = 0; i < len; i++) {
-            frameIndese[i] = frameInfo.get(i * 2);
-            sum += frameInfo.get(i * 2 + 1);
-            timeInMs[i] = sum;
+            Integer frame = frameInfo.get(i * 2), duration = frameInfo.get(i * 2 + 1);
+            if (frame == null || duration == null || frame < 0 || duration <= 0) {
+                throw new IllegalArgumentException("Frames must be nonnegative and durations positive");
+            }
+            sum += duration;
+            if (sum > Integer.MAX_VALUE) throw new IllegalArgumentException("Frame duration overflow");
+            frames[i] = frame;
+            times[i] = (int) sum;
         }
+        frameIndese = frames;
+        timeInMs = times;
     }
 
     @Override

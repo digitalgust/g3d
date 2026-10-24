@@ -23,6 +23,7 @@ out vec3 toLightVector[MAX_LIGHT];
 out vec3 toCameraVector;
 out float visibility;
 out float distanceToCam;
+flat out float pass_opacity;
 
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
@@ -106,6 +107,7 @@ void main(void) {
     
     // 使用实例的纹理偏移而不是uniform变量
     pass_textureCoordinates = (textureCoordinates / numberOfRows) + instanceTextureOffset;
+    pass_opacity = clamp(instanceTransparency, 0.0, 1.0);
 
     vec3 actualNormal = normal;
     if (useFakeLighting > 0.5) {
@@ -120,9 +122,6 @@ void main(void) {
 
     float distance = length(positionRelativeToCam.xyz);
     distanceToCam = distance;
-    if (instanceTransparency <= 0.5) {
-        distanceToCam = 0.0;
-    }
     visibility = exp(-pow((distance * density), gradient));
     visibility = clamp(visibility, 0.50, 1.0);
 }

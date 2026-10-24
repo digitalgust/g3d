@@ -76,18 +76,10 @@ public class GLDriver {
             return 0;
         }
 
-        //Kinda useless to have here
-        glValidateProgram(program);
-        GL.glGetProgramiv(program, GL.GL_LINK_STATUS, return_val, 0);
-        if (return_val[0] == GL_FALSE) {
-            GL.glGetProgramiv(program, GL.GL_INFO_LOG_LENGTH, return_val, 0);
-            byte[] szLog = new byte[return_val[0] + 1];
-            GL.glGetProgramInfoLog(program, szLog.length, return_val, 0, szLog);
-            SysLog.error("G3D|gltf shader link fail :" + new String(szLog, 0, return_val[0]) + "\n vertex shader:" + vertex + "\nfragment shader:" + fragment + "\n");
-            return 0;
-        }
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
+        // ShaderCache owns compiled stages and can link them into multiple programs.
+        // Deleting a cached stage here causes GL_INVALID_OPERATION on subsequent links.
+        glDetachShader(program, vertex);
+        glDetachShader(program, fragment);
 //        SysLog.info("G3D|gltf shader link finish, vertex = " + vertex + ", fragment = " + fragment + ", program = "
 //                + program + " time = " + (System.currentTimeMillis() - startAt));
         return program;
@@ -259,6 +251,7 @@ public class GLDriver {
     }
 
     public static void cleanUp() {
+        ShaderCache.cleanUp();
         GLUtil.checkGlError("error 0.00");
         for (Iterator<Object> it = texInfo2GlTextureMap.keySet().iterator(); it.hasNext(); ) {
             Object info = it.next();

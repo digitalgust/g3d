@@ -97,8 +97,8 @@ public class MasterRenderer extends AbstractRenderer {
         waterRenderer.render(scene.getWaters(), scene.getCamera(), scene.getSun().getDirection());
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass waterRenderer");
 
-        // 再渲染实体（含可能的加法混合），此时已有背景色，发光可见
-        enitiyRenderer.render(scene);
+        // Opaque entities populate depth before animated characters and translucent effects.
+        enitiyRenderer.renderOpaque(scene);
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + "renderMainPass enitiyRenderer");
 
         // 渲染动画模型
@@ -127,8 +127,13 @@ public class MasterRenderer extends AbstractRenderer {
 //            GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass fogRenderer");
         }
 
+        // Transparent entities need the terrain AND characters behind them already drawn.
+        enitiyRenderer.renderTransparent(scene);
+
         // 粒子（本身包含混合控制）
-        particleRenderer.render(ParticleMaster.getParticles(), scene);
+        synchronized (ParticleMaster.class) {
+            particleRenderer.render(ParticleMaster.getParticles(), scene);
+        }
 //        GLUtil.checkGlError(this.getClass().getCanonicalName() + " renderMainPass particleRenderer");
 
         guiRenderer.render(scene.getGuis());
@@ -177,8 +182,9 @@ public class MasterRenderer extends AbstractRenderer {
         scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
         //天空盒先画, 地形侧边渐隐带在反射中也要混合到天空上
         skyboxRenderer.render(scene);
-        enitiyRenderer.render(scene);
+        enitiyRenderer.renderOpaque(scene);
         terrainRenderer.render(scene, false);
+        enitiyRenderer.renderTransparent(scene);
         waterFbos.unbindCurrentFrameBuffer();
         scene.getCamera().reflect(scene.getWaters().get(0).getHeight());
     }

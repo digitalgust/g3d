@@ -2,6 +2,7 @@ package org.mini.g3d.core;
 
 import org.mini.g3d.animation.gltf2.GLDriver;
 import org.mini.g3d.particles.ParticleMaster;
+import org.mini.g3d.particles.EffectMaster;
 import org.mini.g3d.shadowmap.ShadowMappingFrameBuffer;
 import org.mini.g3d.water.WaterFrameBuffers;
 import org.mini.glwrap.GLUtil;
@@ -99,6 +100,7 @@ public class RenderEngine {
         if (shadowMappingFbo != null) {
             shadowMappingFbo.delete();
         }
+        EffectMaster.cleanUp();
         ParticleMaster.cleanUp();
         GLDriver.cleanUp();
         DisplayManager.closeDisplay();

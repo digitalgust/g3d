@@ -7,10 +7,12 @@ import org.mini.g3d.core.Scene;
 import org.mini.g3d.core.models.RawModel;
 import org.mini.g3d.core.models.TexturedModel;
 import org.mini.g3d.core.textures.Texture;
-import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +24,24 @@ public class EntityRenderer extends AbstractRenderer {
     private static final int MAX_INSTANCES = 5000; // 最大实例数量
     private int instanceVBO; // 实例化顶点缓冲区对象ID
     private FloatBuffer instanceBuffer; // 实例化数据缓冲区
-    private int[] vboIds = new int[1]; // 用于存储VBO ID
+    private int[] vboIds = new int[1];
+    private final List<Entity> transparentEntities = new ArrayList<>();
+    private float[] sortView;
+    private final Comparator<Entity> backToFront = new Comparator<Entity>() {
+        @Override
+        public int compare(Entity a, Entity b) {
+            return Float.compare(viewDepth(b), viewDepth(a));
+        }
+    };
+
+    private float viewDepth(Entity entity) {
+        Vector3f p = entity.getPosition();
+        return -(sortView[2] * p.x + sortView[6] * p.y + sortView[10] * p.z + sortView[14]);
+    }
+
+    private static boolean isTransparent(Entity entity) {
+        return entity.getTransparency() > 0f && entity.getTransparency() < 1f;
+    }
 
     public EntityRenderer() {
         // 创建实例VBO
@@ -34,96 +53,108 @@ public class EntityRenderer extends AbstractRenderer {
         instanceBuffer = FloatBuffer.allocate(MAX_INSTANCES * 10);
     }
 
+    /** Compatibility entry point for callers drawing entities without other scene content. */
     public void render(Scene scene) {
+        renderOpaque(scene);
+        renderTransparent(scene);
+    }
+
+    public void renderOpaque(Scene scene) {
+        renderPass(scene, false);
+    }
+
+    public void renderTransparent(Scene scene) {
+        renderPass(scene, true);
+    }
+
+    private void renderPass(Scene scene, boolean transparent) {
         shader.start();
         shader.loadSkyColour(scene.getFogColor());
         shader.loadLights(scene.getLightIterator());
         shader.loadViewMatrix(scene.getCamera());
-        Matrix4f projectionMatrix = scene.getCamera().getProjectionMatrix();
-        shader.loadProjectionMatrix(projectionMatrix);
+        shader.loadProjectionMatrix(scene.getCamera().getProjectionMatrix());
         shader.loadTransparencyDistance(scene.getCamera().getDistanceFromTarget() - 1f);
-
-        Map<TexturedModel, List<Entity>> entities = scene.getVisibleEntitieMap(scene.getCamera());
-        entities.forEach((texturedModel, batch) -> {
-            //multithread , if scene.clear() may batch is null
-            if (texturedModel == null || batch == null || batch.isEmpty()) {
-                return;
-            }
-            if (texturedModel.getTexture() != null) {
-                // 根据批次第一个实例的透明度决定混合模式（整批生效）
-                boolean glowBatch = !batch.isEmpty() && batch.get(0).getTransparency() < 1.0f;
-                if (glowBatch) {
-                    glEnable(GL_BLEND);
-                    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-                    // 为了避免半透物体被前景遮挡，保持深度写入开启
-                    glDepthMask(GL_TRUE);
-                } else {
-                    glDepthMask(GL_TRUE);
-                    glDisable(GL_BLEND);
-                }
-
-                prepareTexturedModel(texturedModel);
-
-                // 准备实例数据
-                int instanceCount = prepareInstancesData(batch);
-
-                // 绑定实例VBO并上传数据
-                glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-                // 上传实例数据到GPU
-                instanceBuffer.position(0);
-                glBufferData(GL_ARRAY_BUFFER, instanceBuffer.limit() * 4, instanceBuffer.array(), 0, GL_DYNAMIC_DRAW);
-
-                // 设置实例属性
-                setupInstanceAttributes();
-
-                // 使用实例化渲染
-                glDrawElementsInstanced(GL_TRIANGLES, texturedModel.getRawModel().getVertexCount(),
-                        GL_UNSIGNED_INT, null, 0, instanceCount);
-                MainFrameBuffer.triangles += texturedModel.getRawModel().getVertexCount() * instanceCount;
-
-                // 恢复状态，避免影响后续渲染器
-                glDepthMask(GL_TRUE);
-                glDisable(GL_BLEND);
-
-                // 解绑实例属性
-                disableInstanceAttributes();
-                unbindTexturedModel();
-            }
-        });
-        shader.stop();
-    }
-
-    private int prepareInstancesData(List<Entity> entities) {
-        instanceBuffer.clear();
-        int count = Math.min(entities.size(), MAX_INSTANCES);
-
-        for (int i = 0; i < count; i++) {
-            Entity entity = entities.get(i);
-
-            // 添加位置
-            Vector3f position = entity.getPosition();
-            instanceBuffer.put(position.x);
-            instanceBuffer.put(position.y);
-            instanceBuffer.put(position.z);
-
-            // 添加旋转
-            instanceBuffer.put(entity.getRotX());
-            instanceBuffer.put(entity.getRotY());
-            instanceBuffer.put(entity.getRotZ());
-
-            // 添加缩放
-            instanceBuffer.put(entity.getScale());
-
-            // 添加纹理偏移
-            instanceBuffer.put(entity.getTextureXOffset());
-            instanceBuffer.put(entity.getTextureYOffset());
-
-            // 添加透明度
-            instanceBuffer.put(entity.getTransparency());
+        shader.loadTransparentPass(transparent);
+        glEnable(GL_DEPTH_TEST);
+        glDepthMask(transparent ? GL_FALSE : GL_TRUE);
+        if (transparent) {
+            glEnable(GL_BLEND);
+            glBlendEquation(GL_FUNC_ADD);
+            // Shader RGB is premultiplied and includes emission; preserve destination alpha.
+            glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+        } else {
+            glDisable(GL_BLEND);
         }
 
-        instanceBuffer.flip();
-        return count;
+        try {
+            Map<TexturedModel, List<Entity>> entities = scene.getVisibleEntitieMap(scene.getCamera());
+            if (transparent) {
+                transparentEntities.clear();
+                for (Map.Entry<TexturedModel, List<Entity>> entry : entities.entrySet()) {
+                    if (entry.getKey() == null || entry.getKey().getTexture() == null || entry.getValue() == null) continue;
+                    for (Entity entity : entry.getValue()) {
+                        if (isTransparent(entity)) transparentEntities.add(entity);
+                    }
+                }
+                sortView = scene.getCamera().getViewMatrix().mat;
+                Collections.sort(transparentEntities, backToFront);
+                // Only adjacent, same-model instances may merge after global depth sorting.
+                for (int first = 0; first < transparentEntities.size();) {
+                    TexturedModel model = transparentEntities.get(first).getModel();
+                    int end = first + 1;
+                    while (end < transparentEntities.size() && transparentEntities.get(end).getModel() == model) end++;
+                    drawBatch(model, transparentEntities, first, end, true);
+                    first = end;
+                }
+            } else {
+                for (Map.Entry<TexturedModel, List<Entity>> entry : entities.entrySet()) {
+                    TexturedModel model = entry.getKey();
+                    List<Entity> batch = entry.getValue();
+                    if (model != null && model.getTexture() != null && batch != null && !batch.isEmpty()) {
+                        drawBatch(model, batch, 0, batch.size(), false);
+                    }
+                }
+            }
+        } finally {
+            transparentEntities.clear();
+            glDepthMask(GL_TRUE);
+            glDisable(GL_BLEND);
+            shader.stop();
+        }
+    }
+
+    private void drawBatch(TexturedModel model, List<Entity> batch, int first, int end, boolean transparent) {
+        boolean bound = false;
+        while (first < end) {
+            instanceBuffer.clear();
+            int count = 0;
+            while (first < end && count < MAX_INSTANCES) {
+                Entity entity = batch.get(first++);
+                if (entity.getTransparency() <= 0f || isTransparent(entity) != transparent) continue;
+                Vector3f position = entity.getPosition();
+                instanceBuffer.put(position.x).put(position.y).put(position.z);
+                instanceBuffer.put(entity.getRotX()).put(entity.getRotY()).put(entity.getRotZ());
+                instanceBuffer.put(entity.getScale());
+                instanceBuffer.put(entity.getTextureXOffset()).put(entity.getTextureYOffset());
+                instanceBuffer.put(entity.getTransparency());
+                count++;
+            }
+            if (count == 0) continue;
+            instanceBuffer.flip();
+            if (!bound) {
+                prepareTexturedModel(model);
+                bound = true;
+            }
+            glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+            glBufferData(GL_ARRAY_BUFFER, instanceBuffer.limit() * 4, instanceBuffer.array(), 0, GL_DYNAMIC_DRAW);
+            setupInstanceAttributes();
+            glDrawElementsInstanced(GL_TRIANGLES, model.getRawModel().getVertexCount(), GL_UNSIGNED_INT, null, 0, count);
+            MainFrameBuffer.triangles += model.getRawModel().getVertexCount() * count;
+        }
+        if (bound) {
+            disableInstanceAttributes();
+            unbindTexturedModel();
+        }
     }
 
     private void setupInstanceAttributes() {

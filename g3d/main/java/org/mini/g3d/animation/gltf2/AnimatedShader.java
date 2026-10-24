@@ -132,7 +132,7 @@ public class AnimatedShader extends org.mini.g3d.core.ShaderProgram {
             location_u_MaterialTextures = new int[texs.size()];
             i = 0;
             for (Map.Entry<String, RenderTexture> entry : texs.entrySet()) {
-                location_u_MaterialTextures[i] = getUniformLocation(entry.getKey());
+                location_u_MaterialTextures[i++] = getUniformLocation(entry.getKey());
             }
         }
         //

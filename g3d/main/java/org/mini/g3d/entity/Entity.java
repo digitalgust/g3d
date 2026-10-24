@@ -11,7 +11,7 @@ public class Entity {
     protected Vector3f position = new Vector3f();
     protected float rotX, rotY, rotZ;
     protected float scale = 1.0f;
-    protected float transparency = 1.0f; //采用网络透，性能高，目前仅支付半透明，1不透明，0透明，0.5半透明
+    protected float transparency = 1.0f; // 1: opaque, (0,1): translucent emissive, 0: invisible
 
     protected int textureIndex = 0;
 
@@ -115,7 +115,7 @@ public class Entity {
     }
 
     public void setTransparency(float transparency) {
-        this.transparency = transparency;
+        this.transparency = Float.isNaN(transparency) ? 1f : Math.max(0f, Math.min(1f, transparency));
     }
 
     public float getTransparency() {

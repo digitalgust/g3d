@@ -58,11 +58,11 @@ public class RenderMaterial {
             //SysLog.info("G3D|Material occlusion map set " + material.toString());
         }
 
+        Vector3f emissive = material.getEmissiveFactor();
+        properties.put("u_EmissiveFactor", emissive == null ? new Vector3f() : emissive);
         if (material.getEmissiveTexture() != null) {
             texturesMap.put("u_EmissiveSampler", new RenderTexture(material.getEmissiveTexture()));
             defines.add("HAS_EMISSIVE_MAP 1");
-            Vector3f emissive = material.getEmissiveFactor();
-            properties.put("u_EmissiveFactor", emissive);
             properties.put("u_EmissiveUVSet", material.getEmissiveTexture().getTexCoord());
             //SysLog.info("G3D|Material emissive map set " + material.toString());
         }

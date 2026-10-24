@@ -16,69 +16,76 @@ import java.util.List;
 
 public class Effect {
     //config
-    public List<Emitter> emitters;
+    public List<Emitter> emitters = new ArrayList<>();
 
     private float firstRun;
     private float secondRun;
     boolean exit = false;
 
 
-    List<EmitterControler> controlers;
+    List<EmitterControler> controlers = new ArrayList<>();
+    private boolean started;
 
     public Effect() {
     }
 
 
     public void update() {
-
+        if (exit) return;
         float now = DisplayManager.getTime();
-        if (firstRun == 0) {
-            firstRun = now;
-            secondRun = now;
+        if (!started) {
+            started = true;
+            firstRun = secondRun = now;
         }
-        boolean onSeconds = false;
-        if (now - secondRun > 1.f) {
-            secondRun = now;
-            onSeconds = true;
-        }
-
+        boolean onSeconds = now - secondRun >= 1f;
+        if (onSeconds) secondRun = now;
         boolean over = true;
-        for (int i = 0; i < emitters.size(); i++) {
-            Emitter emi = emitters.get(i);
-            if (now - firstRun >= emi.startAt) {
+        if (emitters != null) for (Emitter emi : emitters) {
+            if (emi == null || emi.isTerminated()) continue;
+            over = false;
+            float elapsed = now - firstRun - emi.startAt;
+            if (elapsed < 0f) continue;
+            if (!emi.isStartuped()) {
                 emi.startup();
-                for (int j = 0; j < controlers.size(); j++) {
-                    EmitterControler c = controlers.get(j);
-                    if (c.canApply(emi)) {
-                        c.onStart(emi);
-                    }
-                }
+                notifyControlers(emi, 0);
             }
-            for (int j = 0; j < controlers.size(); j++) {
-                EmitterControler c = controlers.get(j);
-                if (c.canApply(emi)) {
-                    c.onUpdate(emi);
-                }
-            }
-            //
-            emi.update();
-            // 每秒调用一次
-            if (onSeconds) {
-                emi.onSecondOver();
-            }
-            if (emi.emitterLife > 0.f && now - firstRun - emi.startAt > emi.emitterLife) {
-                for (int j = 0; j < controlers.size(); j++) {
-                    EmitterControler c = controlers.get(j);
-                    if (c.canApply(emi)) {
-                        c.onTeminate(emi);
-                    }
-                }
+            if (onSeconds) emi.onSecondOver();
+            if (emi.emitterLife > 0f && elapsed >= emi.emitterLife) {
+                notifyControlers(emi, 2);
                 emi.terminate();
+                continue;
             }
-            over = over && emi.isTerminated();
+            notifyControlers(emi, 1);
+            emi.update();
+        }
+        // Last emitter termination can finish the effect in the same frame.
+        if (!over && emitters != null) {
+            over = true;
+            for (Emitter emi : emitters) if (emi != null && !emi.isTerminated()) over = false;
         }
         exit = over;
+    }
 
+    private void notifyControlers(Emitter emi, int event) {
+        if (controlers == null) return;
+        for (EmitterControler c : controlers) {
+            if (c == null || !c.canApply(emi)) continue;
+            if (event == 0) c.onStart(emi);
+            else if (event == 1) c.onUpdate(emi);
+            else c.onTeminate(emi);
+        }
+    }
+
+    /** Stop scene-bound effects without producing an end-of-life burst. */
+    public void terminate() {
+        if (exit) return;
+        exit = true;
+        if (emitters != null) for (Emitter emi : emitters) {
+            if (emi != null && !emi.isTerminated()) {
+                notifyControlers(emi, 2);
+                emi.cancel();
+            }
+        }
     }
 
     public void addControler(EmitterControler modifier) {
@@ -116,7 +123,7 @@ public class Effect {
         if (emitters != null) {
             for (int i = 0; i < emitters.size(); i++) {
                 Emitter emi = emitters.get(i);
-                if (emi.name.equals(pnodeName)) {
+                if (emi != null && pnodeName != null && pnodeName.equals(emi.name)) {
                     return emi;
                 }
             }

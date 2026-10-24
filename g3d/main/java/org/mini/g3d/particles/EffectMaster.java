@@ -12,21 +12,30 @@ import java.util.ListIterator;
  *
  */
 public class EffectMaster {
-    static List<Effect> effects = new ArrayList<>();
+    private static final List<Effect> effects = new ArrayList<>();
+    private static final List<Effect> pending = new ArrayList<>();
 
-
-    public static void add(Effect effect) {
-        effects.add(effect);
+    public static synchronized void add(Effect effect) {
+        if (effect != null && !effect.isTerminated() && !pending.contains(effect) && !effects.contains(effect)) {
+            pending.add(effect);
+        }
     }
 
-    public static void update() {
-        for (ListIterator<Effect> it = effects.listIterator(); it.hasNext(); ) {
+    public static synchronized void update() {
+        effects.addAll(pending);
+        pending.clear();
+        for (ListIterator<Effect> it = effects.listIterator(); it.hasNext();) {
             Effect effect = it.next();
             effect.update();
-            if (effect.isTerminated()) {
-                it.remove();
-            }
+            if (effect.isTerminated()) it.remove();
         }
+    }
+
+    public static synchronized void cleanUp() {
+        for (Effect effect : effects) effect.terminate();
+        for (int i = 0; i < pending.size(); i++) pending.get(i).terminate();
+        effects.clear();
+        pending.clear();
     }
 
     public static Effect parseEffect(String effectJsonStr) {

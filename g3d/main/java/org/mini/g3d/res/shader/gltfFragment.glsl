@@ -124,10 +124,10 @@ uniform int u_NormalUVSet;
 uniform mat3 u_NormalUVTransform;
 #endif
 
+uniform vec3 u_EmissiveFactor;
 #ifdef HAS_EMISSIVE_MAP
 uniform sampler2D u_EmissiveSampler;
 uniform int u_EmissiveUVSet;
-uniform vec3 u_EmissiveFactor;
 uniform mat3 u_EmissiveUVTransform;
 #endif
 
@@ -794,11 +794,11 @@ void main()
     color = mix(color, color * ao, u_OcclusionStrength);
     #endif
 
-    vec3 emissive = vec3(0);
+    vec3 emissive = u_EmissiveFactor;
     #ifdef HAS_EMISSIVE_MAP
-    emissive = SRGBtoLINEAR(texture(u_EmissiveSampler, getEmissiveUV())).rgb * u_EmissiveFactor;
-    color += emissive;
+    emissive *= SRGBtoLINEAR(texture(u_EmissiveSampler, getEmissiveUV())).rgb;
     #endif
+    color += emissive;
 
     #ifndef DEBUG_OUTPUT// no debug
 

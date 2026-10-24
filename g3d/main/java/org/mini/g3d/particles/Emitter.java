@@ -38,7 +38,11 @@ public class Emitter {
     public float directionDeviation = 0.001f;
     public float pps; //particle per second
     public int min;// min particles
-    public int max;// max particles
+    public int max;// max births per second (legacy semantics)
+    public int maxAlive;// concurrent particles; 0 uses the global budget
+    public boolean legacyFps;// compatibility for old lifetime-normalized fps
+    public boolean interpolatePosition;
+    public float maxInterpolationDistance = 10f;
     public int fps;//
     public float speed;
     public float speedError;
@@ -61,7 +65,27 @@ public class Emitter {
     public ParticleTexture texture;
     public int generatedCount = 0;
     static Vector3f zAxis = new Vector3f(0, 0, 1);
-    static Matrix4f localRotationMatrix = new Matrix4f();
+    private final Matrix4f localRotationMatrix = new Matrix4f();
+    private final Vector3f emitPosition = new Vector3f();
+    private final Vector3f emitVelocity = new Vector3f();
+    private final Vector3f coneAxis = new Vector3f();
+    private final Vector3f coneUnit = new Vector3f();
+    private final Vector4f coneSample = new Vector4f();
+    private final Vector3f previousCenter = new Vector3f();
+    private boolean hasPreviousCenter;
+    private int aliveCount;
+
+    void particleAdded() { aliveCount++; }
+    void particleReleased() { aliveCount = Math.max(0, aliveCount - 1); }
+    public int getAliveCount() { return aliveCount; }
+    public void setMaxAlive(int maxAlive) { this.maxAlive = Math.max(0, maxAlive); }
+    public void setLegacyFps(boolean legacyFps) { this.legacyFps = legacyFps; }
+    public void setInterpolatePosition(boolean value) { interpolatePosition = value; }
+    public void setMaxInterpolationDistance(float value) { maxInterpolationDistance = Math.max(0f, value); }
+    public void resetEmissionPath() { hasPreviousCenter = false; }
+    /** Cancellation does not emit the normal end-of-effect minimum burst. */
+    public void cancel() { terminated = true; resetEmissionPath(); }
+
 
 
     public void update() {
@@ -73,9 +97,9 @@ public class Emitter {
     public void startup() {
         if (!startuped) {
             startuped = true;
-            GImage img = GToolkit.getCachedImageFromJar(imagePath);
-            if (img != null) {
-                setImg(img, imageGrids, additive, depthTest);
+            if (imagePath != null && !imagePath.isEmpty()) {
+                GImage image = GToolkit.getCachedImageFromJar(imagePath);
+                if (image != null) setImg(image, imageGrids, additive, depthTest);
             }
             if (audioPath != null && !"".equals(audioPath)) {
                 Sound.getInstance().play(audioPath, getEmitLocation());
@@ -106,9 +130,6 @@ public class Emitter {
         if (offsetLocation != null) {
             runtimeLocation.translate(offsetLocation);
         }
-        runtimeLocation.x += (random.nextFloat() - 0.5f) * 2f * locationError.x;
-        runtimeLocation.y += (random.nextFloat() - 0.5f) * 2f * locationError.y;
-        runtimeLocation.z += (random.nextFloat() - 0.5f) * 2f * locationError.z;
         return runtimeLocation;
     }
 
@@ -136,6 +157,10 @@ public class Emitter {
         cloned.pps = pps;
         cloned.min = min;
         cloned.max = max;
+        cloned.maxAlive = maxAlive;
+        cloned.legacyFps = legacyFps;
+        cloned.interpolatePosition = interpolatePosition;
+        cloned.maxInterpolationDistance = maxInterpolationDistance;
         cloned.fps = fps;
         cloned.speed = speed;
         cloned.speedError = speedError;
@@ -147,6 +172,7 @@ public class Emitter {
         cloned.color = color == null ? null : new Vector4f(color);
         cloned.randomRotation = randomRotation;
         cloned.frameIndex = frameIndex;
+        if (img != null) cloned.setImg(img, imageGrids, additive, depthTest);
         if (modifiers != null) {
             List<ParticleModifier> modifierCopies = new ArrayList<>(modifiers.size());
             for (int i = 0; i < modifiers.size(); i++) {
@@ -167,53 +193,70 @@ public class Emitter {
     }
 
     public void onEmitterTerminate(Vector3f systemCenter) {
-        for (int i = generatedCount; i < getMin(); i++) {
-            emitParticle(systemCenter);
-        }
+        int missing = Math.max(0, getMin() - generatedCount);
+        if (getMax() > 0) missing = Math.min(missing, Math.max(0, getMax() - generatedCount));
+        for (int i = 0; i < missing && emitParticle(systemCenter); i++) generatedCount++;
     }
 
     public void generateParticles(Vector3f systemCenter) {
-        float delta = DisplayManager.getFrameTimeSeconds();
-        float particlesToCreate = pps * delta;
+        if (texture == null || terminated) return;
+        float particlesToCreate = Math.max(0f, pps) * Math.max(0f, DisplayManager.getFrameTimeSeconds());
         int count = (int) Math.floor(particlesToCreate);
-        //不足1的部分按概率发射
-        float partialParticle = particlesToCreate % 1;
-        if (random.nextFloat() < partialParticle) {
-            count++;
-        }
-        if (getMax() > 0) {
-            if (generatedCount + count > getMax()) {
-                count = getMax() - generatedCount;
-            }
-        }
-
+        if (random.nextFloat() < particlesToCreate - count) count++;
+        if (getMax() > 0) count = Math.min(count, Math.max(0, getMax() - generatedCount));
+        if (maxAlive > 0) count = Math.min(count, Math.max(0, maxAlive - aliveCount));
+        count = Math.min(count, Math.max(0, ParticleMaster.getMaxParticles() - ParticleMaster.getActiveCount()));
+        Vector3f.sub(systemCenter, previousCenter, emitPosition);
+        boolean interpolate = interpolatePosition && hasPreviousCenter
+                && emitPosition.lengthSquared() <= maxInterpolationDistance * maxInterpolationDistance;
         for (int i = 0; i < count; i++) {
-            emitParticle(systemCenter);
+            if (interpolate) {
+                float t = (i + 1f) / count;
+                emitPosition.set(previousCenter.x + (systemCenter.x - previousCenter.x) * t,
+                        previousCenter.y + (systemCenter.y - previousCenter.y) * t,
+                        previousCenter.z + (systemCenter.z - previousCenter.z) * t);
+            } else {
+                emitPosition.set(systemCenter);
+            }
+            if (!emitParticle(emitPosition)) break;
+            generatedCount++;
         }
-        generatedCount += count;
-
+        previousCenter.set(systemCenter);
+        hasPreviousCenter = true;
     }
 
-    private void emitParticle(Vector3f center) {
+    private boolean emitParticle(Vector3f center) {
+        if (texture == null || (maxAlive > 0 && aliveCount >= maxAlive)) return false;
+        Particle p = ParticleMaster.obtain();
+        if (p == null) return false;
         Vector3f velocity;
-        if (direction != null) {
-            velocity = generateRandomUnitVectorWithinCone(direction, (float) (directionDeviation * Math.PI));
+        if (direction != null && direction.lengthSquared() > .000001f) {
+            velocity = generateRandomUnitVectorWithinCone(direction, (float) (Math.max(0f, Math.min(1f, directionDeviation)) * Math.PI));
         } else {
             velocity = generateRandomUnitVector();
         }
-        velocity.normalise();
         velocity.scale(generateValue(speed, speedError));
-        float scaletmp = generateValue(scale, scaleError);
-        float lifeLength = generateValue(particleLife, particleLifeError);
-        Particle p = new Particle();
-        p.setActive(texture, new Vector3f(center), velocity, gravity, lifeLength, generateRotation(), scaletmp);
-        p.setColor(color);
+        // Jitter belongs to a birth, never to a getter queried by aura modifiers.
+        emitPosition.set(center);
+        if (locationError != null) {
+            emitPosition.x += generateValue(0f, locationError.x);
+            emitPosition.y += generateValue(0f, locationError.y);
+            emitPosition.z += generateValue(0f, locationError.z);
+        }
+        p.setActive(texture, emitPosition, velocity, gravity, generateValue(particleLife, particleLifeError),
+                generateRotation(), generateValue(scale, scaleError));
+        if (!p.isAlive()) {
+            ParticleMaster.recycleUnused(p);
+            return false;
+        }
+        if (color != null) p.setColor(color);
         if (frameIndex >= 0) {
             p.setFrameChgByModifier(true);
             p.setFrameIndex(frameIndex);
         }
         p.setModifiers(modifiers);
         p.setEmitter(this);
+        return true;
     }
 
     private float generateValue(float average, float errorMargin) {
@@ -241,11 +284,15 @@ public class Emitter {
         float x = (float) (rootOneMinusZSquared * Math.cos(theta));
         float y = (float) (rootOneMinusZSquared * Math.sin(theta));
 
-        Vector4f direction = new Vector4f(x, y, z, 1);
+        coneUnit.set(coneDirection);
+        coneUnit.normalise();
+        coneDirection = coneUnit;
+        Vector4f direction = coneSample;
+        direction.set(x, y, z, 0);
         if (coneDirection.x != 0 || coneDirection.y != 0 || (coneDirection.z != 0 && coneDirection.z != 1 && coneDirection.z != -1)) {
-            Vector3f rotateAxis = Vector3f.cross(coneDirection, zAxis, null);
+            Vector3f rotateAxis = Vector3f.cross(coneDirection, zAxis, coneAxis);
             rotateAxis.normalise();
-            float rotateAngle = (float) Math.acos(Vector3f.dot(coneDirection, zAxis));
+            float rotateAngle = (float) Math.acos(Math.max(-1f, Math.min(1f, Vector3f.dot(coneDirection, zAxis))));
             Matrix4f rotationMatrix = localRotationMatrix;
             rotationMatrix.identity();
             rotationMatrix.rotate(-rotateAngle, rotateAxis);
@@ -253,7 +300,8 @@ public class Emitter {
         } else if (coneDirection.z == -1) {
             direction.z *= -1;
         }
-        return new Vector3f(direction);
+        emitVelocity.set(direction.x, direction.y, direction.z);
+        return emitVelocity;
     }
 
 
@@ -263,7 +311,8 @@ public class Emitter {
         float rootOneMinusZSquared = (float) Math.sqrt(1 - z * z);
         float x = (float) (rootOneMinusZSquared * Math.cos(theta));
         float y = (float) (rootOneMinusZSquared * Math.sin(theta));
-        return new Vector3f(x, y, z);
+        emitVelocity.set(x, y, z);
+        return emitVelocity;
     }
 
     /**
@@ -442,7 +491,9 @@ public class Emitter {
 
     public void setImg(GImage img, int rows, boolean additivePara, boolean depthTestPara) {
         this.img = img;
-        imageGrids = rows;
+        imageGrids = Math.max(1, rows);
+        additive = additivePara;
+        depthTest = depthTestPara;
         if (img != null) {
             texture = new ParticleTexture(img, imageGrids, additivePara, depthTestPara);
         } else {

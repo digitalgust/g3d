@@ -28,6 +28,7 @@ public class EntityShader extends ShaderProgram {
     private int location_skyColour;
     private int location_numberOfRows;
     private int location_transparencyDistance;
+    private int location_transparentPass;
 
     Vector3f defaultLightPosition = new Vector3f(0, 0, 0);
     Vector3f defaultLightColour = new Vector3f(0, 0, 0);
@@ -68,6 +69,7 @@ public class EntityShader extends ShaderProgram {
         location_skyColour = super.getUniformLocation("skyColour");
         location_numberOfRows = super.getUniformLocation("numberOfRows");
         location_transparencyDistance = getUniformLocation("transparencyDistance");
+        location_transparentPass = getUniformLocation("transparentPass");
 
         location_lightPosition = new int[MAX_LIGHTS];
         location_lightColour = new int[MAX_LIGHTS];
@@ -82,6 +84,10 @@ public class EntityShader extends ShaderProgram {
 
     public void loadNumberOfRows(int numberOfRows) {
         super.loadFloat(location_numberOfRows, numberOfRows);
+    }
+
+    public void loadTransparentPass(boolean transparent) {
+        super.loadFloat(location_transparentPass, transparent ? 1f : 0f);
     }
 
     public void loadSkyColour(Vector3f fogColor) {

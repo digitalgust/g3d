@@ -12,6 +12,7 @@ layout(location = 6) in vec2 instanceTextureOffset;  // 实例纹理偏移
 layout(location = 7) in float instanceTransparency;  // 实例透明度
 
 out vec2 pass_textureCoordinates;
+flat out float pass_opacity;
 
 uniform mat4 depthMVP;
 
@@ -82,4 +83,5 @@ void main()
     // 应用深度MVP矩阵
     gl_Position = depthMVP * modelMatrix * vec4(position, 1.0);
     pass_textureCoordinates = uv;
+    pass_opacity = instanceTransparency;
 }

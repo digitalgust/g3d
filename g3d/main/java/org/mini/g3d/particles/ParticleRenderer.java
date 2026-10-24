@@ -10,6 +10,9 @@ import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Map;
 
 import static org.mini.gl.GL.*;
@@ -19,7 +22,7 @@ public class ParticleRenderer extends AbstractRenderer {
     private static final float[] VERTICES = {-0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, -0.5f};
     private static final int MAX_INSTANCES = 2000;
     float[] vboData = new float[MAX_INSTANCES * INSTANCE_DATA_LENGTH];
-    private static final int INSTANCE_DATA_LENGTH = 21;
+    private static final int INSTANCE_DATA_LENGTH = 17;
     Loader loader = new Loader();
 
     private RawModel quad;
@@ -42,38 +45,78 @@ public class ParticleRenderer extends AbstractRenderer {
         shader = new ParticleShader();
     }
 
-    public void render(Map<ParticleTexture, List<Particle>> particles, Scene scene) {
-        prepare();
-        Matrix4f viewMatrix = scene.getCamera().getViewMatrix();
-        Matrix4f projectionMatrix = scene.getCamera().getProjectionMatrix();
-        shader.loadProjectionMatrix(projectionMatrix);
-        shader.loadViewMatrix(viewMatrix);
-        int depthTestState = glIsEnabled(GL_DEPTH_TEST);
+    private final List<Particle> ordered = new ArrayList<>();
+    private final Comparator<Particle> backToFront = new Comparator<Particle>() {
+        public int compare(Particle a, Particle b) {
+            return Float.compare(viewDepth(b), viewDepth(a));
+        }
+    };
+    private Matrix4f view;
+    private boolean cleaned;
+    private final int[] depthMask = new int[1];
 
-        for (ParticleTexture texture : particles.keySet()) {
-            if (texture.isDepthTest()) {
-                glEnable(GL_DEPTH_TEST);
-            } else {
-                glDisable(GL_DEPTH_TEST);
+    private float viewDepth(Particle particle) {
+        Vector3f p = particle.getPosition();
+        float[] m = view.mat;
+        return -(m[2] * p.x + m[6] * p.y + m[10] * p.z + m[14]);
+    }
+
+    public void render(Map<ParticleTexture, List<Particle>> particles, Scene scene) {
+        if (particles.isEmpty()) return;
+        int depthTestState = glIsEnabled(GL_DEPTH_TEST);
+        int blendState = glIsEnabled(GL_BLEND);
+        glGetBooleanv(GL_DEPTH_WRITEMASK, depthMask, 0);
+        prepare();
+        try {
+            view = scene.getCamera().getViewMatrix();
+            shader.loadProjectionMatrix(scene.getCamera().getProjectionMatrix());
+            shader.loadViewMatrix(view);
+            // World particles first; intentional depth-disabled overlays form the last layer.
+            for (int layer = 0; layer < 2; layer++) {
+                boolean depthTest = layer == 0;
+                boolean needsSorting = false;
+                ordered.clear();
+                for (Map.Entry<ParticleTexture, List<Particle>> entry : particles.entrySet()) {
+                    if (entry.getKey().isDepthTest() == depthTest) {
+                        ordered.addAll(entry.getValue());
+                        needsSorting |= !entry.getKey().usesAdditiveBlending();
+                    }
+                }
+                // Additive-only batches commute. With smoke/alpha, sort across ALL textures.
+                if (needsSorting) Collections.sort(ordered, backToFront);
+                if (depthTest) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
+                int first = 0;
+                while (first < ordered.size()) {
+                    ParticleTexture texture = ordered.get(first).getTexture();
+                    int end = first + 1;
+                    while (end < ordered.size() && texture.equals(ordered.get(end).getTexture())) end++;
+                    bindTexture(texture);
+                    for (int base = first; base < end; base += MAX_INSTANCES) {
+                        int count = Math.min(MAX_INSTANCES, end - base);
+                        for (int i = 0; i < count; i++) {
+                            updateModelData(ordered.get(base + i), vboData, i * INSTANCE_DATA_LENGTH);
+                        }
+                        loader.updateVbo(vbo, vboData, count * INSTANCE_DATA_LENGTH);
+                        glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, quad.getVertexCount(), count);
+                    }
+                    first = end;
+                }
             }
-            bindTexture(texture);
-            List<Particle> particleList = particles.get(texture);
-            for (int i = 0; i < particleList.size(); i++) {
-                Particle particle = particleList.get(i);
-                updateModelData(particle, vboData, i * INSTANCE_DATA_LENGTH);
-            }
-            loader.updateVbo(vbo, vboData);
-            glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, quad.getVertexCount(), particleList.size());
+        } finally {
+            ordered.clear();
+            finish();
+            glDepthMask(depthMask[0] != 0 ? GL_TRUE : GL_FALSE);
+            if (depthTestState == GL_TRUE) glEnable(GL_DEPTH_TEST); else glDisable(GL_DEPTH_TEST);
+            if (blendState == GL_TRUE) glEnable(GL_BLEND); else glDisable(GL_BLEND);
         }
-        if (depthTestState == GL_TRUE) {
-            glEnable(GL_DEPTH_TEST);
-        } else {
-            glDisable(GL_DEPTH_TEST);
-        }
-        finish();
     }
 
     public void cleanUp() {
+        if (cleaned) return;
+        cleaned = true;
+        ordered.clear();
+        shader.cleanUp();
+        loader.cleanUp();
     }
 
     private void updateModelData(Particle particle, float[] data, int index) {
@@ -105,9 +148,9 @@ public class ParticleRenderer extends AbstractRenderer {
 
     private void bindTexture(ParticleTexture texture) {
         if (texture.usesAdditiveBlending()) {
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
         } else {
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         }
         // bind texture
         glActiveTexture(GL_TEXTURE0);
@@ -127,6 +170,7 @@ public class ParticleRenderer extends AbstractRenderer {
         glEnableVertexAttribArray(6);
         glEnableVertexAttribArray(7);
         glEnable(GL_BLEND);
+        glBlendEquation(GL_FUNC_ADD);
         glDepthMask(GL_FALSE);
     }
 
