@@ -174,12 +174,7 @@ public final class NodeFlameEffect {
                     float age = particle.getElapsedTime();
                     float t = Math.min(1f, age / particle.getLifeLength());
                     float heat = 1f - t;
-                    Vector4f color = particle.getColor();
-                    float white = (spark ? .5f : .2f) * heat;
-                    color.set(Math.min(1f, red + white), Math.min(1f, green + white),
-                            Math.min(1f, blue + white), Math.min(1f, (spark ? .95f : .65f)
-                                    * BRIGHTNESS_MULTIPLIER
-                                    * Math.min(1f, (age + .025f) / .07f) * heat * heat));
+                    updateColor(particle, heat);
                     particle.setScale(particle.getInitialScale()
                             * (spark ? .35f + .65f * heat : .55f + .55f * (float) Math.sin(t * Math.PI)));
                     // Gentle curl and upward drift; old particles stay in world space.
@@ -189,6 +184,15 @@ public final class NodeFlameEffect {
                     particle.getVelocity().z += (float) Math.cos(age * 7f + phase) * curl;
                 }
             });
+        }
+
+        private void updateColor(Particle particle, float heat) {
+            // Start with a bright VIP tint, then recover the base color while fading out.
+            // Additive blending uses alpha as light intensity; keep the texture's soft edge.
+            float white = (spark ? .55f : .35f) * heat;
+            particle.getColor().set(red + (1f - red) * white,
+                    green + (1f - green) * white, blue + (1f - blue) * white,
+                    Math.min(1f, (spark ? .95f : .65f) * BRIGHTNESS_MULTIPLIER * heat * heat));
         }
 
         @Override
@@ -216,8 +220,7 @@ public final class NodeFlameEffect {
             if (velocity.lengthSquared() > .000001f) velocity.normalise();
             velocity.scale(worldLength * (spark ? .8f : .32f) * (.65f + .7f * random.nextFloat()));
             velocity.y += worldLength * .28f;
-            particle.getColor().set(Math.min(1f, red + .2f), Math.min(1f, green + .2f),
-                    Math.min(1f, blue + .2f), .2f * BRIGHTNESS_MULTIPLIER);
+            updateColor(particle, 1f);
             particle.setScale(particle.getInitialScale() * .6f);
         }
     }
