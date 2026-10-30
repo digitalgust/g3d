@@ -12,8 +12,7 @@ public class ParticleScaleModifier extends ParticleModifier {
 
     @Override
     public void update(Particle particle) {
-        float cur = DisplayManager.getTime();
-        float t = cur - particle.getGenerateAt();//in second
+        float t = particle.getElapsedTime();//in second
         if (t >= startAt && t <= endAt) {
             float e = t - startAt;
             float ef = e / (endAt - startAt);

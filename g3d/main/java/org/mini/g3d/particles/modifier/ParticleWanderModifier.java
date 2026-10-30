@@ -16,8 +16,7 @@ public class ParticleWanderModifier extends ParticleModifier {
 
     @Override
     public void update(Particle particle) {
-        float cur = DisplayManager.getTime();
-        float t = cur - particle.getGenerateAt();//in second
+        float t = particle.getElapsedTime();//in second
         if (t >= startAt && t <= endAt) {
             float dt = DisplayManager.getFrameTimeSeconds();
             float f = fluctuation * dt;

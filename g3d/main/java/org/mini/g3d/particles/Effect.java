@@ -18,8 +18,8 @@ public class Effect {
     //config
     public List<Emitter> emitters = new ArrayList<>();
 
-    private float firstRun;
-    private float secondRun;
+    private double firstRun;
+    private double secondRun;
     boolean exit = false;
 
 
@@ -32,7 +32,7 @@ public class Effect {
 
     public void update() {
         if (exit) return;
-        float now = DisplayManager.getTime();
+        double now = DisplayManager.getTimeSeconds();
         if (!started) {
             started = true;
             firstRun = secondRun = now;
@@ -43,7 +43,7 @@ public class Effect {
         if (emitters != null) for (Emitter emi : emitters) {
             if (emi == null || emi.isTerminated()) continue;
             over = false;
-            float elapsed = now - firstRun - emi.startAt;
+            double elapsed = now - firstRun - emi.startAt;
             if (elapsed < 0f) continue;
             if (!emi.isStartuped()) {
                 emi.startup();

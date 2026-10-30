@@ -32,8 +32,7 @@ public class ParticleLocationModifier extends ParticleModifier {
             onNewFrame(particle.getEmitter());
         }
         // 计算出相对时间差
-        float cur = DisplayManager.getTime();
-        float t = cur - particle.getGenerateAt();//in second
+        float t = particle.getElapsedTime();//in second
         if (t >= startAt && t <= endAt) {
             Vector3f temp = particle.getPosition();
             temp.x += diff.x;

@@ -41,7 +41,7 @@ public class DisplayManager {
     private static long frameCount = 0;
     private static long lastFrameTime = System.currentTimeMillis();
     private static float delta;// 两帧之间的时间差
-    private static float totalTime;// 初始化以来的总时间
+    private static double totalTime;// 长期累计用 double，避免运行数天后 float 无法累加单帧时间
 
     static String glVendor;
     static String glRenderer;
@@ -76,7 +76,7 @@ public class DisplayManager {
         long currentFrameTime = System.currentTimeMillis();
         delta = (currentFrameTime - lastFrameTime) / 1000.0f;
         //System.out.println("G3D|delta ms: " + (currentFrameTime - lastFrameTime));
-        totalTime += delta;
+        totalTime += (currentFrameTime - lastFrameTime) / 1000.0;
         lastFrameTime = currentFrameTime;
         frameCount++;
     }
@@ -95,6 +95,11 @@ public class DisplayManager {
     }
 
     public static float getTime() {
+        return (float) totalTime;
+    }
+
+    /** 高精度累计秒数；生命周期计时应先以 double 相减，再转换为短时 float。 */
+    public static double getTimeSeconds() {
         return totalTime;
     }
 

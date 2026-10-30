@@ -25,8 +25,7 @@ public class ParticleWeaponAuraModifier extends ParticleModifier {
     
     @Override
     public void update(Particle particle) {
-        float cur = DisplayManager.getTime();
-        float t = cur - particle.getGenerateAt();
+        float t = particle.getElapsedTime();
         
         if (t >= startAt && t <= endAt) {
             float e = t - startAt;

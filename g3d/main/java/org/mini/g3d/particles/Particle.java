@@ -158,7 +158,7 @@ public class Particle {
     public float getInitialScale() { return initialScale; }
 
     public float getGravityY() {
-        return GRAVITY * this.gravityEffect * (DisplayManager.getTime() - generateAt);
+        return GRAVITY * this.gravityEffect * elapsedTime;
     }
 
     /**

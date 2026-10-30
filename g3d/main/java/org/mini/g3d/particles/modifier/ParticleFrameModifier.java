@@ -15,7 +15,7 @@ public class ParticleFrameModifier extends ParticleModifier {
 
     @Override
     public void update(Particle particle) {
-        float t = DisplayManager.getTime() - particle.getGenerateAt();
+        float t = particle.getElapsedTime();
         if (t >= startAt && t <= endAt && timeInMs != null && timeInMs.length > 0) {
             int tms = (int) ((t - startAt) * 1000) % timeInMs[timeInMs.length - 1];
             int index = 0;
