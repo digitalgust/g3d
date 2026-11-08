@@ -6,6 +6,15 @@ iOS Android 3d game engine for miniJVM
 * Back to miniJVM main window, run g3ddemo.   
 
 
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+The vector/matrix math classes in `org.mini.g3d.core.vector` are derived from
+[LWJGL](https://www.lwjgl.org) (BSD 3-Clause) and
+[JOML](https://github.com/JOML-CI/JOML) (MIT); see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
 ## Screenshot:
 
   <div align=center><img width="400" height="230" src="https://raw.githubusercontent.com/digitalgust/g3d/master/demo/1.png"/><br/>
