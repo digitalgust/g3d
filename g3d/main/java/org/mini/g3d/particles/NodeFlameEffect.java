@@ -8,13 +8,17 @@ import org.mini.g3d.core.DisplayManager;
 import org.mini.g3d.core.ICamera;
 import org.mini.g3d.core.vector.Matrix4f;
 import org.mini.g3d.core.vector.Vector3f;
-import org.mini.g3d.core.vector.Vector4f;
 import org.mini.gui.GImage;
 
 /** Bounded, instance-local wisps and sparks sampled from a rigid equipment mesh. */
 public final class NodeFlameEffect {
     private static final float SIZE_MULTIPLIER = 1.3f;
     private static final float BRIGHTNESS_MULTIPLIER = 1.25f;
+    // Green, blue, purple, red, yellow and white, visible together around the blade.
+    private static final float[][] MULTICOLOR_PALETTE = {
+            {.12f, 1f, .25f}, {.12f, .45f, 1f}, {.72f, .12f, 1f},
+            {1f, .12f, .18f}, {1f, .85f, .12f}, {1f, 1f, 1f}
+    };
     private final AnimatedModel model;
     private final RenderNode slot;
     private final FlameEmitter wisps;
@@ -28,6 +32,7 @@ public final class NodeFlameEffect {
     private int axis;
     private float localLength, worldLength;
     private float red, green, blue, strength = 1f;
+    private boolean multicolor;
     private long lastFrame = -1;
 
     public NodeFlameEffect(AnimatedModel model, RenderNode slot, GImage texture) {
@@ -38,6 +43,8 @@ public final class NodeFlameEffect {
     }
 
     public RenderNode getSlot() { return slot; }
+
+    public void setMulticolor(boolean multicolor) { this.multicolor = multicolor; }
 
     public void setColor(float red, float green, float blue, float strength) {
         this.red = Math.max(0f, Math.min(1f, red));
@@ -190,8 +197,21 @@ public final class NodeFlameEffect {
             // Start with a bright VIP tint, then recover the base color while fading out.
             // Additive blending uses alpha as light intensity; keep the texture's soft edge.
             float white = (spark ? .55f : .35f) * heat;
-            particle.getColor().set(red + (1f - red) * white,
-                    green + (1f - green) * white, blue + (1f - blue) * white,
+            float r = red, g = green, b = blue;
+            if (multicolor) {
+                // Stable per particle through its lifetime, without a per-birth allocation.
+                // Mix address-based miniJVM hashes so alignment cannot hide palette entries.
+                int seed = particle.hashCode();
+                seed ^= seed >>> 16;
+                seed *= 0x7feb352d;
+                seed ^= seed >>> 15;
+                float[] tint = MULTICOLOR_PALETTE[(seed & 0x7fffffff) % MULTICOLOR_PALETTE.length];
+                r = tint[0];
+                g = tint[1];
+                b = tint[2];
+            }
+            particle.getColor().set(r + (1f - r) * white,
+                    g + (1f - g) * white, b + (1f - b) * white,
                     Math.min(1f, (spark ? .95f : .65f) * BRIGHTNESS_MULTIPLIER * heat * heat));
         }
 

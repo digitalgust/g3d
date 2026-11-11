@@ -63,6 +63,13 @@ public class AnimatedModel extends Entity implements Cloneable {
     /** Bind short-lived world-space wisps to the currently rendered rigid equipment slot. */
     public synchronized boolean setNodeFlame(String slotName, GImage texture,
                                               float red, float green, float blue, float strength) {
+        return setNodeFlame(slotName, texture, red, green, blue, strength, false);
+    }
+
+    /** Multicolor wisps share the existing equipment binding and particle budget. */
+    public synchronized boolean setNodeFlame(String slotName, GImage texture,
+                                              float red, float green, float blue, float strength,
+                                              boolean multicolor) {
         RenderNode slot = findRenderNode(slotName, rootRenderNode);
         if (slot == null) return false;
         NodeFlameEffect existing = null;
@@ -78,6 +85,7 @@ public class AnimatedModel extends Entity implements Cloneable {
                 nodeFlames.add(existing);
             }
             existing.setColor(red, green, blue, strength);
+            existing.setMulticolor(multicolor);
         }
         return true;
     }
